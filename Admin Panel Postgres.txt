@@ -1,0 +1,10 @@
+
+ALLEZ SUR :
+
+http://localhost:5050/
+
+
+CREDENTIALS :
+
+LOGIN : admin@example.com
+PASSWORD : admin
