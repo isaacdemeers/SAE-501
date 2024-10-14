@@ -5,6 +5,7 @@ import Personnalinfo from "@/composents/personnalinfo";
 import Addimage from "@/composents/ImageProfile";
 import SignRecap from "@/composents/SignRecap";
 import SigninLayout from "./layout";
+import { AddUser } from "@/lib/request";
 interface SignData {
     [key: string]: any;
     image?: File;
@@ -52,6 +53,9 @@ export default function Signin() {
             formData.append(key, value instanceof File ? value : String(value));
         });
         console.log(formData);
+        AddUser(formData).then((data) => {
+            console.log(data);
+        }); 
     }
 
     return (
