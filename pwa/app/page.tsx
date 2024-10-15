@@ -1,4 +1,4 @@
-import Head from "next/head";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -12,11 +12,13 @@ import "@fontsource/poppins";
 import "@fontsource/poppins/600.css";
 import "@fontsource/poppins/700.css";
 
-const Welcome = () => (
+export const metadata: Metadata = {
+  title: "Welcome to API Platform",
+  description: "Welcome to API Platform",
+};
+
+export default function Welcome() {
   <div className="w-full overflow-x-hidden">
-    <Head>
-      <title>Welcome to API Platform!</title>
-    </Head>
     <section className="relative w-full bg-spider-cover">
       <a
         href="https://les-tilleuls.coop/en"
@@ -156,9 +158,8 @@ const Welcome = () => (
         </svg>
       </HelpButton>
     </div>
-  </div>
-);
-export default Welcome;
+  </div>;
+}
 
 const Card = ({
   image,
