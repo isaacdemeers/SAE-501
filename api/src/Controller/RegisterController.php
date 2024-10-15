@@ -78,14 +78,14 @@ class RegisterController extends AbstractController
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
         }
 
-        $user = $entityManager->getRepository(User::class)->findOneBy(['verificationToken' => $token]);
+        $user = $entityManager->getRepository(User::class)->findOneBy(['emaillink' => $token]);
 
         if (null === $user) {
             return $this->json(['message' => 'Invalid token'], Response::HTTP_BAD_REQUEST);
         }
 
-        $user->setIsVerified(true);
-        $user->setVerificationToken(null);
+        $user->setEmailverify(true);
+        $user->setEmaillink(null);
         $entityManager->flush();
 
         return $this->json(['message' => 'Email verified successfully'], Response::HTTP_OK);

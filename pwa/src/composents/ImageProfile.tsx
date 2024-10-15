@@ -45,7 +45,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
           setTimeout(() => {
             setFileok(false);
           }, 5000);
-          handleImageData(file);
+          // handleImageData(file);
           setImageSrc(URL.createObjectURL(file));
         }
       };
@@ -55,7 +55,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
 
   const handleSkip = () => {
     handleRecap();
-    signdata.image = undefined;
+    // signdata.image = undefined;
     setImageSrc(null);
   }
 

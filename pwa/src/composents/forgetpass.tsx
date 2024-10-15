@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card , CardHeader , CardContent } from "@/components/ui/card"
 import { useState } from "react"
-import { set } from "react-hook-form"
+
 export default function ForgotPassword() {
 const [formData , setFormData] = useState<{email: string}>({email: ""})
 const [error , setError] = useState<boolean>(false);

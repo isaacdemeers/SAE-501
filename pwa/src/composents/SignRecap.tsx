@@ -17,7 +17,7 @@ const SignRecap: React.FC<SignRecapProps> = ({ signdata , handleRecap , pushdata
     console.log(signdata);
 
     return (
-        <Card className="w-full  lg:w-[450px]">
+        <Card className="w-fit px-10  lg:w-fit">
               <CardHeader>
                 <CardTitle className="text-4xl font-bold text-center">Account Recap</CardTitle>
               </CardHeader>
@@ -53,7 +53,7 @@ const SignRecap: React.FC<SignRecapProps> = ({ signdata , handleRecap , pushdata
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex flex-col gap-2 justify-between">
+              <CardFooter className="flex flex-col gap-2 px-0 justify-between">
           <Button
             size={"lg"}
             onClick={pushdata}

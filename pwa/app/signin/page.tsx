@@ -4,7 +4,6 @@ import { useState } from "react";
 import Personnalinfo from "@/composents/personnalinfo";
 import Addimage from "@/composents/ImageProfile";
 import SignRecap from "@/composents/SignRecap";
-import SigninLayout from "./layout";
 import { AddUser } from "@/lib/request";
 interface SignData {
     [key: string]: any;
@@ -47,20 +46,22 @@ export default function Signin() {
         setAddimage(false);
     }
 
-    const pushdata = () => {
-        const formData = new FormData();
-        Object.entries(signdata).forEach(([key, value]) => {
-            formData.append(key, value instanceof File ? value : String(value));
-        });
-        console.log(formData);
-        AddUser(formData).then((data) => {
+    const pushdata = async () => {
+        try {
+            const formData = new FormData();
+            Object.entries(signdata).forEach(([key, value]) => {
+                formData.append(key, value instanceof File ? value : String(value));
+            });
+            console.log(formData);
+            const data = await AddUser(signdata);
             console.log(data);
-        }); 
+        } catch (error) {
+            console.error("Error adding user:", error);
+        }
     }
 
     return (
         <>
-            <SigninLayout>
             {recap ? (
                 <div>
                     <SignRecap signdata={signdata} pushdata={pushdata} handleRecap={handleRecap}/>
@@ -78,7 +79,6 @@ export default function Signin() {
                     <Addimage signdata={signdata} handleImageData={handleImageData} handleRecap={handleRecap} handleBack={handleBack} />
                 </div>
             )}
-            </SigninLayout>
         </>
     );
 }
