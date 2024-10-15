@@ -19,7 +19,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(normalizationContext: ['groups' => ['user:read']]),
-        new Post(denormalizationContext: ['groups' => ['user:write']]),
+        new Post(
+            uriTemplate: '/register',
+            normalizationContext: ['groups' => ['user:write']]
+        ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
         new Delete()
     ],
@@ -28,6 +31,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    public function __construct()
+    {
+        $this->setRoles(['ROLE_USER']); 
+        $this->setPhoto('/public/logimg.png'); 
+        $this->setEmailverify(false); 
+    }
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -42,19 +51,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:write'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'  ,'user:write'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read'  , 'user:write'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
@@ -62,11 +71,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' ])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' ,'user:write'])]
     private ?string $emaillink = null;
 
     public function getId(): ?int

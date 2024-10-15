@@ -3,6 +3,7 @@ services:
     image: ${IMAGES_PREFIX:-}app-php
     depends_on:
       - database
+      - mailpit
     restart: unless-stopped
     environment:
       PWA_UPSTREAM: pwa:3000
@@ -50,6 +51,12 @@ services:
       # you may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./api/docker/db/data:/var/lib/postgresql/data
 ###< doctrine/doctrine-bundle ###
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # HTTP
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
