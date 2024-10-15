@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use App\Controller\RegisterController;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -21,7 +22,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(normalizationContext: ['groups' => ['user:read']]),
         new Post(
             uriTemplate: '/register',
-            normalizationContext: ['groups' => ['user:write']]
+            controller: RegisterController::class,
+            denormalizationContext: ['groups' => ['user:write']]
         ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
         new Delete()

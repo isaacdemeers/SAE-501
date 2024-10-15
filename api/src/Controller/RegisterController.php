@@ -1,3 +1,4 @@
+<?php
 namespace App\Controller;
 
 use App\Entity\User;
@@ -61,6 +62,12 @@ class RegisterController extends AbstractController
 
         return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
     }
+
+    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
+    {
+        return $this->register($request, $entityManager, $passwordHasher, $mailer, $urlGenerator);
+    }
+
 
     #[Route('/verify-email', name: 'app_confirm_email', methods: ['GET'])]
     public function verifyEmail(Request $request, EntityManagerInterface $entityManager): Response
