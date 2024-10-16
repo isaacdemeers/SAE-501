@@ -12,6 +12,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { usePathname } from "next/navigation"
+import { LoginUser } from "@/lib/request"
+import { GetGrettings } from "@/lib/request"
  
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
@@ -27,17 +29,19 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     setLogdata({ ...logdata, password: e.target.value });
   };
 
-  const handleLogin = (): void => {
-    if (!emailRegex.test(logdata.email) || logdata.password === "") {
-      setLoginerror(true);
-      setTimeout(() => {
-        setLoginerror(false);
-    }, (5000));  
-      return;
-    }
-    console.log(logdata);
-  }; 
-
+    const handleLogin = async() => {
+      if (!emailRegex.test(logdata.email) || logdata.password === "") {
+        setLoginerror(true);
+        setTimeout(() => {
+          setLoginerror(false);
+      }, (5000));  
+        return;
+      }
+      let test = await LoginUser(logdata);
+      let test2 = await GetGrettings();
+      console.log(test);
+      console.log(test2);
+    }; 
   // function to handle the error message when the user input is in
   const errorlog = (): void => {
     setLoginerror(true);

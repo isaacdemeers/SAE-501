@@ -1,7 +1,7 @@
 export async function AddUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch("http://localhost/register", {
+    const response = await fetch("https://localhost/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -11,6 +11,40 @@ export async function AddUser(data: any) {
     return await response.json();
   } catch (error) {
     console.error("Error adding user:", error);
+    throw error;
+  }
+}
+
+export async function LoginUser(data: any) {
+  try {
+    console.log(data);
+    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error logging in user:", error);
+    throw error;
+  }
+}
+
+export async function GetGrettings() {
+  try {
+    const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
+    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/greetings", {
+      method: "GET",
+      headers: {
+      "Content-Type": "application/json",
+      "Authorization": jwtToken
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error getting greetings:", error);
     throw error;
   }
 }
