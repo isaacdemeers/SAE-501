@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import PasswordStrengthBar from 'react-password-strength-bar';
- 
+import { TestEmail } from "@/lib/request"
 interface SigninformProps {
   handleSignData: (data: { email: string; password: string }) => void;
 }
@@ -20,7 +21,8 @@ interface SigninformProps {
 export default function Signinform({ handleSignData }: SigninformProps): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
   const [signdata, setSigndata] = useState<{ email: string; password: string }>({ email: "", password: "" });
-
+  const [emailerror, setEmailerror] = useState<boolean>(false);
+  const [termserror, setTermserror] = useState<boolean>(false);
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSigndata({ ...signdata, email: e.target.value });
@@ -30,7 +32,9 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     setSigndata({ ...signdata, password: e.target.value });
   };
 
-  const handleLogin = (): void => {
+  const handleLogin = async () => {
+    let Terms = document.getElementById('terms');
+    console.log(Terms);
     if (!emailRegex.test(signdata.email) || signdata.password === "") {
         (document.getElementById('email') as HTMLInputElement).value = "";
         (document.getElementById('password') as HTMLInputElement).value = "";
@@ -40,7 +44,26 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     }, (5000));  
       return;
     }
-    handleSignData(signdata);
+    else if (Terms && Terms.getAttribute('data-state') === 'unchecked') {
+      console.log(Terms);
+      setTermserror(true);
+      setTimeout(() => {
+      setTermserror(false);
+    },5000);
+      return;
+    }
+      let verify = await TestEmail(signdata.email);
+      console.log(verify);
+      if(verify.message === "Email already exist"){
+        setEmailerror(true);
+        setTimeout(() => {
+          setEmailerror(false);
+        },5000);
+        return;
+      }
+      else if(verify.message === "OK"){
+        handleSignData(signdata);
+      }
   }; 
 
   return (
@@ -49,7 +72,7 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         <h1 className="text-4xl font-semibold leading-none tracking-tight my-5 mb-2">Sign Up to [name of the app]</h1>
         <p className="text-sm md:text-base text-gray-400">Don’t wait sign up today because [app name] is completely free forever !</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-2">
         <form>
           <div className="grid w-full items-center gap-6">
             {/* <div className="flex flex-col space-y-1.5">
@@ -62,6 +85,11 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
               <span className="mx-2">or continue with</span>
               <span className="flex-grow border-t border-gray-300"></span>
             </p> */}
+            {emailerror ? (
+              <div className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">
+                An account with this email already exist
+                </div>
+                ) : null}
             {loginerror ? (
               <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 text-base md:text-lg w-full">
                 Invalid email or password
@@ -74,14 +102,14 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
               <Input
                 id="email"
                 className={`md:h-12 ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
-                placeholder="John.Doe@gmail.com"
+                placeholder="your@email.com"
                 onChange={handleEmail}
               />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password" className="md:text-base">
-                  Password*
+                  Create a Password*
                 </Label>
               </div>
               <Input
@@ -101,10 +129,24 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         <Button size={"lg"} onClick={() => {  handleLogin(); }} className="w-full md:text-lg">
         Sign Up
         </Button>
+        <div className="flex items-center justify-center space-x-2">
+      <Checkbox id="terms" className={`${termserror ? 'border-red-500' : 'border-black'}`} />
+      <label
+        htmlFor="terms"
+        className= {`text-sm md:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 `}
+      >
+        I agree to the <span> <a className={`appearance-none text-black underline `} href="#">Terms of Services</a></span> and <span><a className={`appearance-none text-black underline `}   href="#">Privacy Policy</a></span>
+      </label> 
+    </div>
+    {termserror ? ( 
+              <div className="flex items-center justify-center space-x-2 text-red-600  text-sm md:text-base w-full">
+                Please agree to the terms of services and privacy policy
+                </div>
+                ) : null}
         <div className="mt-4 text-center text-sm md:text-md">
           Already have an account ?{" "}
           <Link href="/login" className="underline font-bold">
-           Log in
+           Login
           </Link>
         </div>
       </CardFooter>

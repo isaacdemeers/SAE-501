@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { usePathname } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 import { LoginUser } from "@/lib/request"
-import { GetGrettings } from "@/lib/request"
- 
+
+
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
   const [logdata, setLogdata] = useState<{ email: string; password: string }>({ email: "", password: "" });
@@ -31,16 +31,17 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
     const handleLogin = async() => {
       if (!emailRegex.test(logdata.email) || logdata.password === "") {
-        setLoginerror(true);
-        setTimeout(() => {
-          setLoginerror(false);
-      }, (5000));  
+        errorlog();
         return;
       }
-      let test = await LoginUser(logdata);
-      let test2 = await GetGrettings();
-      console.log(test);
-      console.log(test2);
+      let log = await LoginUser(logdata);
+      console.log(log)
+      if(log.message === "Invalid credentials."){
+        errorlog();
+      }
+      else if (log.message === "Authentication successful"){
+       window.location.href = "/";
+      }
     }; 
   // function to handle the error message when the user input is in
   const errorlog = (): void => {
@@ -109,7 +110,7 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 justify-between">
-        <Button size={"lg"} onClick={() => { errorlog(); handleLogin(); }} className="w-full md:text-lg">
+        <Button size={"lg"} onClick={() => {  handleLogin(); }} className="w-full md:text-lg">
           Login
         </Button>
         <div className="mt-4 text-center text-sm md:text-md">

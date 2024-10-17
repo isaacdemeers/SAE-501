@@ -19,11 +19,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ApiResource(
     operations: [
+        new POST(
+            uriTemplate: '/users/testemail',
+            controller: RegisterController::class . '::checkEmail', 
+            denormalizationContext:['groups' => ['user:emailverification']],
+        ),
         new Get(normalizationContext: ['groups' => ['user:read']]),
         new Post(
             uriTemplate: '/register',
             controller: RegisterController::class,
-            denormalizationContext: ['groups' => ['user:write']]
+            denormalizationContext: ['groups' => ['user:create']]
         ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
         new Delete()
@@ -45,7 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:create' , 'user:emailverification'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -53,19 +58,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column]
-    #[Groups(['user:read' , 'user:write'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' , 'user:write'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  ,'user:write'])]
+    #[Groups(['user:read'  ,'user:create'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  , 'user:write'])]
+    #[Groups(['user:read'  , 'user:create'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
@@ -77,7 +82,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' ,'user:write'])]
+    #[Groups(['user:read' ,'user:create'])]
     private ?string $emaillink = null;
 
     public function getId(): ?int

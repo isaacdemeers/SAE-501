@@ -94,7 +94,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
       </CardHeader>
       <CardContent>
         {(loginErrors.firstname || loginErrors.lastname || loginErrors.username) && (
-          <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 text-base md:text-lg w-full">
+          <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 mb-4 text-base md:text-lg w-full">
             Remplissez tous les champs
           </div>
         )}
@@ -134,7 +134,6 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
                 id="username"
                 type="text"
                 placeholder="Username"
-                required
                 className={`md:h-12 ${loginErrors.username ? "border-red-500 placeholder-red-500" : ""}`}
                 onChange={handleUsername}
                 value={logdata.username}

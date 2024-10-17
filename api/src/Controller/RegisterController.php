@@ -15,6 +15,27 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class RegisterController extends AbstractController
 {
+
+    #[Route('users/testemail', name: 'app_users_email', methods: ['POST'])]
+    public function checkEmail(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        $email = $data['email'] ?? null;
+
+        if (null === $email) {
+            return $this->json(['message' => 'Email is missing: ' . $email], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if (null !== $user) {
+            return $this->json(['message' => 'Email already exist'], Response::HTTP_CONFLICT);
+        }
+
+        return $this->json(['message' => 'OK'], Response::HTTP_OK);
+    }
+
+
     #[Route('/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
     {
