@@ -1,7 +1,7 @@
 export async function AddUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch("https://localhost/register", {
+    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

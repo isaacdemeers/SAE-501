@@ -19,12 +19,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ApiResource(
     operations: [
+        new Get(normalizationContext: ['groups' => ['user:read']]),
         new POST(
             uriTemplate: '/users/testemail',
             controller: RegisterController::class . '::checkEmail', 
             denormalizationContext:['groups' => ['user:emailverification']],
         ),
-        new Get(normalizationContext: ['groups' => ['user:read']]),
+        new Get(
+            uriTemplate: '/verify-email/{emaillink}', 
+            controller: RegisterController::class . '::verifyEmail', 
+            read: false, 
+            normalizationContext: ['groups' => ['user:emailconfirmation']],
+            write: true,
+            name: 'emaillink'
+        ),
         new Post(
             uriTemplate: '/register',
             controller: RegisterController::class,
@@ -78,11 +86,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read' ])]
+    #[Groups(['user:read', ])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' ,'user:create'])]
+    #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     public function getId(): ?int

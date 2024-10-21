@@ -13,6 +13,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 class RegisterController extends AbstractController
 {
 
@@ -66,8 +67,8 @@ class RegisterController extends AbstractController
 
             // Génération du lien de vérification
             $verificationLink = $urlGenerator->generate('app_confirm_email', [
-                'token' => $confirmationToken,
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
+                'emaillink' => $confirmationToken,
+            ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
 
             // Envoi de l'email de confirmation
             $email = (new Email())
@@ -89,11 +90,11 @@ class RegisterController extends AbstractController
         return $this->register($request, $entityManager, $passwordHasher, $mailer, $urlGenerator);
     }
 
-
-    #[Route('/verify-email', name: 'app_confirm_email', methods: ['GET'])]
-    public function verifyEmail(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/verify-email/{emaillink}', name: 'app_confirm_email', methods: ['GET'])]
+    public function verifyEmail(string $emaillink, EntityManagerInterface $entityManager): Response
     {
-        $token = $request->query->get('token');
+        $token = $emaillink;
+        $token = rtrim($token, '.json');
 
         if (null === $token) {
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
@@ -106,9 +107,44 @@ class RegisterController extends AbstractController
         }
 
         $user->setEmailverify(true);
-        $user->setEmaillink(null);
+        $user->setEmaillink("");
+        
+
+        $entityManager->persist($user);
         $entityManager->flush();
 
         return $this->json(['message' => 'Email verified successfully'], Response::HTTP_OK);
     }
+
+    #[Route('/reset-password', name: 'app_reset_password', methods: ['POST'])]
+    public function resetPassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        $email = $data['email'] ?? null;
+
+        if (null === $email) {
+            return $this->json(['message' => 'Email is missing'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if (null === $user) {
+            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Génération du token de confirmation d'email
+        $confirmationToken = Uuid::v4()->toRfc4122();
+        $user->setEmaillink($confirmationToken);
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Génération du lien de vérification
+        $verificationLink = $urlGenerator->generate('app_confirm_email', [
+            'emaillink' => $confirmationToken,
+        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
+
+        // Envoi de l'email de confirmation
+        $email = (new Email())
+            ->from('
 }
