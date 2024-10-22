@@ -85,3 +85,19 @@ export async function ResetPassword(email: string) {
     throw error;
   }
 }
+
+export async function Newpass(data: any) {
+  try {
+    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error adding user:", error);
+    throw error;
+  }
+}

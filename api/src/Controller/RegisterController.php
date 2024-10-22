@@ -42,47 +42,48 @@ class RegisterController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        // Vérifier que l'utilisateur n'existe pas déjà
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        // Vérifier que l'utilisateur n'existe pas déjà par email ou username
+        $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
 
-        if (null === $user) {
-            $user = new User();
-            $user->setEmail($data['email']);
-
-            // Hachage du mot de passe
-            $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
-            $user->setPassword($hashedPassword);
-
-            // Champs facultatifs
-            $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
-            $user->setLastname($data['lastname'] ?? 'DefaultLastname');
-            $user->setUsername($data['username'] ?? 'DefaultUsername');
-
-            // Génération du token de confirmation d'email
-            $confirmationToken = Uuid::v4()->toRfc4122();
-            $user->setEmaillink($confirmationToken);
-
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            // Génération du lien de vérification
-            $verificationLink = $urlGenerator->generate('app_confirm_email', [
-                'emaillink' => $confirmationToken,
-            ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
-
-            // Envoi de l'email de confirmation
-            $email = (new Email())
-                ->from('no-reply@example.com')
-                ->to($user->getEmail())
-                ->subject('Please Confirm your Email')
-                ->html('<p>Please confirm your email by clicking on the following link: <a href="' . $verificationLink . '">Verify Email</a></p>');
-
-            $mailer->send($email);
-
-            return $this->json($user, Response::HTTP_CREATED);
+        if (null !== $existingUserByEmail || null !== $existingUserByUsername) {
+            return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
         }
 
-        return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
+        $user = new User();
+        $user->setEmail($data['email']);
+
+        // Hachage du mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
+        $user->setPassword($hashedPassword);
+
+        // Champs facultatifs
+        $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
+        $user->setLastname($data['lastname'] ?? 'DefaultLastname');
+        $user->setUsername($data['username'] ?? 'DefaultUsername');
+
+        // Génération du token de confirmation d'email
+        $confirmationToken = Uuid::v4()->toRfc4122();
+        $user->setEmaillink($confirmationToken);
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Génération du lien de vérification
+        $verificationLink = $urlGenerator->generate('app_confirm_email', [
+            'emaillink' => $confirmationToken,
+        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
+
+        // Envoi de l'email de confirmation
+        $email = (new Email())
+            ->from('no-reply@example.com')
+            ->to($user->getEmail())
+            ->subject('Please Confirm your Email')
+            ->html('<p>Please confirm your email by clicking on the following link: <a href="' . $verificationLink . '">Verify Email</a></p>');
+
+        $mailer->send($email);
+
+        return $this->json($user, Response::HTTP_CREATED);
     }
 
     public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
