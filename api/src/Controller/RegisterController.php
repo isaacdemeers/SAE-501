@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -72,7 +73,7 @@ class RegisterController extends AbstractController
         // Génération du lien de vérification
         $verificationLink = $urlGenerator->generate('app_confirm_email', [
             'emaillink' => $confirmationToken,
-        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
+        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json";
 
         // Envoi de l'email de confirmation
         $email = (new Email())
@@ -109,12 +110,11 @@ class RegisterController extends AbstractController
 
         $user->setEmailverify(true);
         $user->setEmaillink("");
-        
+
 
         $entityManager->persist($user);
         $entityManager->flush();
 
         return $this->json(['message' => 'Email verified successfully'], Response::HTTP_OK);
     }
-
 }

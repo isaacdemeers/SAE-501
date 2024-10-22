@@ -1,7 +1,7 @@
 export async function AddUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/register", {
+    const response = await fetch("https://localhost/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export async function AddUser(data: any) {
 export async function LoginUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/auth", {
+    const response = await fetch("https://localhost/auth", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export async function TestEmail(data: string){
   }
   try {
     console.log(formData);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/users/testemail", {
+    const response = await fetch("https://localhost/users/testemail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export async function TestEmail(data: string){
 export async function GetGrettings() {
   try {
     const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/greetings", {
+    const response = await fetch("https://localhost/greetings", {
       method: "GET",
       headers: {
       "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export async function GetGrettings() {
 
 export async function ResetPassword(email: string) {
   try {
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/passwordemail", {
+    const response = await fetch("https://localhost/reset/passwordemail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +88,7 @@ export async function ResetPassword(email: string) {
 
 export async function Newpass(data: any) {
   try {
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/password", {
+    const response = await fetch("https://localhost/reset/password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
