@@ -8,7 +8,9 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\RegisterController;
+use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -31,15 +33,105 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(
             uriTemplate: '/verify-email/{emaillink}', 
             controller: RegisterController::class . '::verifyEmail', 
-            read: false, 
-            normalizationContext: ['groups' => ['user:emailconfirmation']],
-            write: true,
-            name: 'emaillink'
+            openapiContext: [
+            'parameters' => [
+                [
+                'name' => 'emaillink',
+                'in' => 'path',
+                'required' => true,
+                'schema' => [
+                    'type' => 'string'
+                ],
+                'example' => 'some-email-link'
+                ]
+            ],
+            ],
         ),
         new Post(
             uriTemplate: '/register',
             controller: RegisterController::class,
-            denormalizationContext: ['groups' => ['user:create']]
+            normalizationContext: ['groups' => ['user:create']],
+            openapiContext: [
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'password123'
+                                    ],
+                                    'firstname' => [
+                                        'type' => 'string',
+                                        'example' => 'John'
+                                    ],
+                                    'lastname' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe'
+                                    ],
+                                    'username' => [
+                                        'type' => 'string',
+                                        'example' => 'johndoe'
+                                    ]
+                                ],
+                                'required' => ['email', 'password', 'firstname', 'lastname', 'username']
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ),
+        new Post(
+            uriTemplate: "/reset/passwordemail",
+            controller: ResetPasswordController::class . '::resetPasswordEmail',
+            openapiContext: [
+            'requestBody' => [
+                'content' => [
+                'application/json' => [
+                    'schema' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'email' => [
+                        'type' => 'string',
+                        'example' => 'user@example.com'
+                        ]
+                    ]
+                    ]
+                ]
+                ]
+            ]
+            ]
+        ),
+        new POST(
+            uriTemplate:'/reset/password',
+            controller: ResetPasswordController::class .'::resetPassword',
+            openapiContext: [
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'token' => [
+                                        'type' => 'string',
+                                        'example' => 'some-reset-token'
+                                    ],
+                                    'newPassword' => [
+                                        'type' => 'string',
+                                        'example' => 'newpassword123'
+                                    ]
+                                ],
+                                'required' => ['token', 'newPassword']
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
         new Delete()
@@ -61,7 +153,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:create' , 'user:emailverification'])]
+    #[Groups(['user:read', 'user:create' , 'user:emailverification', 'user:emailresetpassword'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -95,6 +187,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
     private ?string $emaillink = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['user:read' ,'user:create'])]
+    private ?string $tokenpassword = null;
 
     public function getId(): ?int
     {
@@ -217,6 +313,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmaillink(string $emaillink): static
     {
         $this->emaillink = $emaillink;
+
+        return $this;
+    }
+
+    public function getTokenpassword(): ?string
+    {
+        return $this->tokenpassword;
+    }
+
+    public function setTokenpassword(?string $tokenpassword): static
+    {
+        $this->tokenpassword = $tokenpassword;
 
         return $this;
     }

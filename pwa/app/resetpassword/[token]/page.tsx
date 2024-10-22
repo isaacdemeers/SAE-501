@@ -14,6 +14,7 @@ import PasswordStrengthBar from 'react-password-strength-bar';
 import { usePathname } from "next/navigation"
 import { useEffect } from "react";
 import { Newpass } from "@/lib/request";
+import Link from "next/link";
 
 export default function ChangePassword(): JSX.Element {
   const [passworderror, setPassworderror] = useState<boolean>(false);
@@ -73,7 +74,7 @@ const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
       </CardHeader>
       {passwordsuccess && <p className="text-green-600 flex items-center justify-center bg-green-300 h-full mb-5 px-4 py-2 text-base md:text-lg w-full">Password changed successfully</p>}
       {passwordstrenghterror && <p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 mb-10 text-base md:text-lg w-full">Password must be at least 4 characters long</p>}
-        {passworderror && <p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">Please retry</p>}
+        {passworderror && <div className="flex flex-wrap flex-col"><p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">the token may be expired try to change resend an email at <span className="underline"><Link href={"https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/login/forgotpassword"}>this link</Link></span></p> </div>}
       <CardContent className="pb-2">
         <form>
           <div className="grid w-full items-center gap-6">

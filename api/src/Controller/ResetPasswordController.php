@@ -38,6 +38,11 @@ public function resetPasswordEmail(Request $request, EntityManagerInterface $ent
     // Génération du token JWT pour l'utilisateur avec l'email
     $token = $JWTManager->create($user);
 
+    // Stocker le token dans la variable tokenpassword de l'utilisateur
+    $user->setTokenPassword($token);
+    $entityManager->persist($user);
+    $entityManager->flush();
+
     // Création du lien pour réinitialiser le mot de passe
     $resetLink = sprintf('https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/resetpassword/%s', $token);
 
@@ -58,16 +63,17 @@ public function resetPasswordEmail(Request $request, EntityManagerInterface $ent
     return $this->json(['message' => 'Password reset email sent'], Response::HTTP_OK);
 }
 
- #[Route('/reset/password', name: 'reset_password', methods: ['POST'])]
- public function resetPassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, JWTTokenManagerInterface $JWTManager,): Response
- {
-      // Décoder le token JWT pour obtenir l'utilisateur
+#[Route('/reset/password', name: 'reset_password', methods: ['POST'])]
+public function resetPassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, JWTTokenManagerInterface $JWTManager): Response
+{
+    // Décoder le token JWT pour obtenir l'utilisateur
     $data = json_decode($request->getContent(), true);
     $token = $data['token'] ?? null;
 
     if (null === $token) {
         return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
     }
+
     try {
         $tokenData = $JWTManager->parse($token);
         $username = $tokenData['username'];
@@ -82,29 +88,38 @@ public function resetPasswordEmail(Request $request, EntityManagerInterface $ent
     }
 
     // Chercher l'utilisateur par le nom d'utilisateur
-     $user = $entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
+    $user = $entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
 
-     if (null === $user) {
-         return $this->json(['message' => 'User not found'], Response::HTTP_BAD_REQUEST);
-     }
+    if (null === $user) {
+        return $this->json(['message' => 'User not found'], Response::HTTP_BAD_REQUEST);
+    }
 
-     $data = json_decode($request->getContent(), true);
-     $password = $data['password'] ?? null;
+    // Vérifier si le token correspond à celui stocké dans la base de données
+    if ($user->getTokenPassword() !== $token) {
+        return $this->json(['message' => 'Invalid token'], Response::HTTP_BAD_REQUEST);
+    }
 
-     if (null === $password) {
-         return $this->json(['message' => 'Password is missing'], Response::HTTP_BAD_REQUEST);
-     }
+    $password = $data['password'] ?? null;
+
+    if (null === $password) {
+        return $this->json(['message' => 'Password is missing'], Response::HTTP_BAD_REQUEST);
+    }
+
     if (strlen($password) < 4) {
         return $this->json(['message' => 'Password must be at least 4 characters long'], Response::HTTP_BAD_REQUEST);
     }
-     // Hachage du mot de passe
-     $hashedPassword = $passwordHasher->hashPassword($user, $password);
-     $user->setPassword($hashedPassword);
 
-     // Sauvegarde de l'utilisateur
-     $entityManager->persist($user);
-     $entityManager->flush();
+    // Hachage du mot de passe
+    $hashedPassword = $passwordHasher->hashPassword($user, $password);
+    $user->setPassword($hashedPassword);
 
-     return $this->json(['message' => 'Password reset'], Response::HTTP_OK);
- }
+    // Supprimer le token de la base de données
+    $user->setTokenPassword(null);
+
+    // Sauvegarde de l'utilisateur
+    $entityManager->persist($user);
+    $entityManager->flush();
+
+    return $this->json(['message' => 'Password reset'], Response::HTTP_OK);
+}
 }
