@@ -53,9 +53,6 @@ export async function TestEmail(data: string){
 }
 
 
-
-
-
 export async function GetGrettings() {
   try {
     const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
@@ -69,6 +66,22 @@ export async function GetGrettings() {
     return await response.json();
   } catch (error) {
     console.error("Error getting greetings:", error);
+    throw error;
+  }
+}
+
+export async function ResetPassword(email: string) {
+  try {
+    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/passwordemail", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error resetting password:", error);
     throw error;
   }
 }

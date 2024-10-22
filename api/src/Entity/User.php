@@ -24,6 +24,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: '/users/testemail',
             controller: RegisterController::class . '::checkEmail', 
             denormalizationContext:['groups' => ['user:emailverification']],
+            security: "is_granted('ROLE_ADMIN')",
+
         ),
         new Get(
             uriTemplate: '/verify-email/{emaillink}', 

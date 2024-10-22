@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card , CardHeader , CardContent } from "@/components/ui/card"
 import { useState } from "react"
-
+import { ResetPassword } from "@/lib/request"
 export default function ForgotPassword() {
 const [formData , setFormData] = useState<{email: string}>({email: ""})
 const [error , setError] = useState<boolean>(false);
@@ -16,7 +16,7 @@ setFormData({...formData , email: e.target.value})
 console.log(formData)
 }
 
-  const handleForgotPassword = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if(!emailRegex.test(formData.email)){
       setError(true);
@@ -24,6 +24,10 @@ console.log(formData)
         setError(false);
       }, 5000);
       return;
+    }
+    else{
+      let email = await ResetPassword(formData.email);
+      console.log(email);
     }
     const email = formData.email;
     console.log(email);
