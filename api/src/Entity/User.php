@@ -143,8 +143,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct()
     {
-        $this->setRoles(['ROLE_USER']); 
-        $this->setPhoto('/public/logimg.png'); 
+        $this->setRoles(['ROLE_USER']);  
         $this->setEmailverify(false); 
     }
     #[ORM\Id]

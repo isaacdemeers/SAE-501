@@ -1,9 +1,9 @@
 'use client'
-import Signinform from "@/composents/Signinform";
+import Signinform from "@/components/ui/Signinform";
 import { useState } from "react";
-import Personnalinfo from "@/composents/personnalinfo";
-import Addimage from "@/composents/ImageProfile";
-import SignRecap from "@/composents/SignRecap";
+import Personnalinfo from "@/components/ui/personnalinfo";
+import Addimage from "@/components/ui/ImageProfile";
+import SignRecap from "@/components/ui/SignRecap";
 import { AddUser } from "@/lib/request";
 interface SignData {
     [key: string]: any;

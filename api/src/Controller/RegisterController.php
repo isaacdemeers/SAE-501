@@ -36,12 +36,13 @@ class RegisterController extends AbstractController
         return $this->json(['message' => 'OK'], Response::HTTP_OK);
     }
 
-
     #[Route('/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
     {
-        $data = json_decode($request->getContent(), true);
-
+        // Récupérer les données JSON et le fichier
+        $data = json_decode($request->request->get('data'), true);
+        $file = $request->files->get('file');
+        
         // Vérifier que l'utilisateur n'existe pas déjà par email ou username
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
@@ -66,6 +67,15 @@ class RegisterController extends AbstractController
         $confirmationToken = Uuid::v4()->toRfc4122();
         $user->setEmaillink($confirmationToken);
 
+        // Gestion de l'image
+        if ($file) {
+            $imageName = uniqid() . '.' . $file->guessExtension();
+            $file->move($this->getParameter('kernel.project_dir') . '/public/uploads', $imageName);
+            $user->setPhoto($imageName);
+        }
+        else {
+            $user->setPhoto('/logimg.png');
+        }
         $entityManager->persist($user);
         $entityManager->flush();
 

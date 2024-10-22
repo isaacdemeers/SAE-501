@@ -57,7 +57,7 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   return (
     <Card className="w-full  md:w-[450px]">
       <CardHeader>
-        <h1 className="text-4xl font-semibold leading-none tracking-tight my-5">Welcome back to [name of the app]</h1>
+        <h1 className="text-4xl font-semibold leading-none tracking-tight my-5">Bienvenue sur Planit</h1>
       </CardHeader>
       <CardContent>
         <form>
@@ -74,7 +74,7 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
             </p> */}
             {loginerror ? (
               <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 text-base md:text-lg w-full">
-                Invalid email or password
+                Mot de passe ou email incorrect
               </div>
             ) : null}
             <div className="flex flex-col space-y-1.5">
@@ -84,14 +84,14 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
               <Input
                 id="email"
                 className={`md:h-12 ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
-                placeholder="John.Doe@gmail.com"
+                placeholder="utilisateur@email.com"
                 onChange={handleEmail}
               />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password" className="md:text-base">
-                  Password
+                  Mot de passe
                 </Label>
               </div>
               <Input
@@ -99,11 +99,11 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
                 type="password"
                 placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
                 required
-                className={`md:h-12 ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
+                className={`md:h-12 text-xs ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
                 onChange={handlePassword}
               />
               <Link href={`${pathname}/forgotpassword`} className="text-gray-500 pl-2 text-sm">
-                Forgot your password?
+                Mot de passe oublié?
               </Link>
             </div>
           </div>
@@ -111,12 +111,12 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       </CardContent>
       <CardFooter className="flex flex-col gap-2 justify-between">
         <Button size={"lg"} onClick={() => {  handleLogin(); }} className="w-full md:text-lg">
-          Login
+          Se connecter
         </Button>
         <div className="mt-4 text-center text-sm md:text-md">
-          Not registered yet?{" "}
+          Pas encore de compte ?{" "}
           <Link href="/signin" className="underline font-bold">
-            Sign up
+            S'inscrire
           </Link>
         </div>
       </CardFooter>

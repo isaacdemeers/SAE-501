@@ -34,7 +34,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
         const width = img.width;
         const height = img.height;
         console.log(`Width: ${width}, Height: ${height}`);
-        if (width > 800 || height > 400) {
+        if (width > 800 || height > 800) {
           setSizeerror(true);
           setTimeout(() => {
             setSizeerror(false);
@@ -45,7 +45,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
           setTimeout(() => {
             setFileok(false);
           }, 5000);
-          // handleImageData(file);
+           handleImageData(file);
           setImageSrc(URL.createObjectURL(file));
         }
       };
@@ -63,19 +63,19 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
     <>
       {fileok && (
         <div className="text-green-600 flex items-center rounded-xl mb-6 justify-center bg-green-300 h-12 text-base md:text-lg w-full">
-          Your image has been uploaded successfully
-        </div>
+          Votre image a été téléchargée avec succès
+          </div>
       )}
       {sizeerror && (
         <div className="text-red-600 flex items-center rounded-xl mb-6 justify-center bg-red-300 h-12 text-base md:text-lg w-full">
-          Your image is too large,&nbsp; <a href="https://www.iloveimg.com/resize-image" target="_blank" className="underline font-bold">resize it here</a>
+          Votre image est trop grande,&nbsp; <a href="https://www.iloveimg.com/resize-image" target="_blank" className="underline font-bold">redimentionner la ici</a>
         </div>
       )}
 
     <ArrowLeft className="w-10 h-10 text-gray-400 mb-2 cursor-pointer" onClick={() => handleBack()} />
       <Card className="w-full  md:w-[450px]">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Help People recognize you</CardTitle>
+            <CardTitle className="text-2xl font-bold">Aidez les gens à vous reconnaître</CardTitle>
         </CardHeader>
         <CardContent>
           <div className={`flex flex-col items-center justify-center border-2 border-dashed ${sizeerror ? 'border-red-500' : 'border-gray-300'} rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors relative`}>
@@ -86,9 +86,9 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
               <>
                 <Upload className="w-10 h-10 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500 text-center">
-                  Click to upload or drag and drop
+                  Appuyez pour télécharger une image de profil ou faites glisser une image ici
                   <br />
-                  SVG, PNG, or JPG (max. 800x400px)
+                  SVG, PNG, or JPG (max. 800x800px)
                 </p>
               </>
             )}
@@ -100,14 +100,14 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
             onClick={() => handleRecap()}
             className="w-full md:text-lg"
           >
-            Next
+            Suivant
           </Button>
           <Button
             size={"lg"}
             onClick={handleSkip}
             className="w-full bg-gray-200 text-black hover:brightness-90 hover:bg-gray-200 md:text-lg"
           >
-            Skip
+            Passer
           </Button>
         </CardFooter>
       </Card>

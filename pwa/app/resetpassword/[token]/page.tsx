@@ -72,16 +72,16 @@ const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
       <CardHeader className="mb-5">
         <h1 className="text-4xl font-semibold leading-none tracking-tight my-5 mb-2">Change your Password</h1>
       </CardHeader>
-      {passwordsuccess && <p className="text-green-600 flex items-center justify-center bg-green-300 h-full mb-5 px-4 py-2 text-base md:text-lg w-full">Password changed successfully</p>}
-      {passwordstrenghterror && <p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 mb-10 text-base md:text-lg w-full">Password must be at least 4 characters long</p>}
-        {passworderror && <div className="flex flex-wrap flex-col"><p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">the token may be expired try to change resend an email at <span className="underline"><Link href={"https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/login/forgotpassword"}>this link</Link></span></p> </div>}
+      {passwordsuccess && <p className="text-green-600 flex items-center justify-center bg-green-300 h-full mb-5 px-4 py-2 text-base md:text-lg w-full">Le mot de passe a été modifier</p>}
+      {passwordstrenghterror && <p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 mb-10 text-base md:text-lg w-full">Le mot de apsse doit contenir au moins 4 caractères</p>}
+        {passworderror && <div className="flex flex-wrap flex-col"><p className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">le token peut être expiré, essayez de renvoyer un email à <span className="underline"><Link href={"https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/login/forgotpassword"}>ce lien</Link></span></p> </div>}
       <CardContent className="pb-2">
         <form>
           <div className="grid w-full items-center gap-6">
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password" className="md:text-base">
-                 New Password*
+                 Nouveau mot de passe*
                 </Label>
               </div>
               <Input
@@ -89,7 +89,7 @@ const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
                 type="password"
                 placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
                 required
-                className={`md:h-12 ${passworderror ? 'border-red-500 placeholder-red-500' : ''}`}
+                className={`md:h-12 text-xs ${passworderror ? 'border-red-500 placeholder-red-500' : ''}`}
                 onChange={handlePassword}
               />
                <PasswordStrengthBar password={signdata.password} />
@@ -99,7 +99,7 @@ const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
       </CardContent>
       <CardFooter className="flex flex-col gap-2 justify-between">
         <Button size={"lg"} onClick={() => {  handleChangePassword(); }} className="w-full md:text-lg">
-        Change password
+        Changer mon mot de passe
         </Button>
       </CardFooter>
     </Card>

@@ -102,7 +102,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
           <div className="grid w-full items-center gap-6">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="firstname" className="md:text-base">
-                Firstname*
+                Prénom*
               </Label>
               <Input
                 id="firstname"
@@ -114,7 +114,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="lastname" className="md:text-base">
-                Lastname*
+                Nom*
               </Label>
               <Input
                 id="lastname"
@@ -127,13 +127,13 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="username" className="md:text-base">
-                  Username*
+                  Pseudo/Surnom*
                 </Label>
               </div>
               <Input
                 id="username"
                 type="text"
-                placeholder="Username"
+                placeholder="Pseudo/Surnom"
                 className={`md:h-12 ${loginErrors.username ? "border-red-500 placeholder-red-500" : ""}`}
                 onChange={handleUsername}
                 value={logdata.username}
@@ -142,7 +142,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
           </div>
           <CardFooter className="flex flex-col gap-2 w-full px-0 justify-between">
             <Button size={"lg"} type="submit" className="w-full mt-10 md:text-lg">
-              Next
+              Suivant
             </Button>
           </CardFooter>
         </form>

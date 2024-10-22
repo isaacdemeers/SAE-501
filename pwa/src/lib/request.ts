@@ -1,12 +1,15 @@
 export async function AddUser(data: any) {
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+  if (data.image) {
+    formData.append("file", data.image, data.image.name);
+  }
+
   try {
     console.log(data);
     const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body: formData,
     });
     return await response.json();
   } catch (error) {
