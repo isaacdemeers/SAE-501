@@ -1,9 +1,9 @@
 'use client'
-import Signinform from "@/composents/Signinform";
+import Signinform from "@/components/Signinform";
 import { useState } from "react";
-import Personnalinfo from "@/composents/personnalinfo";
-import Addimage from "@/composents/ImageProfile";
-import SignRecap from "@/composents/SignRecap";
+import Personnalinfo from "@/components/personnalinfo";
+import Addimage from "@/components/ImageProfile";
+import SignRecap from "@/components/SignRecap";
 import { AddUser } from "@/lib/request";
 interface SignData {
     [key: string]: any;
@@ -47,18 +47,16 @@ export default function Signin() {
     }
 
     const pushdata = async () => {
-        try {
             const formData = new FormData();
             Object.entries(signdata).forEach(([key, value]) => {
                 formData.append(key, value instanceof File ? value : String(value));
             });
             console.log(formData);
             const data = await AddUser(signdata);
-            console.log(data);
-        } catch (error) {
-            console.error("Error adding user:", error);
-        }
-    }
+            if(data.message === "User created successfully"){
+                window.location.href = "/";
+            }
+        } 
 
     return (
         <>

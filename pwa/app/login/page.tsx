@@ -1,8 +1,10 @@
-import Loginform from "@/composents/Loginform"
-export default function Page(){
+import Loginform from "@/components/Loginform"
 
 
-return(  
-            <Loginform/>
-)
+export default function Page() {
+    return (
+        <>
+            <Loginform />
+        </>
+    )
 }

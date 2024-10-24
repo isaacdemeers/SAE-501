@@ -19,6 +19,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - uploads:/var/www/html/public/uploads
     ports:
       # HTTP
       - target: 80
@@ -37,6 +38,8 @@ services:
     image: ${IMAGES_PREFIX:-}app-pwa
     environment:
       NEXT_PUBLIC_ENTRYPOINT: http://php
+    volumes:
+    - uploads:/usr/src/app/pwa/public/uploads
 
 ###> doctrine/doctrine-bundle ###
   database:
@@ -70,3 +73,4 @@ volumes:
 ###< doctrine/doctrine-bundle ###
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+  uploads:
