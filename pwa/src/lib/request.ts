@@ -56,6 +56,28 @@ export async function TestEmail(data: string){
 }
 
 
+export async function TestUsername(data: string){
+  let formData = {
+      username: data
+    }
+    try {
+      console.log(formData);
+      const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/users/testusername", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error testing username:", error);
+      throw error;
+    }
+  }
+
+
+
 export async function GetGrettings() {
   try {
     const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';

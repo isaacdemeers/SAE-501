@@ -27,7 +27,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: '/users/testemail',
             controller: RegisterController::class . '::checkEmail', 
             denormalizationContext:['groups' => ['user:emailverification']],
-            security: "is_granted('ROLE_ADMIN')",
+        ),
+        new POST(
+            uriTemplate: '/users/testusername',
+            controller: RegisterController::class . '::checkUsername', 
+            denormalizationContext:['groups' => ['user:usernameverification']],
 
         ),
         new Get(
@@ -172,7 +176,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  , 'user:create'])]
+    #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]

@@ -42,6 +42,26 @@ class RegisterController extends AbstractController
         return $this->json(['message' => 'OK'], Response::HTTP_OK);
     }
 
+
+    #[Route('users/testusername', name: 'app_users_username', methods: ['POST'])]
+    public function checkUsername(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        $username = $data['username'] ?? null;
+
+        if (null === $username) {
+            return $this->json(['message' => 'Username is missing: ' . $username], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
+
+        if (null !== $user) {
+            return $this->json(['message' => 'Username already exists'], Response::HTTP_CONFLICT);
+        }
+
+        return $this->json(['message' => 'OK'], Response::HTTP_OK);
+    }
+
     #[Route('/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
     {
@@ -104,7 +124,7 @@ class RegisterController extends AbstractController
 
         $mailer->send($email);
 
-        return $this->json($user, Response::HTTP_CREATED);
+        return $this->json(['message' => 'User created successfully'], Response::HTTP_CREATED);
     }
 
     public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response

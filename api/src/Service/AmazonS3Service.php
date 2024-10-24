@@ -16,7 +16,16 @@ class AmazonS3Service
 
     public function getObjectUrl(string $key): string
     {
-        return $this->s3Client->getObjectUrl($this->bucketName, $key);
+        // Générer une URL signée valide pendant 1 heure (3600 secondes)
+        $cmd = $this->s3Client->getCommand('GetObject', [
+            'Bucket' => $this->bucketName,
+            'Key' => $key,
+        ]);
+
+        $request = $this->s3Client->createPresignedRequest($cmd, '+1 hour');
+
+        // Récupérer l'URL signée
+        return (string) $request->getUri();
     }
 
     public function uploadObject(string $key, string $filePath): bool
