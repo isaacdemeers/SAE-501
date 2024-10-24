@@ -5,7 +5,6 @@ import VerifyEmail from "@/components/VerifyEmail";
 import { VerifyEmailToken } from "@/lib/request";
 
 export default function VerifyEmailPage() {
-    const [token , setToken] = useState<string>("");
     const [isVerified , setIsVerified] = useState<boolean>(false);
     const pathname = usePathname();
 
@@ -13,7 +12,6 @@ export default function VerifyEmailPage() {
         const verifyToken = async () => {
             const urltoken = pathname.split('/').pop();
             if (urltoken) {
-                setToken(urltoken);
                 const result = await VerifyEmailToken(urltoken);
                 if (result.message === "Email verified successfully") {
                     setIsVerified(true);
