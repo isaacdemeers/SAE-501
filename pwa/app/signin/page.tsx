@@ -54,7 +54,7 @@ export default function Signin() {
             console.log(formData);
             const data = await AddUser(signdata);
             if(data.message === "User created successfully"){
-                window.location.href = "/";
+                window.location.href = "/login";
             }
         } 
 

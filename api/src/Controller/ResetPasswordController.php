@@ -44,7 +44,7 @@ public function resetPasswordEmail(Request $request, EntityManagerInterface $ent
     $entityManager->flush();
 
     // Création du lien pour réinitialiser le mot de passe
-    $resetLink = sprintf('https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/resetpassword/%s', $token);
+    $resetLink = sprintf('https://curly-train-x5w767g6r47v3w94-443.app.github.dev/resetpassword/%s', $token);
 
     // Envoi de l'email
     $emailMessage = (new Email())

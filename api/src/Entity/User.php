@@ -34,21 +34,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
             denormalizationContext:['groups' => ['user:usernameverification']],
 
         ),
-        new Get(
-            uriTemplate: '/verify-email/{emaillink}', 
+        new Post(
+            uriTemplate: '/verify-email', 
             controller: RegisterController::class . '::verifyEmail', 
             openapiContext: [
-            'parameters' => [
-                [
-                'name' => 'emaillink',
-                'in' => 'path',
-                'required' => true,
-                'schema' => [
-                    'type' => 'string'
-                ],
-                'example' => 'some-email-link'
+            'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'emailtoken' => [
+                                        'type' => 'string',
+                                        'example' => 'some-verification-token'
+                                    ]
+                                ],
+                                'required' => ['token']
+                            ]
+                        ]
+                    ]
                 ]
-            ],
             ],
         ),
         new Post(

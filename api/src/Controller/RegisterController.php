@@ -111,9 +111,7 @@ class RegisterController extends AbstractController
         $entityManager->flush();
 
         // Génération du lien de vérification
-        $verificationLink = $urlGenerator->generate('app_confirm_email', [
-            'emaillink' => $confirmationToken,
-        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
+        $verificationLink = 'https://curly-train-x5w767g6r47v3w94-443.app.github.dev/verify-email/' . $confirmationToken;
 
         // Envoi de l'email de confirmation
         $email = (new Email())
@@ -132,11 +130,12 @@ class RegisterController extends AbstractController
         return $this->register($request, $entityManager, $passwordHasher, $mailer, $urlGenerator);
     }
 
-    #[Route('/verify-email/{emaillink}', name: 'app_confirm_email', methods: ['GET'])]
-    public function verifyEmail(string $emaillink, EntityManagerInterface $entityManager): Response
+    #[Route('/verify-email', name: 'app_confirm_email', methods: ['POST'])]
+    public function verifyEmail(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $token = rtrim($emaillink, '.json');
-
+        $data = json_decode($request->getContent(), true);
+        $token = $data['emailtoken'] ?? null;
+        
         if (null === $token) {
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
         }
