@@ -13,16 +13,18 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RegisterController extends AbstractController
 {
     private $s3Service;
+    private $params;
 
-    public function __construct(AmazonS3Service $s3Service)
+    public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
     {
         $this->s3Service = $s3Service;
+        $this->params = $params;
     }
-
 
     #[Route('users/testemail', name: 'app_users_email', methods: ['POST'])]
     public function checkEmail(Request $request, EntityManagerInterface $entityManager): Response
@@ -42,7 +44,6 @@ class RegisterController extends AbstractController
 
         return $this->json(['message' => 'OK'], Response::HTTP_OK);
     }
-
 
     #[Route('users/testusername', name: 'app_users_username', methods: ['POST'])]
     public function checkUsername(Request $request, EntityManagerInterface $entityManager): Response
@@ -112,7 +113,8 @@ class RegisterController extends AbstractController
         $entityManager->flush();
 
         // Génération du lien de vérification
-        $verificationLink = 'https://curly-train-x5w767g6r47v3w94-443.app.github.dev/verify-email/' . $confirmationToken;
+        $appUrl = $this->params->get('APP_URL');
+        $verificationLink = $appUrl . '/verify-email/' . $confirmationToken;
 
         // Envoi de l'email de confirmation
         $email = (new Email())
