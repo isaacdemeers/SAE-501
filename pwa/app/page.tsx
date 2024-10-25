@@ -1,33 +1,22 @@
 'use client'
-import { useEffect, useState } from 'react';
 
-const ImageComponent = () => {
-  const [imageUrl, setImageUrl] = useState(null);
 
-  useEffect(() => {
-    // Fetch the image URL from your Symfony API
-    const fetchImageUrl = async () => {
-      try {
-        const response = await fetch(`/api/images/67197595006ff.png`);
-        const data = await response.json();
-        setImageUrl(data.url);
-      } catch (error) {
-        console.error('Error fetching image URL:', error);
-      }
-    };
-
-    fetchImageUrl();
-  }, []);
-
-  if (!imageUrl) {
-    return <p>Loading image...</p>;
-  }
+const HomePage = () => {
+ 
 
   return (
     <div>
-      <img src={imageUrl} alt={`Image of 67197595006ff.png`} />
+      <h1>Page en cours de construction</h1>
+      <div>
+        <button className="mr-2 px-4 py-2 bg-blue-500 text-white border-none rounded">
+          <a href="/login" className="text-white no-underline">Connection</a>
+        </button>
+        <button className="px-4 py-2 bg-green-500 text-white border-none rounded">
+          <a href="/signin" className="text-white no-underline">Inscription</a>
+        </button>
+      </div>
     </div>
   );
 };
 
-export default ImageComponent;
+export default HomePage;

@@ -1,47 +1,44 @@
-<h1 align="center"><a href="https://api-platform.com"><img src="https://api-platform.com/images/logos/Logo_Circle%20webby%20text%20blue.png" alt="API Platform" width="250" height="250"></a></h1>
+# README
 
-API Platform is a next-generation web framework designed to easily create API-first projects without compromising extensibility
-and flexibility:
+## Instructions
 
-* Design your own data model as plain old PHP classes or [**import an existing ontology**](https://api-platform.com/docs/schema-generator).
-* **Expose in minutes a hypermedia REST or a GraphQL API** with pagination, data validation, access control, relation embedding,
-  filters, and error handling...
-* Benefit from Content Negotiation: [GraphQL](https://api-platform.com/docs/core/graphql/), [JSON-LD](https://json-ld.org), [Hydra](https://hydra-cg.com),
-  [HAL](https://github.com/mikekelly/hal_specification/blob/master/hal_specification.md), [JSON:API](https://jsonapi.org/), [YAML](https://yaml.org/), [JSON](https://www.json.org/), [XML](https://www.w3.org/XML/) and [CSV](https://www.ietf.org/rfc/rfc4180.txt) are supported out of the box.
-* Enjoy the **beautiful automatically generated API documentation** ([OpenAPI](https://api-platform.com/docs/core/openapi/)).
-* Add [**a convenient Material Design administration interface**](https://api-platform.com/docs/admin) built with [React](https://reactjs.org/)
-  without writing a line of code.
-* **Scaffold fully functional Progressive-Web-Apps and mobile apps** built with [Next.js](https://api-platform.com/docs/client-generator/nextjs/) (React),
-[Nuxt.js](https://api-platform.com/docs/client-generator/nuxtjs/) (Vue.js) or [React Native](https://api-platform.com/docs/client-generator/react-native/)
-thanks to [the client generator](https://api-platform.com/docs/client-generator/) (a Vue.js generator is also available).
-* Install a development environment and deploy your project in production using **[Docker](https://api-platform.com/docs/distribution)**
-and [Kubernetes](https://api-platform.com/docs/deployment/kubernetes).
-* Easily add **[OAuth](https://oauth.net/) authentication**.
-* Create specs and tests with **[a developer friendly API testing tool](https://api-platform.com/docs/distribution/testing/)**.
+1. **Construire et exécuter Docker :**
+  - Exécutez la commande : `docker compose build --no-cache`
+  - Puis exécutez : `docker compose up --wait`
 
-The official project documentation is available **[on the API Platform website](https://api-platform.com)**.
+2. **Ouvrir le port :**
+  - Ouvrez le port 443 pour accéder à l'application.
+  - Ouvrez le port 8025 pour accéder a la boite mail de test Mailpit
 
-API Platform embraces open web standards and the
-[Linked Data](https://www.w3.org/standards/semanticweb/data) movement. Your API will automatically expose structured data.
-It means that your API Platform application is usable **out of the box** with technologies of
-the semantic web.
+3. **Mettre à jour les URLs des requêtes :**
+  - Allez dans le fichier `.env.local` dans le dossier `pwa`.
+  - Changez la valeur présente dans le champ `NEXT_PUBLIC_API_BASE_URL` par l'URL de l'application sur le port 443.
+  - Idm pour le back allez dans le fichier `.env` dans le dossier `api`.
+  - Changez la valeur présente en bas du fichier dans le champ `APP_URL` par l'URL de l'application sur le port 443.
 
-It also means that **your SEO will be improved** because **[Google leverages these formats](https://developers.google.com/search/docs/guides/intro-structured-data)**.
+## Générer les clés JWT
 
-Last but not least, the server component of API Platform is built on top of the [Symfony](https://symfony.com) framework,
-while client components leverage [React](https://reactjs.org/) ([Vue.js](https://vuejs.org/) flavors are also available).
-It means that you can:
+- Allez sur l'extention docker de VSCode et ouvrez une console pour le conteneur `app-php` 
+- Exécutez la commande : `php bin/console lexik:jwt:generate-keypair`
 
-* Use **thousands of Symfony bundles and React components** with API Platform.
-* Integrate API Platform in **any existing Symfony, React, or Vue application**.
-* Reuse **all your Symfony and JavaScript skills**, and benefit from the incredible amount of documentation available.
-* Enjoy the popular [Doctrine ORM](https://www.doctrine-project.org/projects/orm.html) (used by default, but fully optional:
-  you can use the data provider you want, including but not limited to MongoDB and Elasticsearch)
+## Route disponible
 
-## Install
+- La documentation de l'API est disponible à `/docs`.
+- Routes disponibles dans l'application front pour le moment :
+  - `/signin` pour créer un compte.
+  - `/signup` pour se connecter. La connexion renvoie un jeton nommé `jwt_token` dans les cookies du navigateur.
 
-[Read the official "Getting Started" guide](https://api-platform.com/docs/distribution/).
+## Réinitialisation du mot de passe
 
-## Credits
+- Pour réinitialiser votre mot de passe, utilisez la route `/login` et sélectionnez "Mot de passe oublié".
+- Entrez votre email et cliqué sur le lien dans l'email dans Mailpit.
+- Cliquez sur le lien dans l'email pour modifier votre mot de passe. Note : Le jeton est valable pour une seule tentative.
 
-Created by [Kévin Dunglas](https://dunglas.fr). Commercial support is available at [Les-Tilleuls.coop](https://les-tilleuls.coop).
+## Vérifier le statut du compte
+
+- Vérifiez le statut de vérification du compte en entrant l'ID utilisateur dans la route `GET users/{id}`.
+- Le compte est vérifié si `emailverify = true`.
+- Vous pouvez vérifier votre email grâce à un mail envoyé après la création du compte sur Mailpit.
+
+## Video de test
+https://youtu.be/T91zRI66MC8
