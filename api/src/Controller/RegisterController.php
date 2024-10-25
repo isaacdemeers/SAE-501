@@ -23,6 +23,7 @@ class RegisterController extends AbstractController
         $this->s3Service = $s3Service;
     }
 
+
     #[Route('users/testemail', name: 'app_users_email', methods: ['POST'])]
     public function checkEmail(Request $request, EntityManagerInterface $entityManager): Response
     {

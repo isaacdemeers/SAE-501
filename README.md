@@ -42,3 +42,5 @@
 - Le compte est vérifié si `emailverify = true`.
 - Vous pouvez vérifier votre email grâce à un mail envoyé après la création du compte sur Mailpit.
 
+## Video de test
+https://youtu.be/T91zRI66MC8
