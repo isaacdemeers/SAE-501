@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -30,10 +31,10 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
             time() + 3600, // Expire dans 1 heure
             '/',
             null,
-            false, // True si HTTPS, False pour dev
+            true, // True si HTTPS, False pour dev
             true,  // HttpOnly, inaccessible depuis JS
-            false, // SameSite Lax ou Strict
-            'lax'  // Pour éviter les envois intersites
+            true, // SameSite Lax ou Strict
+            'none'  // Pour éviter les envois intersites
         );
 
         // Créer une réponse avec le cookie
