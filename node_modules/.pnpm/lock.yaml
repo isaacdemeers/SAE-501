@@ -1,0 +1,29 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@fullcalendar/common':
+        specifier: ^5.11.5
+        version: 5.11.5
+
+packages:
+
+  '@fullcalendar/common@5.11.5':
+    resolution: {integrity: sha512-3iAYiUbHXhjSVXnYWz27Od2cslztUPsOwiwKlfGvQxBixv2Kl6a8IPwaijKFYJHXdwYmfPoEgK7rvqAGVoIYwA==}
+
+  tslib@2.8.0:
+    resolution: {integrity: sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==}
+
+snapshots:
+
+  '@fullcalendar/common@5.11.5':
+    dependencies:
+      tslib: 2.8.0
+
+  tslib@2.8.0: {}

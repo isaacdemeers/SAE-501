@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"@fullcalendar/common": "^5.11.5"
+	}
+}
