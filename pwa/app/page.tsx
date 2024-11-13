@@ -4,8 +4,9 @@ import SuggestedEvents from '@/components/SuggestedEvents'
 import MyEvents from '@/components/MyEvents'
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import EventForm from '@/components/event-form';
+import { useState, useEffect, useRef } from 'react';
 
-// Mock data for events
 const myEvents = [
   {
     imageUrl: "/image_mairie_limoges.png",
@@ -52,6 +53,35 @@ const suggestedEvents = [
 ]
 
 export default function Dashboard() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const handleCreateEventClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = (): void => {
+    setIsModalOpen(false);
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      closeModal();
+    }
+  };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModalOpen]);
+
   return (
     <div className="container mx-auto p-4 md:p-8 lg:p-12">
       <div className="flex gap-4 py-4">
@@ -61,11 +91,18 @@ export default function Dashboard() {
         <Button>
           <Link href="/register">Register</Link>
         </Button>
-        <Button>
+        <Button onClick={handleCreateEventClick}>
           Créer un Event
         </Button>
       </div>
       <h1 className="text-4xl font-bold mb-8">Bienvenue, Fred 👋</h1>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div ref={modalRef} className="bg-white p-4 max-h-[80vh] overflow-y-auto rounded-lg">
+            <EventForm  />
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-[3fr_4fr] gap-8">
         <MyEvents events={myEvents} />
         <SuggestedEvents initialEvents={suggestedEvents} />

@@ -9,6 +9,8 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\EventController;
 use App\Repository\EventRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -119,6 +121,10 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['event:read'])]
     private ?\DateTimeInterface $deleted_date = null;
+
+   
+
+ 
 
     public function getId(): ?int
     {
@@ -244,4 +250,5 @@ class Event
 
         return $this;
     }
+
 }
