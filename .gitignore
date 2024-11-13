@@ -8,5 +8,12 @@
 /node_modules
 next-env.d.ts
 
-.devcontainer/
 .DS_Store
+
+.devcontainer/
+
+pwa/node_modules
+pwa/.env.local
+pwa/.env
+
+api/.env

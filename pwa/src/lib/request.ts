@@ -1,3 +1,5 @@
+import API_BASE_URL from "../../utils/apiConfig";
+
 export async function AddUser(data: any) {
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
@@ -7,7 +9,7 @@ export async function AddUser(data: any) {
 
   try {
     console.log(data);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/register", {
+    const response = await fetch(`${API_BASE_URL}/register`, {
       method: "POST",
       body: formData,
     });
@@ -18,10 +20,30 @@ export async function AddUser(data: any) {
   }
 }
 
+export async function VerifyEmailToken(data: string) {
+  let formData = {
+    emailtoken: data
+  }
+  try {
+    console.log(data);
+    const response = await fetch(`${API_BASE_URL}/verify-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    throw error;
+  }
+}
+
 export async function LoginUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/auth", {
+    const response = await fetch(`${API_BASE_URL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,13 +57,13 @@ export async function LoginUser(data: any) {
   }
 }
 
-export async function TestEmail(data: string){
- let formData = {
+export async function TestEmail(data: string) {
+  let formData = {
     email: data
   }
   try {
     console.log(formData);
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/users/testemail", {
+    const response = await fetch(`${API_BASE_URL}/users/testemail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,37 +77,34 @@ export async function TestEmail(data: string){
   }
 }
 
-
-export async function TestUsername(data: string){
+export async function TestUsername(data: string) {
   let formData = {
-      username: data
-    }
-    try {
-      console.log(formData);
-      const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/users/testusername", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Error testing username:", error);
-      throw error;
-    }
+    username: data
   }
-
-
+  try {
+    console.log(formData);
+    const response = await fetch(`${API_BASE_URL}/users/testusername`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error testing username:", error);
+    throw error;
+  }
+}
 
 export async function GetGrettings() {
   try {
     const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/greetings", {
+    const response = await fetch(`${API_BASE_URL}/greetings`, {
       method: "GET",
       headers: {
-      "Content-Type": "application/json",
-      "Authorization": jwtToken
+        "Content-Type": "application/json",
+        "Authorization": jwtToken
       },
     });
     return await response.json();
@@ -97,7 +116,7 @@ export async function GetGrettings() {
 
 export async function ResetPassword(email: string) {
   try {
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/passwordemail", {
+    const response = await fetch(`${API_BASE_URL}/reset/passwordemail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +132,7 @@ export async function ResetPassword(email: string) {
 
 export async function Newpass(data: any) {
   try {
-    const response = await fetch("https://scaling-disco-jj5v6vp6rg97hq64r-443.app.github.dev/reset/password", {
+    const response = await fetch(`${API_BASE_URL}/reset/password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

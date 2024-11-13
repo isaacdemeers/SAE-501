@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\Delete;
 use App\Controller\RegisterController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -34,21 +36,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
             denormalizationContext:['groups' => ['user:usernameverification']],
 
         ),
-        new Get(
-            uriTemplate: '/verify-email/{emaillink}', 
+        new Post(
+            uriTemplate: '/verify-email', 
             controller: RegisterController::class . '::verifyEmail', 
             openapiContext: [
-            'parameters' => [
-                [
-                'name' => 'emaillink',
-                'in' => 'path',
-                'required' => true,
-                'schema' => [
-                    'type' => 'string'
-                ],
-                'example' => 'some-email-link'
+            'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'emailtoken' => [
+                                        'type' => 'string',
+                                        'example' => 'some-verification-token'
+                                    ]
+                                ],
+                                'required' => ['token']
+                            ]
+                        ]
+                    ]
                 ]
-            ],
             ],
         ),
         new Post(
@@ -148,7 +155,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->setRoles(['ROLE_USER']);  
-        $this->setEmailverify(false); 
+        $this->setEmailverify(false);
     }
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -194,6 +201,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['user:read' ,'user:create'])]
     private ?string $tokenpassword = null;
+
+    
 
     public function getId(): ?int
     {
@@ -331,4 +340,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
 }

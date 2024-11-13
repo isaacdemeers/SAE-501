@@ -13,14 +13,17 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RegisterController extends AbstractController
 {
     private $s3Service;
+    private $params;
 
-    public function __construct(AmazonS3Service $s3Service)
+    public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
     {
         $this->s3Service = $s3Service;
+        $this->params = $params;
     }
 
     #[Route('users/testemail', name: 'app_users_email', methods: ['POST'])]
@@ -41,7 +44,6 @@ class RegisterController extends AbstractController
 
         return $this->json(['message' => 'OK'], Response::HTTP_OK);
     }
-
 
     #[Route('users/testusername', name: 'app_users_username', methods: ['POST'])]
     public function checkUsername(Request $request, EntityManagerInterface $entityManager): Response
@@ -111,9 +113,8 @@ class RegisterController extends AbstractController
         $entityManager->flush();
 
         // Génération du lien de vérification
-        $verificationLink = $urlGenerator->generate('app_confirm_email', [
-            'emaillink' => $confirmationToken,
-        ], UrlGeneratorInterface::ABSOLUTE_URL) . ".json"; 
+        $appUrl = $this->params->get('APP_URL');
+        $verificationLink = $appUrl . '/verify-email/' . $confirmationToken;
 
         // Envoi de l'email de confirmation
         $email = (new Email())
@@ -132,11 +133,12 @@ class RegisterController extends AbstractController
         return $this->register($request, $entityManager, $passwordHasher, $mailer, $urlGenerator);
     }
 
-    #[Route('/verify-email/{emaillink}', name: 'app_confirm_email', methods: ['GET'])]
-    public function verifyEmail(string $emaillink, EntityManagerInterface $entityManager): Response
+    #[Route('/verify-email', name: 'app_confirm_email', methods: ['POST'])]
+    public function verifyEmail(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $token = rtrim($emaillink, '.json');
-
+        $data = json_decode($request->getContent(), true);
+        $token = $data['emailtoken'] ?? null;
+        
         if (null === $token) {
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
         }

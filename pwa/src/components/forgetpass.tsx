@@ -9,6 +9,7 @@ import { ResetPassword } from "@/lib/request"
 export default function ForgotPassword() {
 const [formData , setFormData] = useState<{email: string}>({email: ""})
 const [error , setError] = useState<boolean>(false);
+const [success , setSuccess] = useState<boolean>(false);
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +28,22 @@ console.log(formData)
     }
     else{
       let email = await ResetPassword(formData.email);
+      if(email.message === "Password reset email sent"){
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        window.location.href = "/login";
+      }
+      , 3000);
       console.log(email);
+      }
+      else if(email.message === "Email not found"){
+        setError(true);
+        setTimeout(() => {
+          setError(false);
+        }, 5000);
+        return;
+      }
     }
     const email = formData.email;
     console.log(email);
@@ -41,6 +57,7 @@ console.log(formData)
     <CardHeader>
       <h1 className="text-4xl font-bold leading-none tracking-tight my-5 mb-2">Mot de passe oublié ?</h1>
       <p className="text-gray-400">Nous vous enverrons un email qui vous permettra de réinitialiser votre mot de passe.</p>
+      {success && <p className="text-green-500 text-sm">Un email de réinitialisation de mot de passe a été envoyé à votre adresse email</p>}
     </CardHeader>
     <CardContent>
         <form onSubmit={handleForgotPassword} className="space-y-4">
