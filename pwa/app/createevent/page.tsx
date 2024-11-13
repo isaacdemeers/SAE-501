@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import  API_BASE_URL from '../../utils/apiConfig';
+import API_BASE_URL from '../../utils/apiConfig';
+
 const CreateEventPage: React.FC = () => {
     const [eventName, setEventName] = useState('');
     const [eventStartDate, setEventStartDate] = useState('');
@@ -10,9 +11,22 @@ const CreateEventPage: React.FC = () => {
     const [eventDescription, setEventDescription] = useState('');
     const [eventVisibility, setEventVisibility] = useState(true);
     const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const today = new Date().toISOString().split('T')[0];
+        if (eventStartDate < today) {
+            setErrorMessage('Event start date cannot be before today.');
+            return;
+        }
+
+        if (eventEndDate <= eventStartDate) {
+            setErrorMessage('Event end date must be after the start date.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('title', eventName);
         formData.append('datestart', new Date(eventStartDate).toISOString());
@@ -44,13 +58,22 @@ const CreateEventPage: React.FC = () => {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setEventImage(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file.size > 8 * 1024 * 1024) { // 8MB in bytes
+                setErrorMessage('File size should not exceed 8MB');
+                setEventImage(null);
+                e.target.value = ''; // Clear the input value
+            } else {
+                setErrorMessage(null);
+                setEventImage(file);
+            }
         }
     };
 
     return (
         <div className="max-w-2xl mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Create Event</h1>
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">Event Name:</label>
