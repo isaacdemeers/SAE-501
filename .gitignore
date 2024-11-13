@@ -9,3 +9,9 @@
 next-env.d.ts
 
 .devcontainer/
+
+pwa/node_modules
+pwa/.env.local
+pwa/.env
+
+api/.env
