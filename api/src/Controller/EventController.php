@@ -26,8 +26,13 @@ class EventController extends AbstractController
  #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
  public function createEvent(Request $request, EntityManagerInterface $entityManager): JsonResponse
  {
-     $data = json_decode($request->getContent(), true);
-     $file = $request->files->get('file');
+     $data = $request->request->all();
+    
+        if (empty($data['title']) || empty($data['description']) || empty($data['datestart']) || empty($data['dateend']) || empty($data['location']) || !isset($data['visibility'])) {
+            return new JsonResponse(['message' => 'Missing required fields.'], Response::HTTP_BAD_REQUEST);
+        }
+    
+    $file = $request->files->get('img');
  
      $event = new Event();
      $event->setTitle($data['title']);
