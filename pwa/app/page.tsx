@@ -28,7 +28,8 @@ const suggestedEvents = [
     title: "Conférence sur le trie et l'écologie pour tout le territoire du limousin",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ut pharetra lectus, ac convallis nisi. Suspendisse pellentesque viverra auctor. Nunc ultricies neque elit, libero tincid...",
     date: "19 Octobre 2024 à 10h",
-    buttonText: "S'inscrire"
+    buttonText: "Voir l'Événement",
+    id: "1"
   },
   {
     imageUrl: "/image_mairie_limoges.png",
@@ -36,7 +37,8 @@ const suggestedEvents = [
     title: "Atelier sur l'économie circulaire en Nouvelle-Aquitaine",
     description: "Découvrez les principes de l'économie circulaire et son impact sur les entreprises locales. Rejoignez-nous pour une session interactive avec des experts de la région...",
     date: "2 Novembre 2024 à 13h30",
-    buttonText: "S'inscrire"
+    buttonText: "Voir l'Événement",
+    id: "2"
   },
   {
     imageUrl: "/image_mairie_limoges.png",
@@ -44,7 +46,8 @@ const suggestedEvents = [
     title: "Rencontre sur la transition énergétique et l'innovation",
     description: "Participez à une discussion sur la transition énergétique et comment les innovations locales contribuent à la transformation du secteur. Échangez avec des professionnels et chercheurs...",
     date: "12 Novembre 2024 à 15h15",
-    buttonText: "S'inscrire"
+    buttonText: "Voir l'Événement",
+    id: "3"
   }
 ]
 

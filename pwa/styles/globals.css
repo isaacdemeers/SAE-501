@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-    * {
+    /* * {
         font-family: Poppins;
-    }
+    } */
 
   :root {
         --background: 0 0% 100%;
@@ -64,9 +64,9 @@
 
 @layer utilities {
     .bg-spider-cover {
-        @apply bg-cyan-700 bg-center bg-no-repeat;
         background-image: url("../public/api-platform/web.svg");
         background-size: 110%;
+        @apply bg-cyan-700 bg-center bg-no-repeat;
     }
     .ribbon {
         position: absolute;

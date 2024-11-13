@@ -45,7 +45,7 @@ export default function MyEvents({ events }: MyEventsProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
                 {events.map((event, index) => (
                     <MyEventCard key={index} {...event} />
                 ))}

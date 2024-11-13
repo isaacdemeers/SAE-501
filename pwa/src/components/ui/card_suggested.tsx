@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Calendar } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 interface EventCardProps {
     imageUrl: string
@@ -10,6 +11,7 @@ interface EventCardProps {
     description: string
     date: string
     buttonText: string
+    id: string
     onRegister: () => void
 }
 
@@ -19,7 +21,8 @@ export default function EventCard({
     title = "Title Error",
     description = "Description Error",
     date = "Date error",
-    buttonText = "S'inscrire",
+    buttonText = "Voir l'Événement",
+    id = "1",
     onRegister = () => console.log("Register clicked"),
 }: EventCardProps) {
     return (
@@ -45,12 +48,14 @@ export default function EventCard({
                         <Calendar size={16} />
                         <span>{date}</span>
                     </div>
-                    <Button
-                        variant="default"
-                        // onClick={onRegister}
-                        className="self-start">
-                        {buttonText}
-                    </Button>
+                    <Link href={`/event/${id}`}>
+                        <Button
+                            variant="default"
+                            // onClick={onRegister}
+                            className="self-start">
+                            {buttonText}
+                        </Button>
+                    </Link>
                 </CardContent>
             </article>
         </Card>
