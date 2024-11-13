@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
 import API_BASE_URL from '../../utils/apiConfig';
+import { AddEvent } from "@/lib/request"
 
 export default function EventForm() {
   const [eventName, setEventName] = useState('');
@@ -20,6 +21,20 @@ export default function EventForm() {
   const [eventVisibility, setEventVisibility] = useState('public');
   const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [invitees, setInvitees] = useState<string[]>([]);
+  const [inviteeEmail, setInviteeEmail] = useState('');
+
+const handleAddInvitee = () => {
+  if (inviteeEmail && !invitees.includes(inviteeEmail)) {
+    setInvitees([...invitees, inviteeEmail]);
+    setInviteeEmail('');
+  }
+};
+
+const handleRemoveInvitee = (email: string) => {
+  setInvitees(invitees.filter(invitee => invitee !== email));
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -46,22 +61,21 @@ export default function EventForm() {
       formData.append('description', eventDescription);
       formData.append('visibility', eventVisibility);
       formData.append('maxparticipant', maxParticipants.toString());
+      formData.append('invitees', JSON.stringify(invitees));
 
-      try {
-          const response = await fetch(`${API_BASE_URL}/events`, {
-              method: 'POST',
-              body: formData,
-          });
-
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-
-          const result = await response.json();
-          console.log('Event created successfully:', result);
-      } catch (error) {
-          console.error('Error creating event:', error);
+      let event = await AddEvent(formData);
+      if (event.message) {
+          setResultMessage(event.message);
+          setTimeout(() => {
+          setResultMessage(null);
+          }, 3000);
+      } else {
+          setErrorMessage(event.error);
+          setTimeout(() => {
+          setErrorMessage(null);
+          }, 3000);
       }
+
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,6 +99,11 @@ export default function EventForm() {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
+          {resultMessage && (
+            <div className="p-4 text-green-600 bg-green-100 rounded-md">
+              {resultMessage}
+            </div>
+          )}
           {errorMessage && (
             <div className="p-4 text-red-600 bg-red-100 rounded-md">
               {errorMessage}
@@ -126,7 +145,12 @@ export default function EventForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="max-attendees">Nombre de personne maximum</Label>
-              <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value)} />
+              <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => {
+                const value = e.target.value === '' ? '' : Number(e.target.value);
+                if (value === '' || value >= 0) {
+                  setMaxParticipants(value);
+                }
+              }} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visibility">Visibilité</Label>
@@ -155,9 +179,22 @@ export default function EventForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invitee">Invité des personnes</Label>
-              <Input id="invitee" type="email" placeholder="Adresse mail de l'inviter" />
+            <Label htmlFor="invitee">Inviter des personnes</Label>
+            <div className="flex items-center space-x-2">
+              <Input id="invitee" type="email" placeholder="Adresse mail de l'invité" value={inviteeEmail} onChange={(e) => setInviteeEmail(e.target.value)} />
+              <Button type="button" onClick={handleAddInvitee}>Ajouter</Button>
             </div>
+            <div className="space-y-2">
+              {invitees.map((email, index) => (
+                <div key={index} className="flex items-center space-x-2 border-black border-2 rounded-full pl-2 justify-center w-fit">
+                  <span>{email}</span>
+                  <Button variant="ghost" size="sm" className="rounded-full px-2" onClick={() => handleRemoveInvitee(email)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
           </div>
           <Button className="w-full" type="submit">
             Publier l'évènement

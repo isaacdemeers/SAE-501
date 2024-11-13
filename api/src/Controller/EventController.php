@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\UuidV4;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class EventController extends AbstractController
 {
@@ -24,7 +26,7 @@ class EventController extends AbstractController
  
 
  #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
- public function createEvent(Request $request, EntityManagerInterface $entityManager): JsonResponse
+ public function createEvent(Request $request, EntityManagerInterface $entityManager , MailerInterface $mailer, ): JsonResponse
  {
     // Set the maximum file size to 10MB
     $maxFileSize = 8 * 1024 * 1024; // 10MB in bytes
@@ -68,25 +70,34 @@ class EventController extends AbstractController
         $event->setImg('default.jpg');
     }
  
-    $shareLink = 'https://example.com/event/invite/' . $event->getId();
+    $invitees = json_decode($data['invitees'], true);
+
+    $shareLink = 'https://example.com/event/invite/1' . $event->getId();
+
     $event->setSharelink($shareLink);
+
+    if (!empty($invitees) && is_array($invitees)) {
+        foreach ($invitees as $invitee) {
+            if (filter_var($invitee, FILTER_VALIDATE_EMAIL)) {
+                $email = (new Email())
+                    ->from('no-reply@example.com')
+                    ->to($invitee)
+                    ->subject('You are invited to an event')
+                    ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: ' . $shareLink . '</p>');
+
+                $mailer->send($email);
+            }
+        }
+    }
+
 
     $entityManager->persist($event);
     $entityManager->flush();
  
     return new JsonResponse([
         'message' => 'Event created successfully',
-        'event' => [
-          'id' => $event->getId(),
-          'title' => $event->getTitle(),
-          'description' => $event->getDescription(),
-          'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
-          'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
-          'location' => $event->getLocation(),
-          'maxparticipant' => $event->getMaxparticipant(),
-          'img' => $event->getImg(),
-          'sharelink' => $event->getSharelink()
-        ]
     ], Response::HTTP_CREATED);
  }
+
+
 }

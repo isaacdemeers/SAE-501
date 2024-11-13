@@ -145,3 +145,21 @@ export async function Newpass(data: any) {
     throw error;
   }
 }
+
+export async function AddEvent(formData: any) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    const result = await response.json();
+    return result;
+} catch (error) {
+    console.error('Error creating event:', error);
+}
+}
