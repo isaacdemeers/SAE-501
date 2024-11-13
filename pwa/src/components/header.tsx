@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Calendar, Plus, Search, User } from 'lucide-react'
 
-export default function Component() {
+export default function Header() {
   return (
     <header className="border-b">
       <div className="container flex h-16 items-center gap-4 px-4">
