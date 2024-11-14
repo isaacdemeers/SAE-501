@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { abhayalibre } from '@/components/fonts/fonts'
+import { abhayalibre } from '@/lib/fonts'
 
 export default function Footer() {
     return (

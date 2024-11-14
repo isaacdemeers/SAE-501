@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid'
 import React from 'react';
 import EventCard from './eventCard';
+import HoverEventCard from './hover-event-card';
 
 
 
@@ -165,19 +166,10 @@ export function EventSideShow() {
     }, []);
 
     return (
-        <Card className=" relative w-full md:w-96 h-fit p-4 overflow-x-hidden max-h-full">
+        <Card className=" relative w-full md:w-96 h-full p-4 overflow-x-hidden max-h-full">
             <p className="absolute top-1/2 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">Rien à afficher</p>
-            <section id="sideShow" className="w-full h-fit opacity-100 overflow-y-scroll bg-white rounded-sm overflow-hidden">
-                <EventCard
-                    title={"event 1"}
-                    date={"2024-10-31"}
-                    // isPublic={event.extendedProps.isPublic}
-                    // attendees={event.extendedProps.attendees}
-                    // imageUrl={event.extendedProps.imageUrl}
-                    isPublic={true}
-                    attendees={30}
-                    imageUrl="/img.jpg"
-                />
+            <section id="sideShow" className="w-full h-full opacity-100 overflow-y-scroll bg-white rounded-sm overflow-hidden">
+                <HoverEventCard />
             </section>
         </Card>
     )

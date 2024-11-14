@@ -3,18 +3,6 @@
 import * as React from "react"
 import { Search } from "lucide-react"
 import Image from 'next/image'
-import commandIcon from '@/assets/icons/commandk.svg'
-
-
-import {
-    Command,
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
 
 
 
@@ -74,10 +62,12 @@ export default function SearchBar() {
     }, []);
 
     return (
-        <div id="searchBar" className="  border-slate-200  w-60 transition-all transition-200ms bg-white border-[1px] px-2 rounded-md hidden items-center justify-center gap-2 sm:flex">
+        <div id="searchBar" className=" relative border-slate-200  w-60 transition-all transition-200ms bg-white border-[1px] px-2 rounded-md hidden items-center justify-center gap-2 sm:flex">
             <Search size={25} className=" stroke-slate-600" />
-            <input type="text" name="search" id="search" placeholder="Search..." className="ring-none placeholder:text-slate-600 text-slate-600 w-full border-none text-ellipsis" />
-            <Image src={commandIcon} className="stroke-slate-600" alt="commandk" width={30} height={30} />
+            <input type="text" name="search" id="search" placeholder="Search..." className="ring-none placeholder:text-slate-600 text-slate-600 w-full border-none text-ellipsis focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none" />
+            <kbd className="pointer-events-none absolute right-2 top-0 translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex shadow-[0px_0px_10px_7px_#ffffff]">
+                <span className="text-xs">⌘</span>K
+            </kbd>
         </div>
     )
 }
