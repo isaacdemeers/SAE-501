@@ -82,6 +82,26 @@ export default function Dashboard() {
     };
   }, [isModalOpen]);
 
+  useEffect(() => {
+    const authenticateUser = async () => {
+      try {
+        const response = await fetch('/api/auth/validate-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error('Error authenticating user:', error);
+      }
+    };
+
+    authenticateUser();
+  }, []);
+
   return (
     <div className="container mx-auto p-4 md:p-8 lg:p-12">
       <div className="flex gap-4 py-4">
@@ -99,7 +119,7 @@ export default function Dashboard() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div ref={modalRef} className="bg-white p-4 max-h-[80vh] overflow-y-auto rounded-lg">
-            <EventForm  />
+            <EventForm />
           </div>
         </div>
       )}
