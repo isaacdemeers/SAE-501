@@ -55,10 +55,18 @@ Voici une liste qui liste les informations nécessaire pour l'utilisation du pro
  
  ### - Changelog
 
-#### Added
-- a remplir
- 
-#### Changed
-- a remplir
+ ### - Changelog
+
+#### Fonctionnalités déjà présentes
+- inscription
+- connexion
+- Vérification d'email
+- réinitialisation de mot de passe
+
+#### Fonctionnalités ajoutées et fonctionnelles
+- création d'un évènement public
+- visualisation de l'évènement
+- système de détection si l'utilisateur est connecté ou non pour la page principale
+- affichage des évènements suggérés (correspond aux évènements qui commencent bientôt)
   
 
