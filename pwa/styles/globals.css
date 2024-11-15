@@ -6,7 +6,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  color: #475569;
 }
 
 @layer base {
@@ -129,7 +128,10 @@
   scale: 1;
 }
 
+.fc {
+  color: #475569;
 
+}
 .fc-event-main i,
 .fc-event i,
 .fc-event b {

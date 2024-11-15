@@ -34,19 +34,19 @@ export default function SearchBar() {
     React.useEffect(() => {
         const input = document.querySelector<HTMLInputElement>("#search");
         const bar = document.querySelector<HTMLDivElement>("#searchBar");
-        const s = document.querySelector<HTMLDivElement>("#sideShow");
+        // const s = document.querySelector<HTMLDivElement>("#sideShow");
 
 
 
 
         const handleFocus = () => {
             bar?.classList.add("active");
-            s?.classList.add("active");
+            // s?.classList.add("active");
         };
 
         const handleBlur = () => {
             bar?.classList.remove("active");
-            s?.classList.remove("active");
+            // s?.classList.remove("active");
 
         };
 

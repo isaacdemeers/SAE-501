@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid'
 import React, { useRef, useEffect, useState } from 'react';
-import HoverEventCard from '../hover-event-card';
+import HoverEventCard from '@/components/events/sideShowEvent';
 import { Diamond, ChevronLeft, ChevronRight, CalendarDays, ArrowBigUp, SquareMenu, PanelsTopLeft, PanelTop, GitCommitHorizontal } from 'lucide-react';
 import CalendarCustomBtn from './customButtons';
 import FullCalendar from '@fullcalendar/react'
@@ -168,28 +168,28 @@ function renderEventContent(eventInfo: any) {
 
 
 export function EventSideShow() {
-    // React.useEffect(() => {
-    //     const input = document.querySelector<HTMLInputElement>("#search");
-    //     const bar = document.querySelector<HTMLDivElement>("#sideShow");
+    React.useEffect(() => {
+        // const input = document.querySelector<HTMLInputElement>("#search");
+        const bar = document.querySelector<HTMLDivElement>("#sideShow");
 
 
 
-    //     const showEvent = (e: any) => {
+        const showEvent = (e: any) => {
 
-    //     };
+        };
 
-    //     const handleBlur = () => {
-    //         bar?.classList.remove("active");
-    //     };
+        const handleBlur = () => {
+            bar?.classList.remove("active");
+        };
 
-    //     // Ajouter les gestionnaires d'événements
-    //     document.body.addEventListener("click", showEvent);
+        // Ajouter les gestionnaires d'événements
+        document.body.addEventListener("click", showEvent);
 
-    //     // Nettoyer les événements lors du démontage
-    //     return () => {
-    //         document.body.removeEventListener("click", handleBlur);
-    //     };
-    // }, []);
+        // Nettoyer les événements lors du démontage
+        return () => {
+            document.body.removeEventListener("click", handleBlur);
+        };
+    }, []);
 
     return (
         <Card className=" relative w-full md:w-96 h-fit p-4 overflow-x-hidden max-h-full">

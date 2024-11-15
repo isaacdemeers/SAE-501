@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import EventInfoTag from "@/components/eventInfoTag"
+import EventInfoTag from "@/components/events/eventInfoTag"
 import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
 import CustomBadge from "@/components/badge"
 import Image from "next/image"
@@ -79,7 +79,7 @@ export default function HoverEventCard() {
 
 
         <Button variant="default" className="w-full text-sm font-semibold">
-          <Eye className="w-4 h-4 mr-2" />
+          <Eye className="w-4 h-4 mr-2 " />
           Voir l&apos;événement
         </Button>
 

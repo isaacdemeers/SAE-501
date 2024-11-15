@@ -4,7 +4,7 @@ import React from "react"
 import { PlusCircle, Calendar, User, AlignRight } from "lucide-react"
 import { abhayalibre } from '@/lib/fonts'
 import { Card } from "@/components/ui/card"
-import EventCard from "@/components/eventCard"
+import EventCard from "@/components/events/eventCard"
 
 
 import { Button } from "@/components/ui/button"
