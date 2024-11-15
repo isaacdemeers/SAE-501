@@ -26,7 +26,7 @@
 - La documentation de l'API est disponible à `/docs`.
 - Routes disponibles dans l'application front pour le moment :
   - `/signin` pour créer un compte.
-  - `/signup` pour se connecter. La connexion renvoie un jeton nommé `jwt_token` dans les cookies du navigateur.
+  - `/login` pour se connecter. La connexion renvoie un jeton nommé `jwt_token` dans les cookies du navigateur.
 
 ## Réinitialisation du mot de passe
 

@@ -4,6 +4,7 @@
       "@/*": [
         "./src/*"
       ],
+
       "@images/*": [
         "./public/images/*"
       ]
