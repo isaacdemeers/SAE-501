@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import EventCard from '@/components/ui/card_suggested';
+import EventCard from '@/components/dashboard/card_suggested';
 import { Button } from "@/components/ui/button";
 
 interface Event {
