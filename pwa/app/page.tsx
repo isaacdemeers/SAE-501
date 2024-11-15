@@ -1,5 +1,4 @@
-import DashboardClient from '@/components/dashboard/dashboardClient'
-
+import DashboardClient from '@/components/dashboard/DashboardClient'
 // Server component
 export default function Dashboard() {
   return <DashboardClient />

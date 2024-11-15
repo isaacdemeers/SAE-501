@@ -1,7 +1,7 @@
 'use client'
 import { usePathname } from "next/navigation"
 import { useEffect , useState } from "react";
-import VerifyEmail from "@/components/VerifyEmail";
+import VerifyEmail from "@/components/utils/verifyEmail";
 import { VerifyEmailToken } from "@/lib/request";
 
 export default function VerifyEmailPage() {

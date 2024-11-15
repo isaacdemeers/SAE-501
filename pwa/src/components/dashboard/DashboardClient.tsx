@@ -1,7 +1,7 @@
 "use client";
 
-import SuggestedEvents from '@/components/dashboard/suggestedEvents'
-import MyEvents from '@/components/dashboard/myEvents'
+import SuggestedEvents from '@/components/dashboard/SuggestedEvents'
+import MyEvents from '@/components/dashboard/MyEvents'
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import EventForm from '@/components/events/eventForm';

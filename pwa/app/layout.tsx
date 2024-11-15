@@ -7,10 +7,9 @@ import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from "react";
 import Header from "@/components/header/header";
-const inter = Inter({ subsets: ["latin"] });
 import Footer from "@/components/footer/footer";
 
-import type { Metadata } from "next";
+const inter = Inter({ subsets: ["latin"] });
 
 
 // export const metadata: Metadata = {
@@ -20,9 +19,12 @@ import type { Metadata } from "next";
 
 export default function Layout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   const { toast } = useToast();
-  const [cookieStatus, setCookieStatus] = useState(
+  const [cookieStatus, setCookieStatus] = useState(() =>
+    typeof window !== "undefined" &&
     localStorage.getItem("cookie-accepted") === "true"
   );
 
@@ -59,14 +61,11 @@ export default function Layout({
 
   return (
     <html lang="en">
-
-      <body
-        className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         <Header />
         {children}
         <Toaster />
         <Footer />
-
       </body>
     </html>
   );
