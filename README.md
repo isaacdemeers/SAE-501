@@ -43,15 +43,22 @@
 https://youtu.be/T91zRI66MC8
 
 
-# Changelog
+# RENDUS
 
 Voici une liste qui liste les informations nécessaire pour l'utilisation du project.
 
-## [RENDU 1] - Semaine du 11 Novembre
+## [Rendu 1 - Semaine du 11 Novembre]
+
+### - Links
   
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU1)
  
-### Added
+ ### - Changelog
+
+#### Added
+- a remplir
  
-### Changed
+#### Changed
+- a remplir
   
 
