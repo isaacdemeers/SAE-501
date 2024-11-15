@@ -14,6 +14,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use App\Entity\User;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use App\Entity\EventUser;
+use App\Repository\EventRepository;
 
 class EventController extends AbstractController
 {
@@ -67,12 +72,13 @@ class EventController extends AbstractController
         }
     }
     else {
-        $event->setImg('default.jpg');
+        $event->setImg('event-background-desktop.png');
     }
  
     $invitees = json_decode($data['invitees'], true);
 
-    $shareLink = 'https://example.com/event/invite/1' . $event->getId();
+    $shareLink = 'https://example.com/event/invite/
+    1' . $event->getId();
 
     $event->setSharelink($shareLink);
 
@@ -99,5 +105,68 @@ class EventController extends AbstractController
     ], Response::HTTP_CREATED);
  }
 
+#[Route('/event/{event}/join', name: 'app_event_join', methods: ['POST'])]
+public function joinEvent(
+    Request $request,
+    EventRepository $eventRepository,
+    JWTEncoderInterface $jwtEncoder,
+    UserProviderInterface $userProvider,
+    EntityManagerInterface $entityManager
+): JsonResponse {
+    // Récupérer le token JWT depuis le cookie
+    $token = $request->cookies->get('jwt_token');
 
+    if (!$token) {
+        return $this->json(['error' => 'Token is missing'], JsonResponse::HTTP_UNAUTHORIZED);
+    }
+
+    try {
+        // Décoder le token
+        $payload = $jwtEncoder->decode($token);
+
+        if (!$payload) {
+            return $this->json(['error' => 'Invalid token'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        // Vérifier que le token n'est pas expiré
+        $currentTime = time();
+        if ($payload['exp'] < $currentTime) {
+            return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        // Récupérer le username ou identifiant depuis le payload
+        $identifier = $payload['email'] ?? null;
+
+        if (!$identifier) {
+            return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Charger l'utilisateur à partir du UserProvider
+        $user = $userProvider->loadUserByIdentifier($identifier);
+
+        if (!$user) {
+            return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Récupérer l'événement
+        $event = $eventRepository->find($request->get('event'));
+
+        if (!$event) {
+            return $this->json(['error' => 'Event not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Ajouter l'utilisateur à l'événement
+        $eventUser = new EventUser();
+        $eventUser->setEvent($event);
+        $eventUser->setUserId($user);
+        $eventUser->setRole('ROLE_USER');
+
+        $entityManager->persist($eventUser);
+        $entityManager->flush();
+
+        return $this->json(['message' => 'User successfully joined the event'], JsonResponse::HTTP_OK);
+    } catch (\Exception $e) {
+        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
 }

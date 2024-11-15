@@ -163,3 +163,34 @@ export async function AddEvent(formData: any) {
     console.error('Error creating event:', error);
 }
 }
+
+export async function JoinEvent(event: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error joining event:', error);
+  }
+}
+
+export async function IsAuthentificated() {
+  try {
+    const response = await fetch('/api/auth/validate-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error authenticating user:', error);
+  }
+}

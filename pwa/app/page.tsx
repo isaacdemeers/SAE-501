@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import EventForm from '@/components/event-form';
 import { useState, useEffect, useRef } from 'react';
+import { IsAuthentificated, JoinEvent } from '@/lib/request';
 
 const myEvents = [
   {
@@ -84,29 +85,29 @@ export default function Dashboard() {
 
   useEffect(() => {
     const authenticateUser = async () => {
-      try {
-        const response = await fetch('/api/auth/validate-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.error('Error authenticating user:', error);
-      }
+     const response = await IsAuthentificated();
+      console.log(response);
     };
 
     authenticateUser();
   }, []);
+
+
+ async function joinevent(){
+  let event = 1;
+  let response = await JoinEvent(event);
+  console.log(response);
+}  
+
 
   return (
     <div className="container mx-auto p-4 md:p-8 lg:p-12">
       <div className="flex gap-4 py-4">
         <Button>
           <Link href="/login">Login</Link>
+        </Button>
+        <Button>
+          <p onClick={joinevent}>rejoindre l'venement</p>
         </Button>
         <Button>
           <Link href="/register">Register</Link>

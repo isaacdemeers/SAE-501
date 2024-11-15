@@ -25,7 +25,6 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
 
         // Vérifier si l'utilisateur est valide et récupérer l'email et l'username
         $email = $user->getEmail();
-        $username = $user->getUsername();
 
         // Générer le token JWT avec l'email et l'username dans le payload
         $jwt = $this->jwtManager->createFromPayload($user, [

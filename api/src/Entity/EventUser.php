@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use App\Repository\EventUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: EventUserRepository::class)]
+#[ApiResource(mercure: true)]
+
 class EventUser
 {
     #[ORM\Id]
