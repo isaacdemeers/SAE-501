@@ -31,7 +31,12 @@ export default function SuggestedEvents({ initialEvents }: SuggestedEventsProps)
             <h2 className="text-3xl font-semibold mb-4">Événements suggère</h2>
             <div className="space-y-4">
                 {displayedSuggestedEvents.map((event, index) => (
-                    <EventCard key={index} {...event} onRegister={() => console.log(`Registered for ${event.title}`)} />
+                    <EventCard
+                        key={index}
+                        {...event}
+                        id={index.toString()}
+                        onRegister={() => console.log(`Registered for ${event.title}`)}
+                    />
                 ))}
             </div>
             {displayedSuggestedEvents.length < initialEvents.length && (

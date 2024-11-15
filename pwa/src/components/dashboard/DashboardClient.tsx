@@ -8,6 +8,15 @@ import EventForm from '@/components/event-form';
 import { useState, useEffect, useRef } from 'react';
 import AuthPrompt from '@/components/dashboard/AuthPrompt';
 
+interface AuthResponse {
+    isValid: boolean;
+    user: {
+        email: string;
+        id: number;
+        username: string;
+    };
+}
+
 interface Event {
     imageUrl: string;
     location: string;
@@ -16,18 +25,18 @@ interface Event {
 }
 
 const myEvents: Event[] = [
-    // {
-    //     imageUrl: "/image_mairie_limoges.png",
-    //     location: "Zénith, Limoges",
-    //     title: "Venez nous rejoindre pour le lancement de cette nouvelle année de MMI !",
-    //     date: "15 Octobre 2024 à 18h30"
-    // },
-    // {
-    //     imageUrl: "/image_mairie_limoges.png",
-    //     location: "Trampoline Park, Limoges",
-    //     title: "Soirée pote au parc trampoline",
-    //     date: "18 Octobre 2024 à 16h45"
-    // }
+    {
+        imageUrl: "/image_mairie_limoges.png",
+        location: "Zénith, Limoges",
+        title: "Venez nous rejoindre pour le lancement de cette nouvelle année de MMI !",
+        date: "15 Octobre 2024 à 18h30"
+    },
+    {
+        imageUrl: "/image_mairie_limoges.png",
+        location: "Trampoline Park, Limoges",
+        title: "Soirée pote au parc trampoline",
+        date: "18 Octobre 2024 à 16h45"
+    }
 ];
 
 const suggestedEvents = [
@@ -62,8 +71,8 @@ const suggestedEvents = [
 
 export default function DashboardClient() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    let [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState<string>('');
     const modalRef = useRef<HTMLDivElement>(null);
 
     const handleCreateEventClick = () => {
@@ -102,27 +111,22 @@ export default function DashboardClient() {
                     },
                     credentials: 'include'
                 });
+
                 const data = await response.json();
-                setIsAuthenticated(data.isAuthenticated || false);
+                console.log('Raw auth response:', data);
+
+                setIsAuthenticated(data.isValid);
+                if (data.user?.username) {
+                    setUsername(data.user.username);
+                }
             } catch (error) {
-                console.error('Error authenticating user:', error);
+                console.error('Authentication error:', error);
                 setIsAuthenticated(false);
-            } finally {
-                setIsLoading(false);
             }
         };
 
         authenticateUser();
     }, []);
-
-    const name = 'Fred';
-
-    // Don't render anything until we know the authentication status
-    if (isLoading) {
-        return null;
-    }
-
-    isAuthenticated = true;
 
     return (
         <div className="container mx-auto p-4 md:p-8 lg:p-12">
@@ -134,7 +138,7 @@ export default function DashboardClient() {
                 )}
             </div>
             <h1 className="text-4xl font-bold mb-8">
-                {isAuthenticated ? `Bienvenue, ${name} 👋` : "Bienvenue 👋"}
+                {isAuthenticated ? `Bienvenue, ${username} 👋` : "Bienvenue sur Plan-It 👋"}
             </h1>
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
