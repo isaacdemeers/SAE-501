@@ -14,7 +14,7 @@ import { useState } from "react"
 export default function Nav() {
     const [isOpen, setIsOpen] = useState(false)
 
-    let elementStyle = `flex items-center gap-2 delay-300 duration-300 p-4 origin-center  ${isOpen ? "opacity-100 blur-0  scale-100" : "opacity-0 blur-md scale-90"}`
+    let elementStyle = `flex items-center gap-4 delay-300 duration-300 p-4 origin-center  ${isOpen ? "opacity-100 blur-0  scale-100" : "opacity-0 blur-md "}`
 
 
     // if (isOpen) {
@@ -26,8 +26,8 @@ export default function Nav() {
         <>
             {isOpen ? <X onClick={() => setIsOpen(false)} className="h-5 w-5 stroke-slate-600" /> : <AlignRight onClick={() => setIsOpen(!isOpen)} className="h-5 w-5 stroke-slate-600" />}
 
-            <nav className={`bg-white translate-y-full transition-all ${isOpen ? 'translate-y-0' : 'translate-y-full'} absolute left-0 top-0 z-30 h-screen mt-20 w-screen flex flex-col `}>
-                <ul className="flex flex-col items-start justify-center  p-4">
+            <nav className={`bg-white transition-all ${isOpen ? 'translate-y-0' : 'translate-y-full'} absolute left-0 top-0 z-30 h-screen mt-20 w-screen flex flex-col `}>
+                <ul className="flex flex-col items-start justify-center opacity-100  p-4">
                     <li className={elementStyle}>
                         <h3 className="text-3xl font-bold text-slate-600 mb-4">Compte</h3>
                     </li>

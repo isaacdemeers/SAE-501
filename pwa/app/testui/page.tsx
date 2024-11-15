@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Clock, Users } from "lucide-react"
 import Component from "@/components/event-form"
-import { Calendar, EventSideShow } from "@/components/calendar"
+import { Calendar, EventSideShow } from "@/components/calendar/calendar"
 import SearchResult from "@/components/searchResult"
 import Header from "@/components/header"
 
@@ -21,7 +21,7 @@ export default function Home() {
     }
 
     return (
-        <div className=" md:flex-row gap-4 flex-col flex items-start p-4 mb-4 pt-24 h-screen min-h-screen overflow-hidden">
+        <div className=" md:flex-row gap-4 flex-col flex items-start p-4 mb-4 pt-24 h-fit min-h-screen overflow-hidden left-0 w-full">
             {/* <FilterBox />
             <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" /> */}
             {/* <Component /> */}

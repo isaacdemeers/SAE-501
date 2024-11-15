@@ -146,7 +146,7 @@
   border-color: transparent;
   padding: 1px;
 }
-.fc-view-harness, .fc-dayGridDay-view, .fc-view, .fc-daygrid {
-  border-radius: 10px;
-  overflow: hidden; 
+
+.fc-toolbar-title {
+  display: none;
 }
