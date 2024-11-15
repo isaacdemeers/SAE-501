@@ -14,34 +14,53 @@ interface Event {
 }
 
 interface SuggestedEventsProps {
-    initialEvents: Event[];
+    initialEvents: {
+        id: string;
+        imageUrl: string;
+        location: string;
+        title: string;
+        description: string;
+        date: string;
+        buttonText: string;
+    }[];
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
 }
 
-export default function SuggestedEvents({ initialEvents }: SuggestedEventsProps) {
-    const [displayedSuggestedEvents, setDisplayedSuggestedEvents] = useState<Event[]>(initialEvents.slice(0, 2));
-
-    const loadMore = () => {
-        const currentLength = displayedSuggestedEvents.length;
-        const nextEvents = initialEvents.slice(currentLength, currentLength + 2);
-        setDisplayedSuggestedEvents([...displayedSuggestedEvents, ...nextEvents]);
-    };
-
+export default function SuggestedEvents({
+    initialEvents,
+    currentPage,
+    totalPages,
+    onPageChange
+}: SuggestedEventsProps) {
     return (
-        <div>
-            <h2 className="text-3xl font-semibold mb-4">Événements suggère</h2>
+        <div className="space-y-6">
+            <h2 className="text-2xl font-semibold">Événements suggérés</h2>
             <div className="space-y-4">
-                {displayedSuggestedEvents.map((event, index) => (
-                    <EventCard
-                        key={index}
-                        {...event}
-                        id={index.toString()}
-                        onRegister={() => console.log(`Registered for ${event.title}`)}
-                    />
+                {initialEvents.map((event) => (
+                    <EventCard key={event.id} {...event} />
                 ))}
             </div>
-            {displayedSuggestedEvents.length < initialEvents.length && (
-                <div className="mt-4 text-center">
-                    <Button onClick={loadMore} variant="outline">Voir plus</Button>
+            {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => onPageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Précédent
+                    </Button>
+                    <span className="flex items-center px-4">
+                        Page {currentPage} sur {totalPages}
+                    </span>
+                    <Button
+                        variant="outline"
+                        onClick={() => onPageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        Suivant
+                    </Button>
                 </div>
             )}
         </div>

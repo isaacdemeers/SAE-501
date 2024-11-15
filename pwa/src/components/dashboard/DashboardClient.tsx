@@ -18,13 +18,28 @@ interface AuthResponse {
 }
 
 interface Event {
-    imageUrl: string;
-    location: string;
+    id: string;
     title: string;
-    date: string;
+    description: string;
+    datestart: string;
+    dateend: string;
+    location: string;
+    maxparticipant: number;
+    img: string;
+    sharelink: string;
 }
 
-const myEvents: Event[] = [
+interface PaginatedEvents {
+    events: Event[];
+    pagination: {
+        current_page: number;
+        total_pages: number;
+        total_events: number;
+        events_per_page: number;
+    };
+}
+
+const myEvents = [
     {
         imageUrl: "/image_mairie_limoges.png",
         location: "Zénith, Limoges",
@@ -39,40 +54,13 @@ const myEvents: Event[] = [
     }
 ];
 
-const suggestedEvents = [
-    {
-        imageUrl: "/image_mairie_limoges.png",
-        location: "Mairie, Limoges",
-        title: "Conférence sur le trie et l'écologie pour tout le territoire du limousin",
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ut pharetra lectus, ac convallis nisi. Suspendisse pellentesque viverra auctor. Nunc ultricies neque elit, libero tincid...",
-        date: "19 Octobre 2024 à 10h",
-        buttonText: "Voir l'Événement",
-        id: "1"
-    },
-    {
-        imageUrl: "/image_mairie_limoges.png",
-        location: "Palais des Congrès, Bordeaux",
-        title: "Atelier sur l'économie circulaire en Nouvelle-Aquitaine",
-        description: "Découvrez les principes de l'économie circulaire et son impact sur les entreprises locales. Rejoignez-nous pour une session interactive avec des experts de la région...",
-        date: "2 Novembre 2024 à 13h30",
-        buttonText: "Voir l'Événement",
-        id: "2"
-    },
-    {
-        imageUrl: "/image_mairie_limoges.png",
-        location: "Université de Poitiers, Poitiers",
-        title: "Rencontre sur la transition énergétique et l'innovation",
-        description: "Participez à une discussion sur la transition énergétique et comment les innovations locales contribuent à la transformation du secteur. Échangez avec des professionnels et chercheurs...",
-        date: "12 Novembre 2024 à 15h15",
-        buttonText: "Voir l'Événement",
-        id: "3"
-    }
-];
-
 export default function DashboardClient() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState<string>('');
+    const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const modalRef = useRef<HTMLDivElement>(null);
 
     const handleCreateEventClick = () => {
@@ -86,6 +74,29 @@ export default function DashboardClient() {
     const handleClickOutside = (event: MouseEvent) => {
         if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
             closeModal();
+        }
+    };
+
+    // Fetch upcoming events
+    const fetchUpcomingEvents = async (page: number = 1) => {
+        try {
+            const response = await fetch(`/api/events/upcoming?page=${page}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch events');
+            }
+
+            const data: PaginatedEvents = await response.json();
+            setSuggestedEvents(data.events);
+            setCurrentPage(data.pagination.current_page);
+            setTotalPages(data.pagination.total_pages);
+        } catch (error) {
+            console.error('Error fetching upcoming events:', error);
         }
     };
 
@@ -126,7 +137,33 @@ export default function DashboardClient() {
         };
 
         authenticateUser();
+        fetchUpcomingEvents(); // Fetch events when component mounts
     }, []);
+
+    // Function to handle page changes
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            fetchUpcomingEvents(newPage);
+        }
+    };
+
+    // Format events for SuggestedEvents component
+    const formattedSuggestedEvents = suggestedEvents.map(event => ({
+        id: event.id,
+        imageUrl: `/uploads/${event.img}`, // Adjust path according to your setup
+        location: event.location,
+        title: event.title,
+        description: event.description,
+        date: new Date(event.datestart).toLocaleString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        }),
+        buttonText: "Voir l'Événement"
+    }));
 
     return (
         <div className="container mx-auto p-4 md:p-8 lg:p-12">
@@ -153,7 +190,12 @@ export default function DashboardClient() {
                 ) : (
                     <AuthPrompt />
                 )}
-                <SuggestedEvents initialEvents={suggestedEvents} />
+                <SuggestedEvents
+                    initialEvents={formattedSuggestedEvents}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );
