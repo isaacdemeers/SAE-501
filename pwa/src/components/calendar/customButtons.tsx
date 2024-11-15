@@ -13,7 +13,7 @@ export default function CalendarCustomBtn({ icon, action, calendarRef }: { icon:
         handleAction = () => {
             calendarRef.current?.getApi().next();
         }
-    } else if (action == 'prev') {
+    } else if (action == 'previous') {
         handleAction = () => {
             calendarRef.current?.getApi().prev();
         }

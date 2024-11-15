@@ -34,7 +34,7 @@ export function Calendar() {
                     <Separator orientation='vertical' className='h-6 mx-2' />
 
 
-                    <CalendarCustomBtn icon={<ChevronLeft />} action='prev' calendarRef={calendarRef} />
+                    <CalendarCustomBtn icon={<ChevronLeft />} action='previous' calendarRef={calendarRef} />
                     <CalendarCustomBtn icon={<GitCommitHorizontal />} action='today' calendarRef={calendarRef} />
                     <CalendarCustomBtn icon={<ChevronRight />} action='next' calendarRef={calendarRef} />
 

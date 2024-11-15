@@ -11,7 +11,7 @@ import SearchBar from "@/components/searchBar"
 export default function Header() {
     return (
         <>
-            <header className="fixed left-0 bg-slate-50 backdrop-blur-md h-20 bg-opacity-95 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b">
+            <header className="fixed left-0 bg-slate-50 backdrop-blur-md h-20 bg-opacity-90 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
                 <Link href="/" className={` transition-all transition-300ms drop-shadow-lg hover:drop-shadow-md hover:scale-110 text-4xl font-bold text-slate-600 ${abhayalibre.className}`}>
                     PlanIt
                 </Link>
