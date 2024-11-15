@@ -64,7 +64,7 @@ class EventController extends AbstractController
                 return new JsonResponse(['message' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
-            $event->setImg('default.jpg');
+            $event->setImg('event-background-desktop.png');
         }
 
         $shareLink = 'https://example.com/event/invite/' . $event->getId();
