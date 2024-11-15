@@ -19,7 +19,7 @@ class AuthController extends AbstractController
     ): JsonResponse {
         // Récupérer le token JWT depuis le cookie
         $token = $request->cookies->get('jwt_token');
-
+        
         if (!$token) {
             return $this->json(['error' => 'Token is missing'], JsonResponse::HTTP_UNAUTHORIZED);
         }
@@ -38,8 +38,7 @@ class AuthController extends AbstractController
                 return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
             }
 
-            // Récupérer le username ou identifiant depuis le payload
-            $identifier = $payload['username'] ?? null; // ou remplacez 'username' par l'identifiant utilisé dans vos tokens
+            $identifier = $payload['email'] ?? null; // ou remplacez 'username' par l'identifiant utilisé dans vos tokens
 
             if (!$identifier) {
                 return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
