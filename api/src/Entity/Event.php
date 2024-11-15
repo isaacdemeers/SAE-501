@@ -18,7 +18,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(normalizationContext: ['groups' => ['event:read']]),
+        new Get(
+            uriTemplate: '/events/{id}',
+            controller: EventController::class . '::getEvent',
+            normalizationContext: ['groups' => ['event:read']]
+        ),
         new Post(
             uriTemplate: '/events',
             controller: EventController::class . '::createEvent',
@@ -122,9 +126,9 @@ class Event
     #[Groups(['event:read'])]
     private ?\DateTimeInterface $deleted_date = null;
 
-   
 
- 
+
+
 
     public function getId(): ?int
     {
@@ -250,5 +254,4 @@ class Event
 
         return $this;
     }
-
 }
