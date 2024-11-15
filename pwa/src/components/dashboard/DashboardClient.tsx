@@ -151,10 +151,12 @@ export default function DashboardClient() {
     // Format events for SuggestedEvents component
     const formattedSuggestedEvents = suggestedEvents.map(event => ({
         id: event.id,
-        imageUrl: `/uploads/${event.img}`, // Adjust path according to your setup
+        imageUrl: `${event.img}`, // Adjust path according to your setup
         location: event.location,
         title: event.title,
-        description: event.description,
+        description: event.description.length > 200
+            ? `${event.description.substring(0, 200)}...`
+            : event.description,
         date: new Date(event.datestart).toLocaleString('fr-FR', {
             day: 'numeric',
             month: 'long',

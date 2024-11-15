@@ -128,8 +128,12 @@ class EventController extends AbstractController
             $totalEvents = $totalQueryBuilder->getQuery()->getSingleScalarResult();
 
             // Format the events for the response
-            $formattedEvents = array_map(function ($event) {
-                return [
+            $formattedEvents = [];
+            foreach ($events as $event) {
+                $imageName = $event->getImg();
+                $imageUrl = $this->s3Service->getObjectUrl($imageName);
+                
+                $formattedEvents[] = [
                     'id' => $event->getId(),
                     'title' => $event->getTitle(),
                     'description' => $event->getDescription(),
@@ -137,10 +141,10 @@ class EventController extends AbstractController
                     'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
                     'location' => $event->getLocation(),
                     'maxparticipant' => $event->getMaxparticipant(),
-                    'img' => $event->getImg(),
+                    'img' => $imageUrl,
                     'sharelink' => $event->getSharelink()
                 ];
-            }, $events);
+            }
 
             return new JsonResponse([
                 'events' => $formattedEvents,
@@ -151,6 +155,7 @@ class EventController extends AbstractController
                     'events_per_page' => $limit
                 ]
             ]);
+
         } catch (\Exception $e) {
             return new JsonResponse([
                 'message' => 'An error occurred while fetching events',
