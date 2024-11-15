@@ -79,7 +79,7 @@ export default function EventForm() {
   };
 
   return (
-    <Card className=" w-full max-w-4xl mx-auto">
+    <Card className=" w-full  ">
       <CardHeader>
         <CardTitle className="flex justify-center items-center text-3xl font-bold">Créer un évènement</CardTitle>
       </CardHeader>

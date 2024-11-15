@@ -5,8 +5,9 @@ import MyEvents from '@/components/dashboard/MyEvents'
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import EventForm from '@/components/events/eventForm';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import AuthPrompt from '@/components/dashboard/loginPrompt';
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 interface AuthResponse {
     isValid: boolean;
@@ -55,27 +56,11 @@ const myEvents = [
 ];
 
 export default function DashboardClient() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState<string>('');
     const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const modalRef = useRef<HTMLDivElement>(null);
-
-    const handleCreateEventClick = () => {
-        setIsModalOpen(true);
-    };
-
-    const closeModal = (): void => {
-        setIsModalOpen(false);
-    };
-
-    const handleClickOutside = (event: MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-            closeModal();
-        }
-    };
 
     // Fetch upcoming events
     const fetchUpcomingEvents = async (page: number = 1) => {
@@ -99,18 +84,6 @@ export default function DashboardClient() {
             console.error('Error fetching upcoming events:', error);
         }
     };
-
-    useEffect(() => {
-        if (isModalOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isModalOpen]);
 
     useEffect(() => {
         const authenticateUser = async () => {
@@ -168,24 +141,31 @@ export default function DashboardClient() {
     }));
 
     return (
-        <div className="container mx-auto p-4 md:p-8 lg:p-12">
+        <div className="container mt-10 mx-auto p-4 md:p-8 lg:p-12">
             <div className="flex gap-4 py-4 w-full justify-end">
                 {isAuthenticated && (
-                    <Button onClick={handleCreateEventClick}>
-                        Créer un Event
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button>
+                                Créer un Event
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-full max-w-full md:w-3/4 lg:w-1/2">
+                            <DialogTitle>Créer un Event</DialogTitle>
+                            <DialogDescription>
+                                Remplissez le formulaire ci-dessous pour créer un nouvel événement.
+                            </DialogDescription>
+                            <EventForm />
+                            <DialogClose asChild>
+                                <Button>Fermer</Button>
+                            </DialogClose>
+                        </DialogContent>
+                    </Dialog>
                 )}
             </div>
             <h1 className="text-4xl font-bold mb-8">
                 {isAuthenticated ? `Bienvenue, ${username} 👋` : "Bienvenue sur Plan-It 👋"}
             </h1>
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div ref={modalRef} className="bg-white p-4 max-h-[80vh] overflow-y-auto rounded-lg">
-                        <EventForm />
-                    </div>
-                </div>
-            )}
             <div className="grid grid-cols-1 lg:grid-cols-[3fr_4fr] gap-8">
                 {isAuthenticated ? (
                     <MyEvents events={myEvents} />
@@ -200,5 +180,6 @@ export default function DashboardClient() {
                 />
             </div>
         </div>
+        
     );
-} 
+}
