@@ -11,6 +11,7 @@ interface Event {
     description: string;
     date: string;
     buttonText: string;
+    onRegister?: () => void;
 }
 
 interface SuggestedEventsProps {
@@ -39,7 +40,7 @@ export default function SuggestedEvents({
             <h2 className="text-2xl font-semibold">Événements suggérés</h2>
             <div className="space-y-4">
                 {initialEvents.map((event) => (
-                    <EventCard key={event.id} {...event} />
+                    <EventCard key={event.id} {...event} onRegister={() => console.log(`Register clicked for event: ${event.id}`)} />
                 ))}
             </div>
             {totalPages > 1 && (
