@@ -9,10 +9,6 @@
 }
 
 @layer base {
-    /* * {
-        font-family: Poppins;
-    } */
-
   :root {
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;

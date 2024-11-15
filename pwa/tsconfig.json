@@ -4,8 +4,9 @@
       "@/*": [
         "./src/*"
       ],
-      "@public/*": [
-        "./public/*"
+
+      "@images/*": [
+        "./public/images/*"
       ]
     },
     "target": "es5",

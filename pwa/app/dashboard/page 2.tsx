@@ -1,6 +1,6 @@
 "use client";
 
-import SuggestedEvents from '@/components/SuggestedEvents'
+import SuggestedEvents from '@/components/dashboard/SuggestedEvents'
 import MyEvents from '@/components/MyEvents'
 
 // Mock data for events
