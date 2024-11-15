@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Circle, CirclePlus, Clock, Users, ChevronRight, Eye, Lock, LockOpen } from "lucide-react"
 import CustomBadge from "@/components/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
+import { Separator } from "@/components/ui/separator"
 
 
 interface EventCardProps {
@@ -21,19 +22,31 @@ export default function EventCard({ title, date, isPublic, attendees, imageUrl, 
     let tags = ''
     return (
         type === "searchResult" ? (
-            <Card className={`w-full flex relative  overflow-hidden`}>
+            <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
 
-                <CardContent className="flex flex-col w-full p-4 gap-2">
+                <section className=" absolute  w-full h-full flex items-center justify-center ">
+                    <Image
+                        src={imageUrl}
+                        alt={title}
+                        layout="fill"
+                        objectFit="cover"
+                        className="brightness-75 rounded-md opacity-70"
+                    />
+                    <div className=" absolute top-0 left-0 bg-gradient-to-r from-white  via-white to-transparent h-full w-full"></div>
+                </section>
+
+                <CardContent className="flex z-10 flex-col w-full p-4 gap-2 bg-transparent">
 
                     <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{title}</h2>
 
                     <div className="flex gap-4 w-full  justify-between items-center">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">
-                            <div className="flex items-center justify-between h-10 bg-slate-50 w-fit p-4 gap-2 rounded-lg">
+                            <div className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <Clock className="w-4 h-4 mr-1" />
                                 <p className="text-xs text-slate-600">{date}</p>
                             </div>
-                            <ul className="flex items-center justify-between h-10 bg-slate-50 p-4 gap-2 rounded-lg">
+                            <Separator orientation="vertical" className="h-5" />
+                            <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <li>
                                     {isPublic && (
                                         <CustomBadge color="blue" content="PUBLIC" icon={<LockOpen />} />

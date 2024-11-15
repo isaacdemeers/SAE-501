@@ -9,6 +9,7 @@ import { Diamond, ChevronLeft, ChevronRight, CalendarDays, ArrowBigUp, SquareMen
 import CalendarCustomBtn from './customButtons';
 import FullCalendar from '@fullcalendar/react'
 import { Separator } from "@/components/ui/separator"
+import { abhayalibre } from "@/lib/fonts"
 
 
 const randomColor = () => {
@@ -24,7 +25,8 @@ export function Calendar() {
 
         <Card className='p-4  h-full min-h-[500px] w-full transition-all'>
             <div className='flex justify-between items-center  '>
-                <h2 id='title' className='text-slate-600 font-bold text-xl'>{currentTitle}</h2>
+                <h2 id='title' className={`text-slate-600 font-semibold text-4xl ${abhayalibre.className} `}>{currentTitle}</h2>
+
                 <nav className='flex gap-2 items-center justify-end'>
 
                     <CalendarCustomBtn icon={<SquareMenu />} action='day' calendarRef={calendarRef} />

@@ -7,7 +7,7 @@ export default function CustomBadge({ icon, content, color }: { icon: React.Reac
 
 
     return (
-        <Badge variant="default" className={cn(`flex items-center justify-center gap-2 px-2 py-0.5 text-xs font-semibold`)}>
+        <Badge variant="default" className={cn(`flex items-center bg-slate-700 shadow-md justify-center gap-2 px-2 py-0.5 text-xs font-semibold`)}>
             <div className="flex items-center justify-center h-4 w-4  ">
                 {icon}
             </div>
