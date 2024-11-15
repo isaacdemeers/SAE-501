@@ -1,6 +1,5 @@
-# README
 
-## Instructions
+# Instructions
 
 1. **Construire et exécuter Docker :**
   - Exécutez la commande : `docker compose build --no-cache`
@@ -42,3 +41,17 @@
 
 ## Video de test
 https://youtu.be/T91zRI66MC8
+
+
+# Changelog
+
+Voici une liste qui liste les informations nécessaire pour l'utilisation du project.
+
+## [RENDU 1] - Semaine du 11 Novembre
+  
+ 
+### Added
+ 
+### Changed
+  
+

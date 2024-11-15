@@ -8,7 +8,7 @@ import EventCard from "@/components/events/eventCard"
 
 
 import { Button } from "@/components/ui/button"
-import SearchBar from "@/components/searchBar"
+import SearchBar from "@/components/search/searchBar"
 
 import imagess from "@public/image_mairie_limoges.png"
 

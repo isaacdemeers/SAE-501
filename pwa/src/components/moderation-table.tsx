@@ -55,6 +55,15 @@ export default function Component() {
   }
 
   return (
-
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nom</TableHead>
+          <TableHead>Username</TableHead>
+          <TableHead>Date d'inscription</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+    </Table>
   )
 }

@@ -5,11 +5,11 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from "react";
-
+import Header from "@/components/header/header";
 const inter = Inter({ subsets: ["latin"] });
+import Footer from "@/components/footer/footer";
 
 import type { Metadata } from "next";
-import { inter } from "@/lib/fonts";
 
 
 export const metadata: Metadata = {
@@ -61,8 +61,10 @@ export default function Layout({
 
       <body
         className={`${inter.className} antialiased`}>
+        <Header />
         {children}
         <Toaster />
+        <Footer />
 
       </body>
     </html>

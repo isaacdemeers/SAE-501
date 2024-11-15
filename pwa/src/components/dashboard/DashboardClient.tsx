@@ -1,12 +1,12 @@
 "use client";
 
-import SuggestedEvents from '@/components/dashboard/SuggestedEvents'
-import MyEvents from '@/components/dashboard/MyEvents'
+import SuggestedEvents from '@/components/dashboard/suggestedEvents'
+import MyEvents from '@/components/dashboard/myEvents'
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import EventForm from '@/components/event-form';
+import EventForm from '@/components/events/eventForm';
 import { useState, useEffect, useRef } from 'react';
-import AuthPrompt from '@/components/dashboard/AuthPrompt';
+import AuthPrompt from '@/components/dashboard/loginPrompt';
 
 interface AuthResponse {
     isValid: boolean;

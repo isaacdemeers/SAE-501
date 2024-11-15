@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Circle, CirclePlus, Clock, Users, ChevronRight, Eye, Lock, LockOpen } from "lucide-react"
-import CustomBadge from "@/components/badge"
+import CustomBadge from "@/components/utils/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { Separator } from "@/components/ui/separator"
 

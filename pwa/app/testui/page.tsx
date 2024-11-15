@@ -5,10 +5,10 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Clock, Users } from "lucide-react"
-import Component from "@/components/event-form"
+import Component from "@/components/events/eventForm"
 import { Calendar, EventSideShow } from "@/components/calendar/calendar"
-import SearchResult from "@/components/searchResult"
-import Header from "@/components/header"
+import SearchResult from "@/components/search/searchResult"
+import Header from "@/components/header/header"
 
 export default function Home() {
 

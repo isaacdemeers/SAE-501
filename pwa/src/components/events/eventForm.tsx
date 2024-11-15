@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
-import API_BASE_URL from '../../utils/apiConfig';
+import API_BASE_URL from '../../../utils/apiConfig';
 
 export default function EventForm() {
   const [eventName, setEventName] = useState('');

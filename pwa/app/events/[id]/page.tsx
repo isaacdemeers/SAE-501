@@ -1,4 +1,4 @@
-import PageEvent from "@/components/PageEvent";
+import EventPage from "@/components/events/eventPage";
 
 interface EventPageProps {
   params: {
@@ -7,5 +7,5 @@ interface EventPageProps {
 }
 
 export default function Page({ params }: EventPageProps) {
-  return <PageEvent params={params} />;
+  return <EventPage params={params} />;
 }

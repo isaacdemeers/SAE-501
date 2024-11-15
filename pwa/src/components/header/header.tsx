@@ -1,12 +1,12 @@
 import Link from "next/link"
 import { PlusCircle, Calendar, User, AlignRight } from "lucide-react"
 import { abhayalibre, inter } from '@/lib/fonts'
-import SearchResult from "@/components/searchResult"
-import Nav from "@/components/nav"
+import SearchResult from "@/components/search/searchResult"
+import Nav from "@/components/header/headerNav"
 
 
 import { Button } from "@/components/ui/button"
-import SearchBar from "@/components/searchBar"
+import SearchBar from "@/components/search/searchBar"
 
 export default function Header() {
     return (

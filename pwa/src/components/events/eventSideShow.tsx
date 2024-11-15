@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
-import CustomBadge from "@/components/badge"
+import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
 import eventImage from "@/image_mairie_limoges.png"
 

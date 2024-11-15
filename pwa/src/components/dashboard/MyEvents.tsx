@@ -8,7 +8,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Calendar, CalendarX2 } from 'lucide-react'
-import MyEventCard from '@/components/dashboard/my_event_card'
+import MyEventCard from '@/components/dashboard/myEventCard'
 
 interface Event {
     imageUrl: string;

@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid'
 import React, { useRef, useEffect, useState } from 'react';
-import HoverEventCard from '@/components/events/sideShowEvent';
+import HoverEventCard from '@/components/events/eventSideShow';
 import { Diamond, ChevronLeft, ChevronRight, CalendarDays, ArrowBigUp, SquareMenu, PanelsTopLeft, PanelTop, GitCommitHorizontal } from 'lucide-react';
 import CalendarCustomBtn from './customButtons';
 import FullCalendar from '@fullcalendar/react'
