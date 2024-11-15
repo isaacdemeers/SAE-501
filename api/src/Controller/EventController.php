@@ -155,6 +155,16 @@ public function joinEvent(
             return $this->json(['error' => 'Event not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
+        // Vérifier si l'utilisateur est déjà inscrit à l'événement
+        $existingEventUser = $entityManager->getRepository(EventUser::class)->findOneBy([
+            'Event' => $event,
+            'Userid' => $user
+        ]);
+
+        if ($existingEventUser) {
+            return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
+        }
+
         // Ajouter l'utilisateur à l'événement
         $eventUser = new EventUser();
         $eventUser->setEvent($event);

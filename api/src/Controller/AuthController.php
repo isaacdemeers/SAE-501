@@ -29,7 +29,9 @@ class AuthController extends AbstractController
         $token = $request->cookies->get('jwt_token');
 
         if (!$token) {
-            return $this->json(['error' => 'Token is missing'], JsonResponse::HTTP_UNAUTHORIZED);
+            return $this->json([
+                'isValid' => false,
+            ]);
         }
 
         try {
@@ -37,27 +39,35 @@ class AuthController extends AbstractController
             $payload = $jwtEncoder->decode($token);
 
             if (!$payload) {
-                return $this->json(['error' => 'Invalid token'], JsonResponse::HTTP_UNAUTHORIZED);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Vérifier que le token n'est pas expiré
             $currentTime = time();
             if ($payload['exp'] < $currentTime) {
-                return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Récupérer le username ou identifiant depuis le payload
             $identifier = $payload['email'] ?? null; // ou remplacez 'username' par l'identifiant utilisé dans vos tokens
 
             if (!$identifier) {
-                return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Charger l'utilisateur à partir du UserProvider
                 $user = $userProvider->loadUserByIdentifier($identifier);
 
             if (!$user) {
-                return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Obtenir l'URL de l'image via AmazonS3Service
@@ -75,7 +85,9 @@ class AuthController extends AbstractController
                 ],
             ]);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json([
+                'isValid' => false,
+            ]);
         }
     }
 }
