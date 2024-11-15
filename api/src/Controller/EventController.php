@@ -169,4 +169,36 @@ public function joinEvent(
         return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
+
+#[Route('/event/{id}', name: 'app_event_get', methods: ['POST'])]
+public function getevent (Request $request, EventRepository $eventRepository): JsonResponse
+{
+    $event = $eventRepository->find($request->get('id'));
+    if (!$event) {
+        return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    $eventData = [
+        'id' => $event->getId(),
+        'title' => $event->getTitle(),
+        'description' => $event->getDescription(),
+        'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+        'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+        'location' => $event->getLocation(),
+        'maxparticipant' => $event->getMaxparticipant(),
+        'visibility' => $event->isVisibility(),
+        'sharelink' => $event->getSharelink(),
+    ];
+
+    // Get the image URL from AWS S3
+    $imageName = $event->getImg();
+    if ($imageName) {
+        $imageUrl = $this->s3Service->getObjectUrl($imageName);
+        $eventData['img'] = $imageUrl;
+    } else {
+        $eventData['img'] = null;
+    }
+
+    return $this->json($eventData, JsonResponse::HTTP_OK);
+}
 }
