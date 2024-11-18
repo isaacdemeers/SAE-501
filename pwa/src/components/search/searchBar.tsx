@@ -1,13 +1,25 @@
-"use client"
-
 import * as React from "react"
 import { Search } from "lucide-react"
 import Image from 'next/image'
 
-
-
 export default function SearchBar() {
     const [open, setOpen] = React.useState(false)
+    const [eventData, setEventData] = React.useState(null)
+
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://php/api/events`);
+                const data = await response.json();
+                setEventData(data);
+                console.log(data);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -18,7 +30,6 @@ export default function SearchBar() {
                 input?.focus()
                 input?.select()
             }
-            //echap
             else if (e.key === "Escape") {
                 e.preventDefault()
                 setOpen((open) => !open)
