@@ -3,6 +3,10 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+
+      "@images/*": [
+        "./public/images/*"
       ]
     },
     "target": "es5",

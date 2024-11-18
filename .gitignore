@@ -8,6 +8,8 @@
 /node_modules
 next-env.d.ts
 
+.DS_Store
+
 .devcontainer/
 
 pwa/node_modules

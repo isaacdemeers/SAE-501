@@ -7,8 +7,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown, Calendar } from 'lucide-react'
-import MyEventCard from '@/components/ui/my_event_card'
+import { ChevronDown, Calendar, CalendarX2 } from 'lucide-react'
+import MyEventCard from '@/components/dashboard/myEventCard'
 
 interface Event {
     imageUrl: string;
@@ -45,11 +45,21 @@ export default function MyEvents({ events }: MyEventsProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div className="flex flex-col gap-4">
-                {events.map((event, index) => (
-                    <MyEventCard key={index} {...event} />
-                ))}
-            </div>
+            {events.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                    {events.map((event, index) => (
+                        <MyEventCard key={index} {...event} />
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-lg p-6 text-center border border-gray-200">
+                    <CalendarX2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-semibold mb-2">Aucun événement</h3>
+                    <p className="text-gray-600 mb-4">
+                        Vous n'êtes pas encore inscrit à un événement.
+                    </p>
+                </div>
+            )}
         </div>
     )
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;

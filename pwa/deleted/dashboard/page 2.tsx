@@ -1,7 +1,7 @@
 "use client";
 
-import SuggestedEvents from '@/components/SuggestedEvents'
-import MyEvents from '@/components/MyEvents'
+import SuggestedEvents from '@/components/dashboard/suggestedEvents'
+import MyEvents from '@/components/dashboard/myEvents'
 
 // Mock data for events
 const myEvents = [

@@ -23,6 +23,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
             controller: EventController::class . '::getEvent',
             normalizationContext: ['groups' => ['event:read']]
         ),
+        new Get(
+            uriTemplate: '/events/{id}',
+            controller: EventController::class . '::getEvent',
+            normalizationContext: ['groups' => ['event:read']]
+        ),
         new Post(
             uriTemplate: '/events',
             controller: EventController::class . '::createEvent',
@@ -139,7 +144,7 @@ class Event
 
    
 
- 
+
 
     public function getId(): ?int
     {

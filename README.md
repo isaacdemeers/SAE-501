@@ -1,6 +1,5 @@
-# README
 
-## Instructions
+# Instructions
 
 1. **Construire et exécuter Docker :**
   - Exécutez la commande : `docker compose build --no-cache`
@@ -26,7 +25,7 @@
 - La documentation de l'API est disponible à `/docs`.
 - Routes disponibles dans l'application front pour le moment :
   - `/signin` pour créer un compte.
-  - `/signup` pour se connecter. La connexion renvoie un jeton nommé `jwt_token` dans les cookies du navigateur.
+  - `/login` pour se connecter. La connexion renvoie un jeton nommé `jwt_token` dans les cookies du navigateur.
 
 ## Réinitialisation du mot de passe
 
@@ -42,3 +41,32 @@
 
 ## Video de test
 https://youtu.be/T91zRI66MC8
+
+
+# RENDUS
+
+Voici une liste qui liste les informations nécessaire pour l'utilisation du project.
+
+## [Rendu 1 - Semaine du 11 Novembre]
+
+### - Links
+  
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU1)
+ 
+ ### - Changelog
+
+ ### - Changelog
+
+#### Fonctionnalités déjà présentes
+- inscription
+- connexion
+- Vérification d'email
+- réinitialisation de mot de passe
+
+#### Fonctionnalités ajoutées et fonctionnelles
+- création d'un évènement public
+- visualisation de l'évènement
+- système de détection si l'utilisateur est connecté ou non pour la page principale
+- affichage des évènements suggérés (correspond aux évènements qui commencent bientôt)
+  
+

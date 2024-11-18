@@ -29,7 +29,7 @@ export default function EventCard({
         <Card className="overflow-hidden">
             <article className="flex flex-col sm:flex-row gap-4 p-4">
                 <div className="w-full sm:w-[200px] h-[130px] overflow-hidden rounded-md">
-                    <Image
+                    <img
                         width={200}
                         height={130}
                         src={imageUrl}

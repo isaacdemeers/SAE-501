@@ -1,9 +1,9 @@
 'use client'
-import Signinform from "@/components/Signinform";
+import SignInForm from "@/components/login/signInForm";
 import { useState } from "react";
-import Personnalinfo from "@/components/personnalinfo";
-import Addimage from "@/components/ImageProfile";
-import SignRecap from "@/components/SignRecap";
+import PersonnalInfo from "@/components/login/personnalInfo";
+import Addimage from "@/components/login/imageProfile";
+import SignRecap from "@/components/login/signInRecap";
 import { AddUser } from "@/lib/request";
 interface SignData {
     [key: string]: any;
@@ -35,7 +35,7 @@ export default function Signin() {
     }
 
     const handleRecap = () => {
-        if(recap == true) {
+        if (recap == true) {
             setRecap(false);
             return;
         }
@@ -47,30 +47,30 @@ export default function Signin() {
     }
 
     const pushdata = async () => {
-            const formData = new FormData();
-            Object.entries(signdata).forEach(([key, value]) => {
-                formData.append(key, value instanceof File ? value : String(value));
-            });
-            console.log(formData);
-            const data = await AddUser(signdata);
-            if(data.message === "User created successfully"){
-                window.location.href = "/login";
-            }
-        } 
+        const formData = new FormData();
+        Object.entries(signdata).forEach(([key, value]) => {
+            formData.append(key, value instanceof File ? value : String(value));
+        });
+        console.log(formData);
+        const data = await AddUser(signdata);
+        if (data.message === "User created successfully") {
+            window.location.href = "/login";
+        }
+    }
 
     return (
         <>
             {recap ? (
                 <div>
-                    <SignRecap signdata={signdata} pushdata={pushdata} handleRecap={handleRecap}/>
+                    <SignRecap signdata={signdata} pushdata={pushdata} handleRecap={handleRecap} />
                 </div>
             ) : personnalinfo == false ? (
                 <div>
-                    <Signinform handleSignData={handleSignData} />
+                    <SignInForm handleSignData={handleSignData} />
                 </div>
             ) : addimage == false ? (
                 <div>
-                    <Personnalinfo signdata={signdata} handlePersonnalData={handlePersonnalData} />
+                    <PersonnalInfo signdata={signdata} handlePersonnalData={handlePersonnalData} />
                 </div>
             ) : (
                 <div>

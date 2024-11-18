@@ -1,7 +1,7 @@
-import ForgotPassword from "@/components/forgetpass";
+import ForgotPassword from "@/components/utils/forgetPass";
 
-export default function Page(){
-    return(
-            <ForgotPassword/>
+export default function Page() {
+    return (
+        <ForgotPassword />
     )
 }
