@@ -13,12 +13,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { redirect, usePathname } from "next/navigation"
 import { LoginUser } from "@/lib/request"
-
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
   const [logdata, setLogdata] = useState<{ email: string; password: string }>({ email: "", password: "" });
 const pathname = usePathname();
+const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const returnUrl = searchParams.get('returnUrl') || '/';
 
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -40,7 +45,7 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         errorlog();
       }
       else if (log.message === "Authentication successful"){
-       window.location.href = "/";
+        router.push(returnUrl)
       }
     }; 
   // function to handle the error message when the user input is in

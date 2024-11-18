@@ -1,5 +1,10 @@
+'use client';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader , DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
   Edit,
@@ -23,6 +28,16 @@ interface EventPageProps {
 
 export default async function PageEvent({ params }: EventPageProps) {
   const { id } = params;
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      alert(`Email enregistré : ${email}`);
+      setEmail(""); // Réinitialiser l'email après soumission
+    }
+  };
+
 
   const data = await fetch(`http://php/events/${id}`);
   const eventData = await data.json();
@@ -106,6 +121,43 @@ export default async function PageEvent({ params }: EventPageProps) {
               <Button variant="default">
                 <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
               </Button>
+              <Dialog>
+      <DialogTrigger asChild>
+        <Button>S'inscrire</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <h2 className="text-lg font-bold">S'inscrire</h2>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Pour vous inscrire, connectez-vous ou fournissez un email.
+          </p>
+          <div className="flex flex-col gap-4">
+            <Link href="/login" passHref>
+              <Button variant="secondary">Se connecter</Button>
+            </Link>
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <Label htmlFor="email">Votre email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Entrez votre email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Button type="submit">S'inscrire avec votre email</Button>
+            </form>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setEmail("")}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
             </div>
 
             <div className="flex flex-col gap-4 mb-3 w-48md:w-72 lg:w-96 md:mb-6">

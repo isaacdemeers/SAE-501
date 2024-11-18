@@ -17,6 +17,12 @@ import {
 import Image from "next/image";
 import eventImage from "@images/event-background-desktop.png";
 import Link from "next/link";
+import { Dialog, DialogTrigger, DialogContent , DialogHeader , DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import { IsAuthentificated } from "@/lib/request";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 interface EventPageProps {
   params: {
@@ -26,6 +32,26 @@ interface EventPageProps {
 
 export default function EventPage({ params }: EventPageProps) {
   const { id } = params;
+  const [email, setEmail] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      alert(`Email enregistré : ${email}`);
+      setEmail(""); // Réinitialiser l'email après soumission
+    }
+  }
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      let isAuthenticated = await IsAuthentificated();
+      if (isAuthenticated.isValid) {
+        setIsAuthenticated(true);
+      }
+    };
+
+    checkAuthentication();
+  }, []);
+
 
   return (
     <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
@@ -81,9 +107,56 @@ export default function EventPage({ params }: EventPageProps) {
               <Button variant="default" className="">
                 <Share2 className="w-4 h-4 mr-2" /> Partager
               </Button>
-              <Button variant="default">
-                <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
-              </Button>
+              {isAuthenticated ? (  
+                <Button variant="default">
+                  <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
+                  </Button>
+                  ) : ( 
+              <Dialog>
+      <DialogTrigger asChild>
+      <Button variant="default">
+                  <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
+                  </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <h2 className="text-lg font-bold">S'inscrire à l'évènement</h2>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Pour vous inscrire, connectez-vous.
+          </p>
+          <div className="flex flex-col gap-4">
+            <Link href="/login?returnUrl=/event/${id}" passHref>
+              <Button className="flex w-full items-center justify-center" variant="secondary">Se connecter</Button>
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              ou inscrivez-vous avec votre email
+            </p>
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <Label htmlFor="email">Votre email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Entrez votre email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Button type="submit">S'inscrire avec votre email</Button>
+            </form>
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose>
+          <Button variant="outline" onClick={() => setEmail("")}>
+            Fermer
+          </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    )}
             </div>
 
             <div className="flex flex-col gap-4 mb-3 md:mb-6">

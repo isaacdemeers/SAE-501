@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
 import API_BASE_URL from '../../../utils/apiConfig';
+import { AddEvent } from "@/lib/request"
 
 export default function EventForm() {
   const [eventName, setEventName] = useState('');
@@ -20,7 +21,19 @@ export default function EventForm() {
   const [eventVisibility, setEventVisibility] = useState('public');
   const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [invitees, setInvitees] = useState<string[]>([]);
+  const [inviteeEmail, setInviteeEmail] = useState('');
 
+const handleAddInvitee = () => {
+  if (inviteeEmail && !invitees.includes(inviteeEmail)) {
+    setInvitees([...invitees, inviteeEmail]);
+    setInviteeEmail('');
+  }
+};
+
+const handleRemoveInvitee = (email: string) => {
+  setInvitees(invitees.filter(invitee => invitee !== email));
+};
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -46,21 +59,14 @@ export default function EventForm() {
     formData.append('description', eventDescription);
     formData.append('visibility', eventVisibility);
     formData.append('maxparticipant', maxParticipants.toString());
+    formData.append('invitees', JSON.stringify(invitees));
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/events`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+    let response = await AddEvent(formData);
+      if(response.message = "Event created successfully"){
+        setErrorMessage('Event created successfully');
       }
-
-      const result = await response.json();
-      console.log('Event created successfully:', result);
-    } catch (error) {
-      console.error('Error creating event:', error);
+    else {
+      setErrorMessage('An error occurred while adding the event. Please try again.');
     }
   };
 
@@ -155,9 +161,42 @@ export default function EventForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invitee">Invité des personnes</Label>
-              <Input id="invitee" type="email" placeholder="Adresse mail de l'inviter" />
-            </div>
+  <Label htmlFor="invitee">Inviter des personnes</Label>
+  <div className="flex gap-2">
+    <Input
+      id="invitee"
+      type="email"
+      placeholder="Adresse mail de l'invité"
+      value={inviteeEmail}
+      onChange={(e) => setInviteeEmail(e.target.value)}
+    />
+    <Button
+      type="button"
+      onClick={handleAddInvitee}
+      disabled={!inviteeEmail || invitees.includes(inviteeEmail)}
+    >
+      Ajouter
+    </Button>
+  </div>
+  {invitees.length > 0 && (
+    <ul className="mt-2 space-y-2">
+      {invitees.map((email, index) => (
+        <li
+          key={index}
+          className="flex items-center justify-between w-fit  pl-3 pr-0 border-black border-2 rounded-full"
+        >
+          <span className=" pr-3">{email}</span>
+          <Button className="rounded-full bg-inherit hover:text-white text-black"
+            size="icon"
+            onClick={() => handleRemoveInvitee(email)}
+          >
+            <X className="w-4 h-4 rounded-full font-bold " />
+          </Button>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
           </div>
           <Button className="w-full" type="submit">
             Publier l'évènement

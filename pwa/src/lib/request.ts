@@ -148,7 +148,7 @@ export async function Newpass(data: any) {
 
 export async function AddEvent(formData: any) {
   try {
-    const response = await fetch(`${API_BASE_URL}/events`, {
+    const response = await fetch(`${API_BASE_URL}/event/create`, {
         method: 'POST',
         body: formData,
     });
