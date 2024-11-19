@@ -1,17 +1,34 @@
 'use client'
 import Link from "next/link"
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { PlusCircle, Calendar, User, AlignRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import EventCard from "@/components/events/eventCard"
 import FilterBox from "@/components/search/filter"
 import imagess from "@images/image_mairie_limoges.png"
+import { GetAllEvents } from "@/lib/request"
+
+interface Event {
+    id: number;
+    title: string;
+    datestart: string;
+    dateend: string;
+    description: string;
+    img: string;
+    location: string;
+    maxparticipant: string;
+    sharelink: string;
+}
 
 interface SearchResultProps {
     isOpen: boolean
 }
 
 export default function SearchResult({ isOpen }: SearchResultProps) {
+    const [events, setEvents] = useState<Event[]>([])
+    useEffect(() => {
+        GetAllEvents().then(setEvents)
+    }, [])
     return (
         <Card
             id="searchResult"
@@ -28,10 +45,19 @@ export default function SearchResult({ isOpen }: SearchResultProps) {
             </div>
 
             <ul className="flex flex-wrap items-start justify-evenly w-full max-h-[80vh] overflow-y-scroll rounded-lg gap-2">
-                <EventCard title="Event 1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
-                <EventCard title="Event 2" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
-                <EventCard title="Event 3" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
-                <EventCard title="Event 4" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
+                {events.map((event) => (
+                    <EventCard
+                        key={event.id.toString()}
+                        event={{
+                            title: event.title,
+                            date: event.datestart,
+                            isPublic: true,
+                            attendees: parseInt(event.maxparticipant),
+                            imageUrl: event.img
+                        }}
+                        type="searchResult"
+                    />
+                ))}
             </ul>
         </Card>
     )

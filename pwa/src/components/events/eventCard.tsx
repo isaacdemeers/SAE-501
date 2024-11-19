@@ -8,28 +8,31 @@ import { Separator } from "@/components/ui/separator"
 
 
 interface EventCardProps {
-    title: string
-    date: string
-    isPublic: boolean
-    attendees: number
-    imageUrl: string
-    type: string
+    key?: string;
+    event: {
+        title: string;
+        date: string;
+        isPublic: boolean;
+        attendees: number;
+        imageUrl: string;
+    };
+    type: string;
 }
 
 
 
-export default function EventCard({ title, date, isPublic, attendees, imageUrl, type }: EventCardProps) {
+export default function EventCard({ key, event, type }: EventCardProps) {
+    const { title, date, isPublic, attendees, imageUrl } = event
+    console.log(event)
     let tags = ''
     return (
         type === "searchResult" ? (
             <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
 
                 <section className=" absolute  w-full h-full flex items-center justify-center ">
-                    <Image
+                    <img
                         src={imageUrl}
                         alt={title}
-                        layout="fill"
-                        objectFit="cover"
                         className="brightness-75 rounded-md opacity-70"
                     />
                     <div className=" absolute top-0 left-0 bg-gradient-to-r from-white  via-white to-transparent h-full w-full"></div>

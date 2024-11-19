@@ -145,3 +145,20 @@ export async function Newpass(data: any) {
     throw error;
   }
 }
+
+export async function GetAllEvents() {
+  try {
+    const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
+    const response = await fetch(`${API_BASE_URL}/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": jwtToken
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+}
