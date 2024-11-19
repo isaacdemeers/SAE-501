@@ -48,7 +48,7 @@ export default function EventCard({
                         <Calendar size={16} />
                         <span>{date}</span>
                     </div>
-                    <Link href={`/event/${id}`}>
+                    <Link href={`/events/${id}`}>
                         <Button
                             variant="default"
                             // onClick={onRegister}
