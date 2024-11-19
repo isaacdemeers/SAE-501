@@ -32,7 +32,7 @@ const searchEvents = (search: string, activeFilters: string[]) => {
         // Filtrer d'abord par visibilité si le filtre private est actif
         let filteredEvents = events;
         if (activeFilters.includes('private')) {
-            filteredEvents = events.filter(event => !event.isPublic);
+            filteredEvents = events.filter((event: Event) => !event.isPublic);
         }
 
         // Ensuite appliquer les autres filtres
