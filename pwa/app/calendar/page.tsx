@@ -28,7 +28,6 @@ export default function Home() {
             {/* <SearchResult /> */}
             <Header />
             <Calendar />
-            <SearchResult isOpen={true} />
 
 
         </div>

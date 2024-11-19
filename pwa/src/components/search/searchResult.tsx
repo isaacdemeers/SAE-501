@@ -15,8 +15,9 @@ export default function SearchResult({ isOpen }: SearchResultProps) {
     return (
         <Card
             id="searchResult"
-            className={`bg-slate-50 backdrop-blur-lg bg-opacity-80 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] fixed top-0 z-40 left-1/2 w-2/3 transform -translate-x-1/2 
-             items-center justify-between p-4 mt-24  flex origin-top-left flex-col gap-4 max-h-[80vh] rounded-xl shadow-lg `}
+            className={`bg-slate-50 bg-opacity-100 backdrop-blur-lg transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] fixed top-0 z-40 left-1/2 w-2/3 transform -translate-x-1/2 
+             items-center justify-between p-4 mt-24 flex origin-top-left flex-col gap-4 max-h-[80vh] rounded-xl shadow-lg
+             ${isOpen ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-md -translate-y-4 pointer-events-none'}`}
         >
             <header className="flex items-center justify-between w-full">
                 <FilterBox />

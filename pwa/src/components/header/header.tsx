@@ -6,7 +6,7 @@ import Nav from "@/components/header/headerNav"
 
 
 import { Button } from "@/components/ui/button"
-import SearchBar from "@/components/search/searchBar"
+import SearchBar from "@/components/search/search"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,9 +26,9 @@ import {
 export default function Header() {
     return (
         <>
-            <header className="fixed  left-0 bg-slate-50 backdrop-blur-lg h-20 bg-opacity-90 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
-                <Link href="/" className={` transition-all transition-300ms drop-shadow-lg hover:drop-shadow-md hover:scale-110 text-4xl font-bold text-slate-600 w-full ${abhayalibre.className}`}>
-                    PlanIt
+            <header className="fixed  left-0 bg-slate-50 bg-opacity-80 backdrop-blur-lg h-20  z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
+                <Link href="/" className={`  drop-shadow-lg   text-3xl font-bold text-slate-600 w-full flex   items-center justify-start ${abhayalibre.className}`}>
+                    <p className="transition-all transition-300ms w-fit hover:scale-105 x hover:drop-shadow-md ">PlanIt</p>
                 </Link>
 
                 <SearchBar />
@@ -70,7 +70,7 @@ export default function Header() {
                                             <span className="sr-only">User profile</span>
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className=" translate-x-2 rounded-lg w-56 bg-slate-50 bg-opacity-80 backdrop-blur-lg" align="end">
+                                    <DropdownMenuContent className=" translate-x-2 rounded-lg w-56 bg-slate-50 bg-opacity-90 backdrop-blur-lg" align="end">
                                         <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem>
@@ -103,6 +103,7 @@ export default function Header() {
                     </Button>
 
                 </div>
+
 
             </header>
         </>
