@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
-import API_BASE_URL from '../../utils/apiConfig';
+import API_BASE_URL from '../../../utils/apiConfig';
 
 export default function EventForm() {
   const [eventName, setEventName] = useState('');
@@ -22,64 +22,64 @@ export default function EventForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      const today = new Date().toISOString().split('T')[0];
-      if (eventStartDate < today) {
-          setErrorMessage('Event start date cannot be before today.');
-          return;
+    const today = new Date().toISOString().split('T')[0];
+    if (eventStartDate < today) {
+      setErrorMessage('Event start date cannot be before today.');
+      return;
+    }
+
+    if (eventEndDate <= eventStartDate) {
+      setErrorMessage('Event end date must be after the start date.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', eventName);
+    formData.append('datestart', new Date(eventStartDate).toISOString());
+    formData.append('dateend', new Date(eventEndDate).toISOString());
+    formData.append('location', eventLocation);
+    if (eventImage) {
+      formData.append('img', eventImage, eventImage.name);
+    }
+    formData.append('description', eventDescription);
+    formData.append('visibility', eventVisibility);
+    formData.append('maxparticipant', maxParticipants.toString());
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/events`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
 
-      if (eventEndDate <= eventStartDate) {
-          setErrorMessage('Event end date must be after the start date.');
-          return;
-      }
-
-      const formData = new FormData();
-      formData.append('title', eventName);
-      formData.append('datestart', new Date(eventStartDate).toISOString());
-      formData.append('dateend', new Date(eventEndDate).toISOString());
-      formData.append('location', eventLocation);
-      if (eventImage) {
-          formData.append('img', eventImage, eventImage.name);
-      }
-      formData.append('description', eventDescription);
-      formData.append('visibility', eventVisibility);
-      formData.append('maxparticipant', maxParticipants.toString());
-
-      try {
-          const response = await fetch(`${API_BASE_URL}/events`, {
-              method: 'POST',
-              body: formData,
-          });
-
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-
-          const result = await response.json();
-          console.log('Event created successfully:', result);
-      } catch (error) {
-          console.error('Error creating event:', error);
-      }
+      const result = await response.json();
+      console.log('Event created successfully:', result);
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-          const file = e.target.files[0];
-          if (file.size > 10 * 1024 * 1024) { // 8MB in bytes
-              setErrorMessage('File size should not exceed 8MB');
-              setEventImage(null);
-              e.target.value = ''; // Clear the input value
-          } else {
-              setErrorMessage(null);
-              setEventImage(file);
-          }
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) { // 8MB in bytes
+        setErrorMessage('File size should not exceed 8MB');
+        setEventImage(null);
+        e.target.value = ''; // Clear the input value
+      } else {
+        setErrorMessage(null);
+        setEventImage(file);
       }
+    }
   };
 
   return (
-    <Card className=" w-full max-w-4xl mx-auto">
+    <Card className=" w-full  ">
       <CardHeader>
         <CardTitle className="flex justify-center items-center text-3xl font-bold">Créer un évènement</CardTitle>
       </CardHeader>
@@ -126,7 +126,7 @@ export default function EventForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="max-attendees">Nombre de personne maximum</Label>
-              <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value)} />
+              <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value === '' ? '' : parseInt(e.target.value))} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="visibility">Visibilité</Label>

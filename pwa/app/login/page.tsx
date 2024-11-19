@@ -1,10 +1,10 @@
-import Loginform from "@/components/Loginform"
+import LoginForm from "@/components/login/loginForm"
 
 
 export default function Page() {
     return (
         <>
-            <Loginform />
+            <LoginForm />
         </>
     )
 }

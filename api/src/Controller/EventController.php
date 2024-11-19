@@ -23,19 +23,10 @@ class EventController extends AbstractController
         $this->s3Service = $s3Service;
     }
 
-    private $s3Service;
-
-    public function __construct(AmazonS3Service $s3Service)
-    {
-        $this->s3Service = $s3Service;
-    }
 
 
-    #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
-    public function createEvent(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        // Set the maximum file size to 10MB
-        $maxFileSize = 8 * 1024 * 1024; // 10MB in bytes
+
+   
     #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
     public function createEvent(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -172,5 +163,81 @@ class EventController extends AbstractController
         }
 
         return $this->json($eventData, JsonResponse::HTTP_OK);
+    }
+    #[Route('/api/events/upcoming', name: 'get_upcoming_events', methods: ['GET'])]
+    public function getUpcomingEvents(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            $currentDate = new \DateTime();
+
+            // Get the page number from query parameters, default to 1 if not provided
+            $page = $request->query->getInt('page', 1);
+            $limit = 10; // Number of events per page
+            $offset = ($page - 1) * $limit;
+
+            // Create query builder
+            $queryBuilder = $entityManager->createQueryBuilder();
+            $queryBuilder
+                ->select('e')
+                ->from(Event::class, 'e')
+                ->where('e.datestart > :currentDate')
+                ->andWhere('e.visibility = :visibility')
+                ->setParameter('currentDate', $currentDate)
+                ->setParameter('visibility', true) // Assuming true means public
+                ->orderBy('e.datestart', 'ASC')
+                ->setMaxResults($limit)
+                ->setFirstResult($offset);
+
+            $events = $queryBuilder->getQuery()->getResult();
+
+           
+            // Get total count for pagination
+            $totalQueryBuilder = $entityManager->createQueryBuilder();
+            $totalQueryBuilder
+                ->select('COUNT(e)')
+                ->from(Event::class, 'e')
+                ->where('e.datestart > :currentDate')
+                ->andWhere('e.visibility = :visibility')
+                ->setParameter('currentDate', $currentDate)
+                ->setParameter('visibility', true);
+
+            $totalEvents = $totalQueryBuilder->getQuery()->getSingleScalarResult();
+
+
+            // Format the events for the response
+            $formattedEvents = [];
+            foreach ($events as $event) {
+                $imageName = $event->getImg();
+                $imageUrl = $this->s3Service->getObjectUrl($imageName);
+                
+                $formattedEvents[] = [
+                    'id' => $event->getId(),
+                    'title' => $event->getTitle(),
+                    'description' => $event->getDescription(),
+                    'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                    'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                    'location' => $event->getLocation(),
+                    'maxparticipant' => $event->getMaxparticipant(),
+                    'img' => $imageUrl,
+                    'sharelink' => $event->getSharelink()
+                ];
+            }
+
+            return new JsonResponse([
+                'events' => $formattedEvents,
+                'pagination' => [
+                    'current_page' => $page,
+                    'total_pages' => ceil($totalEvents / $limit),
+                    'total_events' => $totalEvents,
+                    'events_per_page' => $limit
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'message' => 'An error occurred while fetching events',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

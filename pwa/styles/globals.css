@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 @layer base {
   :root {
         --background: 0 0% 100%;
@@ -73,11 +79,73 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
+
+*:focus {
+  outline: none;
+}
+
+
+#searchBar {
+  transition: all .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#searchBar.active {
+  width: 300px;
+}
+
+#searchResult {
+  transition: all .3s cubic-bezier(0.22, 1, 0.36, 1);
+  visibility: hidden;
+  scale: 1.05;
+
+}
+
+#searchResult.active {
+  opacity: 1;
+  filter: blur(0px);
+  scale: 1;
+  visibility: visible;
+}
+
+#sideShow {
+  transition: all .3s cubic-bezier(0.22, 1, 0.36, 1);
+  visibility: hidden;
+  scale: 0.95;
+  opacity: 0;
+  filter: blur(10px);
+
+}
+
+#sideShow.active {
+  filter: blur(0px);
+  opacity: 1;
+  filter: blur(0px);
+  visibility: visible;
+  scale: 1;
+}
+
+.fc {
+  color: #475569;
+
+}
+.fc-event-main i,
+.fc-event i,
+.fc-event b {
+  color: #ffffff;
+  font-style: normal;
+}
+
+.fc-event b {
+  margin: 0 3px;
+}
+
+.fc-event-main,
+.fc-event {
+  border: none;
+  border-color: transparent;
+  padding: 1px;
+}
+
+.fc-toolbar-title {
+  display: none;
 }
