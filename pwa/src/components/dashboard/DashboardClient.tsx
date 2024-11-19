@@ -2,7 +2,6 @@
 
 import SuggestedEvents from '@/components/dashboard/SuggestedEvents'
 import MyEvents from '@/components/dashboard/MyEvents'
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import EventForm from '@/components/events/eventForm';
 import { useState, useEffect } from 'react';
@@ -141,7 +140,7 @@ export default function DashboardClient() {
     }));
 
     return (
-        <div className="container mt-10 mx-auto p-4 md:p-8 lg:p-12">
+        <div className="container mt-16 mx-auto p-4 md:p-8 lg:p-12">
             <div className="flex gap-4 py-4 w-full justify-end">
                 {isAuthenticated && (
                     <Dialog>
@@ -180,6 +179,6 @@ export default function DashboardClient() {
                 />
             </div>
         </div>
-        
+
     );
 }
