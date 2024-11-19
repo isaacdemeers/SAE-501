@@ -194,3 +194,7 @@ export async function IsAuthentificated() {
     console.error('Error authenticating user:', error);
   }
 }
+
+// stocker les users qu'on invite pour event privé 
+// stocker id + email + uuid pour le lien de pas connecter
+// pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte

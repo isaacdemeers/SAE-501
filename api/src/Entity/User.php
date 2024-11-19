@@ -156,7 +156,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->setRoles(['ROLE_USER']);  
         $this->setEmailverify(false);
-        $this->eventUsers = new ArrayCollection();
+        $this->userevents = new ArrayCollection();
     }
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -203,15 +203,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read' ,'user:create'])]
     private ?string $tokenpassword = null;
 
-    /**
-     * @var Collection<int, EventUser>
-     */
-    #[ORM\OneToMany(mappedBy: 'User_id', targetEntity: EventUser::class)]
-    private Collection $eventUsers;
-
-    
-
-    public function getId(): ?int
+  
+        public function getId(): ?int
     {
         return $this->id;
     }
@@ -348,34 +341,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, EventUser>
-     */
-    public function getEventUsers(): Collection
-    {
-        return $this->eventUsers;
-    }
-
-    public function addEventUser(EventUser $eventUser): static
-    {
-        if (!$this->eventUsers->contains($eventUser)) {
-            $this->eventUsers->add($eventUser);
-            $eventUser->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEventUser(EventUser $eventUser): static
-    {
-        if ($this->eventUsers->removeElement($eventUser)) {
-            // set the owning side to null (unless already changed)
-            if ($eventUser->getUserId() === $this) {
-                $eventUser->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
+ 
 }

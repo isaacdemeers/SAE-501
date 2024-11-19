@@ -28,6 +28,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
             controller: EventController::class . '::getEvent',
             normalizationContext: ['groups' => ['event:read']]
         ),
+        new Get(
+            uriTemplate: '/events',
+            controller: EventController::class .'::getAllEvents',
+            normalizationContext: ['groups' => ['event:read']]
+        ),
         new Post(
             uriTemplate: '/events',
             controller: EventController::class . '::createEvent',
@@ -131,21 +136,9 @@ class Event
     #[Groups(['event:read'])]
     private ?\DateTimeInterface $deleted_date = null;
 
-    /**
-     * @var Collection<int, EventUser>
-     */
-    #[ORM\OneToMany(mappedBy: 'Event', targetEntity: EventUser::class)]
-    private Collection $eventUsers;
+    
 
-    public function __construct()
-    {
-        $this->eventUsers = new ArrayCollection();
-    }
-
-   
-
-
-
+  
     public function getId(): ?int
     {
         return $this->id;
@@ -267,36 +260,6 @@ class Event
     public function setDeletedDate(?\DateTimeInterface $deleted_date): static
     {
         $this->deleted_date = $deleted_date;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, EventUser>
-     */
-    public function getEventUsers(): Collection
-    {
-        return $this->eventUsers;
-    }
-
-    public function addEventUser(EventUser $eventUser): static
-    {
-        if (!$this->eventUsers->contains($eventUser)) {
-            $this->eventUsers->add($eventUser);
-            $eventUser->setEvent($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEventUser(EventUser $eventUser): static
-    {
-        if ($this->eventUsers->removeElement($eventUser)) {
-            // set the owning side to null (unless already changed)
-            if ($eventUser->getEvent() === $this) {
-                $eventUser->setEvent(null);
-            }
-        }
 
         return $this;
     }

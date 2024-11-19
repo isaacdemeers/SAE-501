@@ -14,10 +14,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
-use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use App\Entity\EventUser;
+use App\Entity\UserEvent;
 use App\Repository\EventRepository;
 
 class EventController extends AbstractController
@@ -111,13 +111,13 @@ public function joinEvent(
     EventRepository $eventRepository,
     JWTEncoderInterface $jwtEncoder,
     UserProviderInterface $userProvider,
-    EntityManagerInterface $entityManager
+    EntityManagerInterface $entityManager,
 ): JsonResponse {
     // Récupérer le token JWT depuis le cookie
     $token = $request->cookies->get('jwt_token');
 
     if (!$token) {
-        return $this->json(['error' => 'Token is missing'], JsonResponse::HTTP_UNAUTHORIZED);
+        return $this->json(['error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
     }
 
     try {
@@ -125,58 +125,63 @@ public function joinEvent(
         $payload = $jwtEncoder->decode($token);
 
         if (!$payload) {
-            return $this->json(['error' => 'Invalid token'], JsonResponse::HTTP_UNAUTHORIZED);
+            return $this->json(['error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
         }
 
         // Vérifier que le token n'est pas expiré
         $currentTime = time();
         if ($payload['exp'] < $currentTime) {
-            return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
+            return $this->json(['error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
         }
 
         // Récupérer le username ou identifiant depuis le payload
         $identifier = $payload['email'] ?? null;
 
         if (!$identifier) {
-            return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
         }
 
         // Charger l'utilisateur à partir du UserProvider
         $user = $userProvider->loadUserByIdentifier($identifier);
 
         if (!$user) {
-            return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
         // Récupérer l'événement
         $event = $eventRepository->find($request->get('event'));
 
         if (!$event) {
-            return $this->json(['error' => 'Event not found'], JsonResponse::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
         }
 
         // Vérifier si l'utilisateur est déjà inscrit à l'événement
-        $existingEventUser = $entityManager->getRepository(EventUser::class)->findOneBy([
-            'Event' => $event,
-            'Userid' => $user
+        $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+            'event' => $event,
+            'user_id' => $user
         ]);
 
-        if ($existingEventUser) {
+        if ($existingUserEvent) {
             return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
         }
 
         // Ajouter l'utilisateur à l'événement
-        $eventUser = new EventUser();
-        $eventUser->setEvent($event);
-        $eventUser->setUserId($user);
-        $eventUser->setRole('ROLE_USER');
+        $userEvent = new UserEvent();
+        $userEvent->setEvent($event);
+        $userEvent->setUserId($user);
+        $userEvent->setRole('ROLE_USER');
+        $userEvent->setUserEmail(null);
 
-        $entityManager->persist($eventUser);
+        $entityManager->persist($userEvent);
         $entityManager->flush();
 
-        return $this->json(['message' => 'User successfully joined the event'], JsonResponse::HTTP_OK);
+        return $this->json([
+            'message' => 'User successfully joined the event',
+            'event' => $event->getId(),
+            'user' => $user->getUserIdentifier()
+        ], Response::HTTP_OK);
     } catch (\Exception $e) {
-        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -211,6 +216,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
 
     return $this->json($eventData, JsonResponse::HTTP_OK);
 }
+
 #[Route('/api/events/upcoming', name: 'get_upcoming_events', methods: ['GET'])]
     public function getUpcomingEvents(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -285,6 +291,105 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 'message' => 'An error occurred while fetching events',
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/events', name: 'get_all_events', methods: ['GET'])]
+    public function getAllEvents(EventRepository $eventRepository): JsonResponse
+    {
+        $events = $eventRepository->findAll();
+
+        $formattedEvents = [];
+        foreach ($events as $event) {
+            $imageName = $event->getImg();
+            $imageUrl = $this->s3Service->getObjectUrl($imageName);
+
+            $formattedEvents[] = [
+                'id' => $event->getId(),
+                'title' => $event->getTitle(),
+                'description' => $event->getDescription(),
+                'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                'location' => $event->getLocation(),
+                'maxparticipant' => $event->getMaxparticipant(),
+                'img' => $imageUrl,
+                'sharelink' => $event->getSharelink()
+            ];
+        }
+
+        return new JsonResponse($formattedEvents, JsonResponse::HTTP_OK);
+    }
+
+
+
+    #[Route('/userevents/{eventid}', name: 'get_event_users', methods: ['GET'])]
+    public function getEventUsers($eventid, Request $request, EntityManagerInterface $entityManager, JWTEncoderInterface $jwtEncoder, UserProviderInterface $userProvider): JsonResponse
+    {
+        // Récupérer le token JWT depuis le cookie
+        $token = $request->cookies->get('jwt_token');
+
+        if (!$token) {
+            return new JsonResponse(['isLog' => false, 'error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        try {
+            // Décoder le token
+            $payload = $jwtEncoder->decode($token);
+
+            if (!$payload) {
+                return new JsonResponse(['isLog' => false, 'error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
+            }
+
+            // Vérifier que le token n'est pas expiré
+            $currentTime = time();
+            if ($payload['exp'] < $currentTime) {
+                return new JsonResponse(['isLog' => false, 'error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
+            }
+
+            // Récupérer le username ou identifiant depuis le payload
+            $identifier = $payload['email'] ?? null;
+
+            if (!$identifier) {
+                return new JsonResponse(['isLog' => false, 'error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Charger l'utilisateur à partir du UserProvider
+            $user = $userProvider->loadUserByIdentifier($identifier);
+
+            if (!$user) {
+                return new JsonResponse(['isLog' => false, 'error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Récupérer l'événement
+            $event = $entityManager->getRepository(Event::class)->find($eventid);
+
+            if (!$event) {
+                return new JsonResponse(['isLog' => true, 'error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier si l'utilisateur est inscrit à l'événement
+            $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user_id' => $user
+            ]);
+
+            if (!$userEvent) {
+                return new JsonResponse(['isLog' => false, 'message' => 'User is not joined to the event'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Récupérer tous les utilisateurs inscrits à l'événement
+            $userEvents = $entityManager->getRepository(UserEvent::class)->findBy(['event' => $event]);
+
+            $users = [];
+            foreach ($userEvents as $userEvent) {
+                $users[] = [
+                    'role' => $userEvent->getRole(),
+                ];
+            }
+
+            return new JsonResponse(['isLog' => true, 'users' => $users], JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['isLog' => false, 'error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
