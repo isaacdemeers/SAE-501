@@ -30,8 +30,8 @@ export default function HoverEventCard() {
         <h3 className="font-semibold mb-2 text-sm">Tags</h3>
 
         <div className="flex items-center justify-start gap-2  mb-4">
-          <CustomBadge icon={<Users />} content="23" color="red" />
-          <CustomBadge icon={<Lock />} content="PUBLIC" color="blue" />
+          <CustomBadge icon={<Users />} content="23" color={0} />
+          <CustomBadge icon={<Lock />} content="PUBLIC" color={1} />
         </div>
         <h3 className="font-semibold mb-2 text-sm">Informations</h3>
         <ul className="flex flex-col gap-2">

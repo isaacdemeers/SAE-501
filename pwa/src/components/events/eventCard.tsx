@@ -5,11 +5,13 @@ import { Circle, CirclePlus, Clock, Users, ChevronRight, Eye, Lock, LockOpen } f
 import CustomBadge from "@/components/utils/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { Separator } from "@/components/ui/separator"
+import Link from "next/link"
 
 
 interface EventCardProps {
     key?: string;
     event: {
+        id: string;
         title: string;
         date: string;
         isPublic: boolean;
@@ -22,8 +24,7 @@ interface EventCardProps {
 
 
 export default function EventCard({ key, event, type }: EventCardProps) {
-    const { title, date, isPublic, attendees, imageUrl } = event
-    console.log(event)
+    const { id, title, date, isPublic, attendees, imageUrl } = event
     let tags = ''
     return (
         type === "searchResult" ? (
@@ -46,31 +47,37 @@ export default function EventCard({ key, event, type }: EventCardProps) {
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">
                             <div className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <Clock className="w-4 h-4 mr-1" />
-                                <p className="text-xs text-slate-600">{date}</p>
+                                <p className="text-xs text-slate-600">{date.split(' ')[0]}</p>
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <li>
                                     {isPublic && (
-                                        <CustomBadge color="blue" content="PUBLIC" icon={<LockOpen />} />
+                                        <CustomBadge color={1} content="PUBLIC" icon={<LockOpen />} />
                                     )}
                                     {!isPublic && (
-                                        <CustomBadge color="red" content="PRIVATE" icon={<Lock />} />
+                                        <CustomBadge color={0} content="PRIVATE" icon={<Lock />} />
                                     )}
                                 </li>
                                 <li>
-                                    <CustomBadge color="green" content={attendees.toString()} icon={<Users />} />
+                                    {attendees > 0 && (
+                                        <CustomBadge color={2} content={attendees.toString()} icon={<Users />} />
+                                    )}
                                 </li>
                             </ul>
                         </div>
                         <div className="flex flex-col lg:flex-row gap-2 items-end justify-center lg:items-center   rounded-lg">
                             <Button variant="outline">
-                                <Eye className="w-4 h-4 mr-2 " />
-                                Voir l&apos;événement
+                                <Link href={`/events/${id}`} className="flex items-center justify-center">
+                                    <Eye className="w-4 h-4 mr-2 " />
+                                    Voir l&apos;événement
+                                </Link>
                             </Button>
                             <Button className="flex gap-2">
-                                <CirclePlus size={16} className=" stroke-white" />
-                                S'inscrire
+                                <Link href={`/users/${id}`} className="flex items-center justify-center">
+                                    <CirclePlus size={16} className=" mr-2 stroke-white" />
+                                    S'inscrire
+                                </Link>
                             </Button>
                         </div>
 

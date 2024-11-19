@@ -18,6 +18,7 @@ interface Event {
     location: string;
     maxparticipant: string;
     sharelink: string;
+    isPublic: boolean;
 }
 
 interface SearchResultProps {
@@ -49,9 +50,10 @@ export default function SearchResult({ isOpen }: SearchResultProps) {
                     <EventCard
                         key={event.id.toString()}
                         event={{
+                            id: event.id.toString(),
                             title: event.title,
                             date: event.datestart,
-                            isPublic: true,
+                            isPublic: event.isPublic,
                             attendees: parseInt(event.maxparticipant),
                             imageUrl: event.img
                         }}

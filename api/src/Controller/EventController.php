@@ -58,7 +58,7 @@ class EventController extends AbstractController
             $data['maxparticipant'] = 0;
         }
         $event->setMaxparticipant($data['maxparticipant']);
-        $event->setVisibility($data['visibility']);
+        $event->setVisibility($data['visibility'] === 'public');
         if ($file) {
             $imageName = uniqid() . '.' . $file->guessExtension();
             $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
@@ -98,7 +98,7 @@ class EventController extends AbstractController
             $data['maxparticipant'] = 0;
         }
         $event->setMaxparticipant($data['maxparticipant']);
-        $event->setVisibility($data['visibility']);
+        $event->setVisibility($data['visibility'] === 'public');
         if ($file) {
             $imageName = uniqid() . '.' . $file->guessExtension();
             $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
@@ -128,7 +128,8 @@ class EventController extends AbstractController
                 'location' => $event->getLocation(),
                 'maxparticipant' => $event->getMaxparticipant(),
                 'img' => $event->getImg(),
-                'sharelink' => $event->getSharelink()
+                'sharelink' => $event->getSharelink(),
+                'isPublic' => $event->isVisibility()
             ]
         ], Response::HTTP_CREATED);
     }
@@ -151,6 +152,7 @@ class EventController extends AbstractController
             'maxparticipant' => $event->getMaxparticipant(),
             'visibility' => $event->isVisibility(),
             'sharelink' => $event->getSharelink(),
+            'isPublic' => $event->isVisibility()
         ];
 
         // Get the image URL from AWS S3
@@ -219,7 +221,8 @@ class EventController extends AbstractController
                     'location' => $event->getLocation(),
                     'maxparticipant' => $event->getMaxparticipant(),
                     'img' => $imageUrl,
-                    'sharelink' => $event->getSharelink()
+                    'sharelink' => $event->getSharelink(),
+                    'isPublic' => $event->isVisibility()
                 ];
             }
 
@@ -258,7 +261,8 @@ class EventController extends AbstractController
                 'location' => $event->getLocation(),
                 'maxparticipant' => $event->getMaxparticipant(),
                 'img' => $imageUrl,
-                'sharelink' => $event->getSharelink()
+                'sharelink' => $event->getSharelink(),
+                'isPublic' => $event->isVisibility()
             ];
         }
 

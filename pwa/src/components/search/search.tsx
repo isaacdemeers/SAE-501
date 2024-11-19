@@ -67,7 +67,7 @@ export default function SearchBar() {
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div id="searchBar" className={`relative border-slate-200 w-60 bg-white border-[1px] px-2 rounded-lg hidden items-center justify-center gap-2 sm:flex ${open ? 'px-4 py-1 rounded-2xl w-96 shadow-md' : ''} `}>
+            <div id="searchBar" className={`relative border-slate-200 w-60 bg-white border-[1px] px-2 rounded-lg hidden items-center justify-center gap-2 sm:flex  ${open ? 'px-4 py-1 rounded-2xl w-96 shadow-md' : ''} `}>
                 <Search size={25} className="stroke-slate-600 " />
                 <input
                     type="text"
