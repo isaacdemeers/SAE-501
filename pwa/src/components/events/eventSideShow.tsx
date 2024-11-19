@@ -9,7 +9,7 @@ import eventImage from "@/image_mairie_limoges.png"
 
 export default function HoverEventCard() {
   return (
-    <Card className="flex flex-col w-full h-full max-w-sm bg-white shadow-lg">
+    <Card className="flex flex-col w-full h-full max-w-sm bg-white shadow-lg border-none p-0">
       <CardHeader className="flex h-fit flex-row items-center justify-between px-4  border-b">
         <CardTitle className="text-xl font-bold text-slate-600">Event 1</CardTitle>
       </CardHeader>

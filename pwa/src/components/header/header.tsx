@@ -26,14 +26,14 @@ import {
 export default function Header() {
     return (
         <>
-            <header className="fixed left-0 bg-slate-50 backdrop-blur-lg h-20 bg-opacity-90 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
-                <Link href="/" className={` transition-all transition-300ms drop-shadow-lg hover:drop-shadow-md hover:scale-110 text-4xl font-bold text-slate-600 ${abhayalibre.className}`}>
+            <header className="fixed  left-0 bg-slate-50 backdrop-blur-lg h-20 bg-opacity-90 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
+                <Link href="/" className={` transition-all transition-300ms drop-shadow-lg hover:drop-shadow-md hover:scale-110 text-4xl font-bold text-slate-600 w-full ${abhayalibre.className}`}>
                     PlanIt
                 </Link>
 
                 <SearchBar />
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center w-full gap-2 justify-end">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -105,7 +105,6 @@ export default function Header() {
                 </div>
 
             </header>
-            <SearchResult />
         </>
     )
 }

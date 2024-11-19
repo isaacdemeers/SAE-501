@@ -19,7 +19,7 @@ const filterOptions = [
 
 export default function FilterBox() {
     const [selectedFilters, setSelectedFilters] = React.useState<string[]>([])
-    const [isCollapsed, setIsCollapsed] = React.useState(false)
+    const [isCollapsed, setIsCollapsed] = React.useState(true)
 
     const handleFilterChange = (filterId: string) => {
         setSelectedFilters((prev) =>

@@ -2,84 +2,36 @@
 import Link from "next/link"
 import React from "react"
 import { PlusCircle, Calendar, User, AlignRight } from "lucide-react"
-import { abhayalibre } from '@/lib/fonts'
 import { Card } from "@/components/ui/card"
 import EventCard from "@/components/events/eventCard"
 import FilterBox from "@/components/search/filter"
-
-
-import { Button } from "@/components/ui/button"
-import SearchBar from "@/components/search/searchBar"
-
 import imagess from "@images/image_mairie_limoges.png"
 
+interface SearchResultProps {
+    isOpen: boolean
+}
 
-
-export default function SearchResult() {
-    React.useEffect(() => {
-        const input = document.querySelector<HTMLInputElement>("#search");
-        const bar = document.querySelector<HTMLDivElement>("#searchResult");
-
-        if (!input) return;
-        if (!bar) return;
-
-
-        const handleFocus = () => {
-            bar.classList.add("active");
-        };
-
-        const handleBlur = () => {
-            bar.classList.remove("active");
-        };
-
-        // Ajouter les gestionnaires d'événements
-        input.addEventListener("focus", handleFocus);
-        input.addEventListener("blur", handleBlur);
-
-        // Nettoyer les événements lors du démontage
-        return () => {
-            input.removeEventListener("focus", handleFocus);
-            input.removeEventListener("blur", handleBlur);
-        };
-    }, []);
+export default function SearchResult({ isOpen }: SearchResultProps) {
     return (
-        // <section className=" absolute z-30 top-0 left-0 w-screen h-screen flex items-start sm:items-center justify-center bg-slate-950 sm:px-80 sm:py-16 bg-opacity-60">
-        // </section >
-        // <section className="bg-slate-950 z-40 absolute w-screen h-screen top-0 left-0 bg-opacity-60 flex items-center justify-center py-24 aspect-square ">
-        <Card id="searchResult" className=" transition-all fixed top-0 z-40 left-1/2 w-2/3  opacity-0 transform -translate-x-1/2 
-         bg-slate-50 bg-opacity-95 items-center justify-between p-4 mt-24 backdrop-blur-md blur-md flex origin-top-left flex-col gap-4 max-h-[80vh] rounded-xl shadow-lg">
-
-
+        <Card
+            id="searchResult"
+            className={` transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] fixed top-0 z-40 left-1/2 w-2/3 transform -translate-x-1/2 
+            bg-slate-50 bg-opacity-80 items-center justify-between p-4 mt-24  flex origin-top-left flex-col gap-4 max-h-[80vh] rounded-xl shadow-lg opacity-100 `}
+        >
             <header className="flex items-center justify-between w-full">
                 <FilterBox />
-
-
             </header>
 
             <div className="flex items-center justify-start mt-2 w-full">
                 <h4 className="font-normal text-slate-600 text-xs bg-slate-100 rounded-md py-1 px-2">4 results</h4>
             </div>
 
-            <ul className=" flex flex-wrap items-start justify-evenly w-full max-h-[80vh] overflow-y-scroll rounded-lg gap-2">
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-                <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" type="searchResult" />
-
+            <ul className="flex flex-wrap items-start justify-evenly w-full max-h-[80vh] overflow-y-scroll rounded-lg gap-2">
+                <EventCard title="Event 1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
+                <EventCard title="Event 2" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
+                <EventCard title="Event 3" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
+                <EventCard title="Event 4" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl={imagess.src} type="searchResult" />
             </ul>
-
-
-
         </Card>
-
-
-
-
     )
-
 }
