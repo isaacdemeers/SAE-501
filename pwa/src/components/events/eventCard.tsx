@@ -25,7 +25,6 @@ interface EventCardProps {
 
 
 export default function EventCard({ key, event, type }: EventCardProps) {
-    console.log(event)
     const { id, title, date, isPublic, attendees, imageUrl, description } = event
     let tags = ''
     return (

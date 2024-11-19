@@ -28,30 +28,40 @@ interface SearchResultProps {
 }
 
 const searchEvents = (search: string, activeFilters: string[]) => {
-    return GetAllEvents().then(events => events.filter((event: Event) => {
-        if (activeFilters.length === 0) {
-            return event.title.toLowerCase().includes(search.toLowerCase())
+    return GetAllEvents().then(events => {
+        // Filtrer d'abord par visibilité si le filtre private est actif
+        let filteredEvents = events;
+        if (activeFilters.includes('private')) {
+            filteredEvents = events.filter(event => !event.isPublic);
         }
 
-        return activeFilters.some(filter => {
-            switch (filter) {
-                case 'title':
-                    return event.title.toLowerCase().includes(search.toLowerCase())
-                case 'description':
-                    return event.description.toLowerCase().includes(search.toLowerCase())
-                case 'date':
-                    return event.datestart.toLowerCase().includes(search.toLowerCase()) ||
-                        event.dateend.toLowerCase().includes(search.toLowerCase())
-                case 'private':
-                    return !event.isPublic && event.title.toLowerCase().includes(search.toLowerCase())
-                case 'users':
-                    return event.maxparticipant.toString().includes(search)
-                default:
-                    return false
+        // Ensuite appliquer les autres filtres
+        return filteredEvents.filter((event: Event) => {
+            // Obtenir les filtres actifs sans le filtre private
+            const contentFilters = activeFilters.filter(f => f !== 'private');
+
+            if (contentFilters.length === 0) {
+                return event.title.toLowerCase().includes(search.toLowerCase());
             }
-        })
-    }))
-}
+
+            return contentFilters.some(filter => {
+                switch (filter) {
+                    case 'title':
+                        return event.title.toLowerCase().includes(search.toLowerCase());
+                    case 'description':
+                        return event.description.toLowerCase().includes(search.toLowerCase());
+                    case 'date':
+                        return event.datestart.toLowerCase().includes(search.toLowerCase()) ||
+                            event.dateend.toLowerCase().includes(search.toLowerCase());
+                    case 'users':
+                        return event.maxparticipant.toString().includes(search);
+                    default:
+                        return false;
+                }
+            });
+        });
+    });
+};
 
 // Ajoutez cette fonction pour obtenir le label d'un filtre
 const getFilterLabel = (filterId: string): string => {
@@ -61,9 +71,8 @@ const getFilterLabel = (filterId: string): string => {
 
 export default function SearchResult({ isOpen, search }: SearchResultProps) {
     const [events, setEvents] = useState<Event[]>([])
-    const [activeFilters, setActiveFilters] = useState<string[]>([])
+    const [activeFilters, setActiveFilters] = useState<string[]>(["title"])
     const [activeFilterColors, setActiveFilterColors] = useState<string[]>([])
-
 
     useEffect(() => {
         searchEvents(search, activeFilters).then(setEvents)
@@ -90,7 +99,7 @@ export default function SearchResult({ isOpen, search }: SearchResultProps) {
                     {events.length} résultats
                 </h4>
 
-                <h4 className={`font-normal text-slate-600 text-xs rounded-md py-1 px-2 ${activeFilterColors.join(' ')}`}>
+                <h4 className={`font-normal text-slate-600 text-xs rounded-md py-1 px-2  ${activeFilterColors.join(' ')}`}>
                     {activeFilters.length > 0
                         ? 'Filtrés par ' + activeFilters.map(f => getFilterLabel(f)).join(', ')
                         : 'Aucun filtre'}
