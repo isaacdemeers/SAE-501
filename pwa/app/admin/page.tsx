@@ -1,27 +1,24 @@
 "use client";
 
-import Head from "next/head";
 import { useEffect, useState } from "react";
+import { HydraAdmin } from "@api-platform/admin";
 
-const Admin = () => {
-  // Load the admin client-side
-  const [DynamicAdmin, setDynamicAdmin] = useState(<p>Loading...</p>);
+export default function Admin() {
+  const [mounted, setMounted] = useState(false);
+  const entrypoint = process.env.NEXT_PUBLIC_API_ENTRYPOINT || 'https://localhost';
+
   useEffect(() => {
-    (async () => {
-      const HydraAdmin = (await import("@api-platform/admin")).HydraAdmin;
-
-      setDynamicAdmin(<HydraAdmin entrypoint={window.origin}></HydraAdmin>);
-    })();
+    setMounted(true);
   }, []);
 
-  return (
-    <>
-      <Head>
-        <title>API Platform Admin</title>
-      </Head>
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
 
-      {DynamicAdmin}
-    </>
+  return (
+    <HydraAdmin
+      entrypoint={entrypoint}
+      basename="/admin"
+    />
   );
-};
-export default Admin;
+}

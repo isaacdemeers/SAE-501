@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
@@ -27,20 +28,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(normalizationContext: ['groups' => ['user:read']]),
         new POST(
             uriTemplate: '/users/testemail',
-            controller: RegisterController::class . '::checkEmail', 
-            denormalizationContext:['groups' => ['user:emailverification']],
+            controller: RegisterController::class . '::checkEmail',
+            denormalizationContext: ['groups' => ['user:emailverification']],
         ),
         new POST(
             uriTemplate: '/users/testusername',
-            controller: RegisterController::class . '::checkUsername', 
-            denormalizationContext:['groups' => ['user:usernameverification']],
+            controller: RegisterController::class . '::checkUsername',
+            denormalizationContext: ['groups' => ['user:usernameverification']],
 
         ),
         new Post(
-            uriTemplate: '/verify-email', 
-            controller: RegisterController::class . '::verifyEmail', 
+            uriTemplate: '/verify-email',
+            controller: RegisterController::class . '::verifyEmail',
             openapiContext: [
-            'requestBody' => [
+                'requestBody' => [
                     'content' => [
                         'application/json' => [
                             'schema' => [
@@ -101,26 +102,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: "/reset/passwordemail",
             controller: ResetPasswordController::class . '::resetPasswordEmail',
             openapiContext: [
-            'requestBody' => [
-                'content' => [
-                'application/json' => [
-                    'schema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'email' => [
-                        'type' => 'string',
-                        'example' => 'user@example.com'
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com'
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
-                    ]
                 ]
-                ]
-            ]
             ]
         ),
         new POST(
-            uriTemplate:'/reset/password',
-            controller: ResetPasswordController::class .'::resetPassword',
+            uriTemplate: '/reset/password',
+            controller: ResetPasswordController::class . '::resetPassword',
             openapiContext: [
                 'requestBody' => [
                     'content' => [
@@ -145,7 +146,23 @@ use Symfony\Component\Serializer\Annotation\Groups;
             ]
         ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
-        new Delete()
+        new Delete(),
+        new Get(
+            normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new GetCollection(
+            normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new Put(
+            normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
+            denormalizationContext: ['groups' => ['user:write', 'user:admin:write']],
+            security: "is_granted('ROLE_ADMIN')"
+        ),
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')"
+        )
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
@@ -154,36 +171,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct()
     {
-        $this->setRoles(['ROLE_USER']);  
+        $this->setRoles(['ROLE_USER']);
         $this->setEmailverify(false);
     }
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read', 'user:admin:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:create' , 'user:emailverification', 'user:emailresetpassword'])]
+    #[Groups(['user:read', 'user:create', 'user:emailverification', 'user:emailresetpassword', 'user:admin:read', 'user:admin:write'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'user:admin:read', 'user:admin:write'])]
     private array $roles = [];
 
     #[ORM\Column]
-    #[Groups(['user:read' , 'user:create'])]
+    #[Groups(['user:create', 'user:admin:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' , 'user:create'])]
+    #[Groups(['user:read', 'user:create', 'user:admin:read', 'user:admin:write'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  ,'user:create'])]
+    #[Groups(['user:read', 'user:create', 'user:admin:read', 'user:admin:write'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
+    #[Groups(['user:read', 'user:create', 'user:usernameverification', 'user:admin:read', 'user:admin:write'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
@@ -191,18 +209,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', ])]
+    #[Groups(['user:read',])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
+    #[Groups(['user:read', 'user:create', 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['user:read' ,'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $tokenpassword = null;
 
-    
+
 
     public function getId(): ?int
     {
@@ -253,9 +271,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function eraseCredentials(): void
-    {
-    }
+    public function eraseCredentials(): void {}
 
     public function getFirstname(): ?string
     {
@@ -340,5 +356,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
 }
