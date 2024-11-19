@@ -164,7 +164,8 @@ export async function AddEvent(formData: any) {
 }
 }
 
-export async function JoinEvent(event: number) {
+export async function JoinEvent(event: number , email: string) {
+  if(email === "") {
   try {
     const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
       method: 'POST',
@@ -177,6 +178,22 @@ export async function JoinEvent(event: number) {
   } catch (error) {
     console.error('Error joining event:', error);
   }
+}
+else {
+  
+  const formData = new FormData();
+  formData.append("email", email);
+  try {
+    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error joining event:', error);
+  }
+}
 }
 
 export async function IsAuthentificated() {

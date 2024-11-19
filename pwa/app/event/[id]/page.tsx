@@ -36,14 +36,8 @@ export default function EventPage({ params }: EventPageProps) {
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      alert(`Email enregistré : ${email}`);
-      setEmail(""); // Réinitialiser l'email après soumission
-    }
-  }
+  const [connectionuuid , setConnectionuuid] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -70,16 +64,31 @@ export default function EventPage({ params }: EventPageProps) {
     checkUserSubscription();
   }, [id, isAuthenticated]);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const connection = urlParams.get("connection");
+    if (connection) {
+      setConnectionuuid(connection);
+    }
+  }, []);
+
   async function handleSubscribe() {
-    let sub = await JoinEvent(id);
+    let sub = await JoinEvent(id , email);
     if (sub.message === "User successfully joined the event") {
+      setIsDialogOpen(false);
       setIsSubscribed(true);
-      alert("Vous avez rejoint l'événement avec succès");
+      if(sub.link !== "") {
+      setConnectionuuid(sub.link);      // Replace alert with console log or any other notification method
+      console.log("Vous avez rejoint l'événement avec succès");
+    }
+  }
+    else  {
+      console.log(sub);
     }
   }
 
   return (
-    <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
+    <div className="max-w-2xl p-4 mt-20 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
       <header className="flex justify-between mb-8">
         <Link href="/dashboard" className="md:hidden">
           <Button variant="ghost" size="sm" className="md:hidden">
@@ -132,17 +141,42 @@ export default function EventPage({ params }: EventPageProps) {
               <Button variant="default" className="">
                 <Share2 className="w-4 h-4 mr-2" /> Partager
               </Button>
-    {isAuthenticated ? (
-      isSubscribed ? (
-        <Button variant="default" className="bg-blue-500 md:flex hover:bg-blue-400">
-          <Check className="w-4 h-4 mr-2" /> Inscrit
-        </Button>
-      ) : (
-        <Button variant="default" onClick={handleSubscribe}>
-          <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
-        </Button>
-      )
+    {isSubscribed ? (
+     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+     <DialogTrigger asChild>
+       <Button
+         variant="default"
+         className="bg-blue-500 md:flex hover:bg-blue-400"
+         onClick={() => setIsDialogOpen(true)}
+       >
+         <Check className="w-4 h-4 mr-2" /> Inscrit
+       </Button>
+     </DialogTrigger>
+     <DialogContent>
+       <DialogHeader>
+         <h2 className="text-lg font-bold">Désinscription</h2>
+       </DialogHeader>
+       <div className="space-y-4">
+         <p className="text-sm text-muted-foreground">
+           Attention, vous allez vous désinscrire de cet évènement. Voulez-vous vraiment continuer ?
+         </p>
+       </div>
+       <DialogFooter>
+         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+           Annuler
+         </Button>
+         <Button variant="destructive">
+           Se désinscrire
+         </Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
     ) : (
+      isAuthenticated ? (
+      <Button variant="default" onClick={handleSubscribe}>
+        <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
+      </Button>
+      ) : (
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="default">
@@ -164,7 +198,13 @@ export default function EventPage({ params }: EventPageProps) {
               <p className="text-sm text-muted-foreground">
                 ou inscrivez-vous avec votre email
               </p>
-              <form onSubmit={handleSubmit} className="space-y-2">
+                <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubscribe();
+                }}
+                className="space-y-2"
+                >
                 <Label htmlFor="email">Votre email</Label>
                 <Input
                   id="email"
@@ -175,7 +215,7 @@ export default function EventPage({ params }: EventPageProps) {
                   required
                 />
                 <Button type="submit">S'inscrire avec votre email</Button>
-              </form>
+                </form>
             </div>
           </div>
           <DialogFooter>
@@ -187,7 +227,7 @@ export default function EventPage({ params }: EventPageProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    )}
+      )
     )}
             </div>
 

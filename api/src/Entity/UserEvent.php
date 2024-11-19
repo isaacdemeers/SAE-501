@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Entity;
 
@@ -13,12 +13,12 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: UserEventRepository::class)]
 #[ApiResource(
     operations: [
-        
+        new Get(),
+        new Post(),
+        new Put(),
+        new Delete()
     ],
 )]   
-
-
-
 class UserEvent
 {
     #[ORM\Id]
@@ -30,14 +30,15 @@ class UserEvent
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $event = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userevents')]
-    private ?User $user_id = null;
+    #[ORM\ManyToOne(inversedBy: 'userevents', targetEntity: User::class)]
+    #[ORM\JoinColumn(onDelete: "SET NULL", nullable: true)]
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
     private ?string $role = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $user_email = null;
+    private ?string $userEmail = null;
 
     public function getId(): ?int
     {
@@ -56,14 +57,14 @@ class UserEvent
         return $this;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(?User $user_id): static
+    public function setUser(?User $user): static
     {
-        $this->user_id = $user_id;
+        $this->user = $user;
 
         return $this;
     }
@@ -82,12 +83,12 @@ class UserEvent
 
     public function getUserEmail(): ?string
     {
-        return $this->user_email;
+        return $this->userEmail;
     }
 
-    public function setUserEmail(?string $user_email): static
+    public function setUserEmail(?string $userEmail): static
     {
-        $this->user_email = $user_email;
+        $this->userEmail = $userEmail;
 
         return $this;
     }

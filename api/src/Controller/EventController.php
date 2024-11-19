@@ -17,7 +17,9 @@ use Symfony\Component\Mime\Email;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use App\Entity\EventUser;
+use App\Entity\User;
 use App\Entity\UserEvent;
+use App\Entity\UserInvitation;
 use App\Repository\EventRepository;
 
 class EventController extends AbstractController
@@ -61,7 +63,7 @@ class EventController extends AbstractController
         $data['maxparticipant'] = 0;
     }
     $event->setMaxparticipant($data['maxparticipant']);
-    $event->setVisibility($data['visibility']);
+    $event->setVisibility($data['visibility'] === 'public');
     if ($file) {
         $imageName = uniqid() . '.' . $file->guessExtension();
         $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
@@ -105,6 +107,7 @@ class EventController extends AbstractController
     ], Response::HTTP_CREATED);
  }
 
+
 #[Route('/event/{event}/join', name: 'app_event_join', methods: ['POST'])]
 public function joinEvent(
     Request $request,
@@ -112,14 +115,65 @@ public function joinEvent(
     JWTEncoderInterface $jwtEncoder,
     UserProviderInterface $userProvider,
     EntityManagerInterface $entityManager,
+    MailerInterface $mailer
 ): JsonResponse {
     // Récupérer le token JWT depuis le cookie
     $token = $request->cookies->get('jwt_token');
 
     if (!$token) {
-        return $this->json(['error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+        $email = $request->get('email');
+        if(!$email) {
+            return $this->json(['error' => 'Email or Token is missing'], Response::HTTP_UNAUTHORIZED);
+        }
+
+    $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+    if ($user) {
+        return $this->json(['message' => 'Cette adresse mail est lier a un compte veuillez vous connectez pour vous inscrire'], Response::HTTP_NOT_FOUND);
+    }
+    $event = $eventRepository->find($request->get('event'));
+
+    $userEvent = new UserEvent();
+    $userEvent->setEvent($event);
+    $userEvent->setUser(null);
+    $userEvent->setRole('ROLE_USER');
+    $userEvent->setUserEmail(userEmail: $email);
+
+    $entityManager->persist($userEvent);
+    $entityManager->flush();
+
+    $uuid = UuidV4::v4();
+    $invitation = new UserInvitation();
+    $invitation->setLink($uuid);
+    $invitation->setEmail($email);
+    $invitation->setEvent($event);
+    $invitation->setExpiration($event->getDateend());
+
+    $entityManager->persist($invitation);
+    $entityManager->flush();
+
+    $link = 'http://localhost/events/' . $event->getId() . '?connection=' . $uuid;
+
+    $email = (new Email())
+        ->from('no-reply@example.com')
+        ->to($email)
+        ->subject('You are invited to an event')
+        ->html('<p>You have join the event: ' . $event->getTitle() . '</p><p>Event details: ' . $link . '</p>');
+
+    try {
+        $mailer->send($email);
+    } catch (\Exception $e) {
+        return $this->json(['error' => 'Failed to send email: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
+    $entityManager->persist($userEvent);
+    $entityManager->flush();
+
+    return $this->json([
+        'message' => 'User successfully joined the event',
+        'link' => $link,
+    ], Response::HTTP_OK);
+    }
     try {
         // Décoder le token
         $payload = $jwtEncoder->decode($token);
@@ -158,7 +212,7 @@ public function joinEvent(
         // Vérifier si l'utilisateur est déjà inscrit à l'événement
         $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
             'event' => $event,
-            'user_id' => $user
+            'user' => $user
         ]);
 
         if ($existingUserEvent) {
@@ -168,7 +222,7 @@ public function joinEvent(
         // Ajouter l'utilisateur à l'événement
         $userEvent = new UserEvent();
         $userEvent->setEvent($event);
-        $userEvent->setUserId($user);
+        $userEvent->setUser($user);
         $userEvent->setRole('ROLE_USER');
         $userEvent->setUserEmail(null);
 
@@ -177,13 +231,12 @@ public function joinEvent(
 
         return $this->json([
             'message' => 'User successfully joined the event',
-            'event' => $event->getId(),
-            'user' => $user->getUserIdentifier()
         ], Response::HTTP_OK);
     } catch (\Exception $e) {
         return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
+
 
 #[Route('/event/{id}', name: 'app_event_get', methods: ['POST'])]
 public function getevent (Request $request, EventRepository $eventRepository): JsonResponse
@@ -370,7 +423,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             // Vérifier si l'utilisateur est inscrit à l'événement
             $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
                 'event' => $event,
-                'user_id' => $user
+                'user' => $user
             ]);
 
             if (!$userEvent) {

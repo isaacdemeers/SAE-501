@@ -156,7 +156,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->setRoles(['ROLE_USER']);  
         $this->setEmailverify(false);
-        $this->userevents = new ArrayCollection();
     }
     #[ORM\Id]
     #[ORM\GeneratedValue]
