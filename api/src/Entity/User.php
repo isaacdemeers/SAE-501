@@ -25,7 +25,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[ApiResource(
     operations: [
-        new Get(normalizationContext: ['groups' => ['user:read']]),
+        new GetCollection(
+            uriTemplate: '/users',
+            security: "is_granted('ROLE_ADMIN')",
+            normalizationContext: ['groups' => ['user:read', 'user:admin:read']]
+        ),
+        new Get(
+            security: "is_granted('ROLE_ADMIN')",
+            normalizationContext: ['groups' => ['user:read', 'user:admin:read']]
+        ),
         new POST(
             uriTemplate: '/users/testemail',
             controller: RegisterController::class . '::checkEmail',
@@ -147,14 +155,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Put(denormalizationContext: ['groups' => ['user:write']]),
         new Delete(),
-        new Get(
-            normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
-            security: "is_granted('ROLE_ADMIN')"
-        ),
-        new GetCollection(
-            normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
-            security: "is_granted('ROLE_ADMIN')"
-        ),
         new Put(
             normalizationContext: ['groups' => ['user:read', 'user:admin:read']],
             denormalizationContext: ['groups' => ['user:write', 'user:admin:write']],
