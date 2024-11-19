@@ -90,9 +90,7 @@
 } 
 
 #searchResult {
-  transition: all .3s cubic-bezier(0.22, 1, 0.36, 1);
-  visibility: hidden;
-  scale: 1.05;
+  backdrop-filter: blur(10px);
 
 }
 

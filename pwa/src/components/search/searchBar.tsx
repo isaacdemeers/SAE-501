@@ -26,7 +26,6 @@ export default function SearchBar() {
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </div>
-            <SearchResult isOpen={open} />
         </div>
     )
 }

@@ -26,7 +26,7 @@ class EventController extends AbstractController
 
 
 
-   
+
     #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
     public function createEvent(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -190,7 +190,7 @@ class EventController extends AbstractController
 
             $events = $queryBuilder->getQuery()->getResult();
 
-           
+
             // Get total count for pagination
             $totalQueryBuilder = $entityManager->createQueryBuilder();
             $totalQueryBuilder
@@ -209,7 +209,7 @@ class EventController extends AbstractController
             foreach ($events as $event) {
                 $imageName = $event->getImg();
                 $imageUrl = $this->s3Service->getObjectUrl($imageName);
-                
+
                 $formattedEvents[] = [
                     'id' => $event->getId(),
                     'title' => $event->getTitle(),
@@ -232,12 +232,36 @@ class EventController extends AbstractController
                     'events_per_page' => $limit
                 ]
             ]);
-
         } catch (\Exception $e) {
             return new JsonResponse([
                 'message' => 'An error occurred while fetching events',
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+    #[Route('/events', name: 'get_all_events', methods: ['GET'])]
+    public function getAllEvents(EventRepository $eventRepository): JsonResponse
+    {
+        $events = $eventRepository->findAll();
+
+        $formattedEvents = [];
+        foreach ($events as $event) {
+            $imageName = $event->getImg();
+            $imageUrl = $this->s3Service->getObjectUrl($imageName);
+
+            $formattedEvents[] = [
+                'id' => $event->getId(),
+                'title' => $event->getTitle(),
+                'description' => $event->getDescription(),
+                'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                'location' => $event->getLocation(),
+                'maxparticipant' => $event->getMaxparticipant(),
+                'img' => $imageUrl,
+                'sharelink' => $event->getSharelink()
+            ];
+        }
+
+        return new JsonResponse($formattedEvents, JsonResponse::HTTP_OK);
     }
 }
