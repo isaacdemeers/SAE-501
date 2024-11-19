@@ -17,6 +17,7 @@ interface EventCardProps {
         isPublic: boolean;
         attendees: number;
         imageUrl: string;
+        description: string;
     };
     type: string;
 }
@@ -24,11 +25,12 @@ interface EventCardProps {
 
 
 export default function EventCard({ key, event, type }: EventCardProps) {
-    const { id, title, date, isPublic, attendees, imageUrl } = event
+    console.log(event)
+    const { id, title, date, isPublic, attendees, imageUrl, description } = event
     let tags = ''
     return (
         type === "searchResult" ? (
-            <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
+            <Card className={`w-full flex relative text-slate-600  overflow-hidden animate-show transition-transform duration-300`}>
 
                 <section className=" absolute  w-full h-full flex items-center justify-center ">
                     <img
@@ -42,6 +44,7 @@ export default function EventCard({ key, event, type }: EventCardProps) {
                 <CardContent className="flex z-10 flex-col w-full p-4 gap-2 bg-transparent">
 
                     <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{title}</h2>
+                    <p className="text-xs text-slate-600 text-ellipsis w-5/12 overflow-hidden text-nowrap">{description}</p>
 
                     <div className="flex gap-4 w-full  justify-between items-center">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">

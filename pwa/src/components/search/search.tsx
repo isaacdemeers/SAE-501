@@ -10,13 +10,17 @@ import SearchResult from "@/components/search/searchResult"
 
 
 export default function SearchBar() {
-    const searchInput = document.getElementById('search') as HTMLInputElement
-
+    const [searchValue, setSearchValue] = React.useState("")
     const [open, setOpen] = React.useState(false)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchValue(e.target.value)
+    }
 
     React.useEffect(() => {
         // Gestionnaire pour command + k
         const handleKeyDown = (event: KeyboardEvent) => {
+            const searchInput = document.getElementById('search') as HTMLInputElement
             if (event.metaKey && event.key === 'k') {
                 setOpen(!open)
                 if (searchInput && !open) {
@@ -59,6 +63,7 @@ export default function SearchBar() {
     const handleClick = function () {
         setOpen(true)
         //select all the text in the search bar
+        const searchInput = document.getElementById('search') as HTMLInputElement
         if (searchInput) {
             searchInput.select()
         }
@@ -73,16 +78,17 @@ export default function SearchBar() {
                     type="text"
                     name="search"
                     id="search"
+                    value={searchValue}
+                    onChange={handleInputChange}
                     placeholder="Search..."
                     className="ring-none placeholder:text-slate-600 text-slate-600 text-sm w-full border-none text-ellipsis focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none rounded-md"
                     onClick={handleClick}
-
                 />
                 <kbd className="pointer-events-none absolute right-2 top-[50%] translate-y-[-50%] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex shadow-[0px_0px_10px_7px_#ffffff]">
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </div>
-            <SearchResult isOpen={open} />
+            <SearchResult isOpen={open} search={searchValue} />
         </div>
     )
 }
