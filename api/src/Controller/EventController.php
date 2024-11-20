@@ -21,6 +21,7 @@ use App\Entity\User;
 use App\Entity\UserEvent;
 use App\Entity\UserInvitation;
 use App\Repository\EventRepository;
+use App\Repository\UserRepository;
 
 class EventController extends AbstractController
 {
@@ -113,6 +114,7 @@ class EventController extends AbstractController
 public function joinEvent(
     Request $request,
     EventRepository $eventRepository,
+    UserRepository $userRepository,
     JWTEncoderInterface $jwtEncoder,
     UserProviderInterface $userProvider,
     EntityManagerInterface $entityManager,
@@ -121,59 +123,124 @@ public function joinEvent(
     // Récupérer le token JWT depuis le cookie
     $token = $request->cookies->get('jwt_token');
 
-    if (!$token) {
+    if (empty($token)) {
         $email = $request->get('email');
-        if(!$email) {
-            return $this->json(['error' => 'Email or Token is missing'], Response::HTTP_UNAUTHORIZED);
+        if (!$email) {
+            return $this->json(['error' => 'Email is missing'], Response::HTTP_BAD_REQUEST);
+        }
+        $user = $userRepository->findOneBy(['email'=> $email]);
+        if ($user) {
+            if ($user->getRoles() !== 'ROLE_INVITE') {
+            return $this->json(['error' => 'Account exists with this email, please log in'], Response::HTTP_BAD_REQUEST);
+            }
+            try {
+            // Récupérer l'événement
+        $event = $eventRepository->find($request->get('event'));
+
+        if (!$event) {
+            return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
         }
 
-    $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        // Vérifier si l'utilisateur est déjà inscrit à l'événement
+        $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+            'event' => $event,
+            'user' => $user
+        ]);
 
-    if ($user) {
-        return $this->json(['message' => 'Cette adresse mail est lier a un compte veuillez vous connectez pour vous inscrire'], Response::HTTP_NOT_FOUND);
-    }
-    $event = $eventRepository->find($request->get('event'));
+        if ($existingUserEvent) {
+            return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
+        }
 
-    $userEvent = new UserEvent();
-    $userEvent->setEvent($event);
-    $userEvent->setUser(null);
-    $userEvent->setRole('ROLE_USER');
-    $userEvent->setUserEmail(userEmail: $email);
+        // Ajouter l'utilisateur à l'événement
+        $userEvent = new UserEvent();
+        $userEvent->setEvent($event);
+        $userEvent->setUser($user);
+        $userEvent->setRole('ROLE_USER');
+        $entityManager->persist($userEvent);
+        $entityManager->flush();
 
-    $entityManager->persist($userEvent);
-    $entityManager->flush();
+        $uuid = UuidV4::v4();
+        $link = 'https://example.com/event/invite/' . $uuid;
 
-    $uuid = UuidV4::v4();
-    $invitation = new UserInvitation();
-    $invitation->setLink($uuid);
-    $invitation->setEmail($email);
-    $invitation->setEvent($event);
-    $invitation->setExpiration($event->getDateend());
+        $EmailInvitation = new UserInvitation();
+        $EmailInvitation->setEvent($event);
+        $EmailInvitation->setUserId($user);
+        $EmailInvitation->setDateInvitation(new \DateTime());
+        $EmailInvitation->setLink($link);
+        $EmailInvitation->setExpiration($event->getDateend());
 
-    $entityManager->persist($invitation);
-    $entityManager->flush();
-
-    $link = 'http://localhost/events/' . $event->getId() . '?connection=' . $uuid;
-
-    $email = (new Email())
-        ->from('no-reply@example.com')
-        ->to($email)
-        ->subject('You are invited to an event')
-        ->html('<p>You have join the event: ' . $event->getTitle() . '</p><p>Event details: ' . $link . '</p>');
-
-    try {
-        $mailer->send($email);
+        $email = (new Email())
+            ->from('noreply@exemple.fr')
+            ->to($user->getEmail())
+            ->subject('You have joined an event')
+            ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
+           
+            $mailer->send($email);
+        return $this->json([
+            'message' => 'User successfully joined the event',
+        ], Response::HTTP_OK);
     } catch (\Exception $e) {
-        return $this->json(['error' => 'Failed to send email: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+}
+else{
+    "créer un utilisateur dans la table user avec le role ROLE_INVITE";
+$user = new User();
+$user->setEmail($email);
+$user->setPassword('12345');
+$user->setPhoto('default.jpg');
+$user->setRoles(['ROLE_INVITE']);
+$user->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($user);
+$entityManager->flush();
 
-    $entityManager->persist($userEvent);
-    $entityManager->flush();
+// Execute the rest of the function
+$event = $eventRepository->find($request->get('event'));
 
-    return $this->json([
-        'message' => 'User successfully joined the event',
-        'link' => $link,
-    ], Response::HTTP_OK);
+if (!$event) {
+    return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+}
+
+// Vérifier si l'utilisateur est déjà inscrit à l'événement
+$existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+    'event' => $event,
+    'user' => $user
+]);
+
+if ($existingUserEvent) {
+    return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
+}
+
+// Ajouter l'utilisateur à l'événement
+$userEvent = new UserEvent();
+$userEvent->setEvent($event);
+$userEvent->setUser($user);
+$userEvent->setRole('ROLE_USER');
+$entityManager->persist($userEvent);
+$entityManager->flush();
+
+$uuid = UuidV4::v4();
+$link = 'https://example.com/event/invite/' . $uuid;
+
+$EmailInvitation = new UserInvitation();
+$EmailInvitation->setEvent($event);
+$EmailInvitation->setUserId($user);
+$EmailInvitation->setDateInvitation(new \DateTime());
+$EmailInvitation->setLink($link);
+$EmailInvitation->setExpiration($event->getDateend());
+
+$email = (new Email())
+    ->from('noreply@exemple.fr')
+    ->to($user->getEmail())
+    ->subject('You have joined an event')
+    ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
+
+$mailer->send($email);
+
+return $this->json([
+    'message' => 'User successfully joined the event',
+], Response::HTTP_OK);
+}
     }
     try {
         // Décoder le token
@@ -225,8 +292,6 @@ public function joinEvent(
         $userEvent->setEvent($event);
         $userEvent->setUser($user);
         $userEvent->setRole('ROLE_USER');
-        $userEvent->setUserEmail(null);
-
         $entityManager->persist($userEvent);
         $entityManager->flush();
 
@@ -255,7 +320,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
         'location' => $event->getLocation(),
         'maxparticipant' => $event->getMaxparticipant(),
-        'visibility' => $event->isVisibility(),
+        'visibility' => $event->getVisibility(),
         'sharelink' => $event->getSharelink(),
     ];
 
@@ -290,7 +355,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
                 ->setParameter('currentDate', $currentDate)
-                ->setParameter('visibility', true) // Assuming true means public
+                ->setParameter('visibility', 1) // 1 means public
                 ->orderBy('e.datestart', 'ASC')
                 ->setMaxResults($limit)
                 ->setFirstResult($offset);
@@ -306,7 +371,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
                 ->setParameter('currentDate', $currentDate)
-                ->setParameter('visibility', true);
+                ->setParameter('visibility', 1);
 
             $totalEvents = $totalQueryBuilder->getQuery()->getSingleScalarResult();
 

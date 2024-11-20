@@ -34,6 +34,9 @@ class UserInvitation
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user_id = null;
 
+    #[ORM\ManyToOne]
+    private ?User $user_invite = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -107,6 +110,18 @@ class UserInvitation
     public function setUserId(?User $user_id): static
     {
         $this->user_id = $user_id;
+
+        return $this;
+    }
+
+    public function getUserInvite(): ?User
+    {
+        return $this->user_invite;
+    }
+
+    public function setUserInvite(?User $user_invite): static
+    {
+        $this->user_invite = $user_invite;
 
         return $this;
     }
