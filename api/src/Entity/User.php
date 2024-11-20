@@ -174,15 +174,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read' , 'user:create'])]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 , nullable: true)]
     #[Groups(['user:read' , 'user:create'])]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 , nullable: true)]
     #[Groups(['user:read'  ,'user:create'])]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 , nullable: true)]
     #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
     private ?string $username = null;
 
@@ -190,17 +190,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?string $photo = null;
 
-    #[ORM\Column]
-    #[Groups(['user:read', ])]
+    #[ORM\Column( nullable: true)]
+    #[Groups(['user:read'])]
     private ?bool $emailverify = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 , nullable: true)]
     #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['user:read' ,'user:create'])]
     private ?string $tokenpassword = null;
+
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deleted_at = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
 
   
         public function getId(): ?int
@@ -336,6 +343,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTokenpassword(?string $tokenpassword): static
     {
         $this->tokenpassword = $tokenpassword;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
 
         return $this;
     }

@@ -38,7 +38,7 @@ class RegisterController extends AbstractController
 
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-        if (null !== $user) {
+        if (null !== $user && in_array('ROLE_USER', $user->getRoles())) {
             return $this->json(['message' => 'Email already exists'], Response::HTTP_CONFLICT);
         }
 
@@ -90,7 +90,7 @@ class RegisterController extends AbstractController
         $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
         $user->setLastname($data['lastname'] ?? 'DefaultLastname');
         $user->setUsername($data['username'] ?? 'DefaultUsername');
-
+        $user->setCreatedAt(new \DateTimeImmutable());
         // Génération du token de confirmation d'email
         $confirmationToken = Uuid::v4()->toRfc4122();
         $user->setEmaillink($confirmationToken);

@@ -19,13 +19,20 @@ class UserInvitation
     private ?Event $event = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 255)]
     private ?string $link = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $expiration = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_invitation = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $date_acceptinvitation = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user_id = null;
 
     public function getId(): ?int
     {
@@ -40,18 +47,6 @@ class UserInvitation
     public function setEvent(?Event $event): static
     {
         $this->event = $event;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
 
         return $this;
     }
@@ -76,6 +71,42 @@ class UserInvitation
     public function setExpiration(\DateTimeInterface $expiration): static
     {
         $this->expiration = $expiration;
+
+        return $this;
+    }
+
+    public function getDateInvitation(): ?\DateTimeInterface
+    {
+        return $this->date_invitation;
+    }
+
+    public function setDateInvitation(\DateTimeInterface $date_invitation): static
+    {
+        $this->date_invitation = $date_invitation;
+
+        return $this;
+    }
+
+    public function getDateAcceptinvitation(): ?\DateTimeInterface
+    {
+        return $this->date_acceptinvitation;
+    }
+
+    public function setDateAcceptinvitation(?\DateTimeInterface $date_acceptinvitation): static
+    {
+        $this->date_acceptinvitation = $date_acceptinvitation;
+
+        return $this;
+    }
+
+    public function getUserId(): ?User
+    {
+        return $this->user_id;
+    }
+
+    public function setUserId(?User $user_id): static
+    {
+        $this->user_id = $user_id;
 
         return $this;
     }

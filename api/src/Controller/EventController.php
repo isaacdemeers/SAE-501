@@ -63,7 +63,8 @@ class EventController extends AbstractController
         $data['maxparticipant'] = 0;
     }
     $event->setMaxparticipant($data['maxparticipant']);
-    $event->setVisibility($data['visibility'] === 'public');
+    $event->setCreatedAt(new \DateTimeImmutable());
+    $event->setVisibility($data['visibility'] === 'public' ? 1 : 0);
     if ($file) {
         $imageName = uniqid() . '.' . $file->guessExtension();
         $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());

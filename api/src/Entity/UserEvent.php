@@ -37,9 +37,6 @@ class UserEvent
     #[ORM\Column(length: 255)]
     private ?string $role = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $userEmail = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -81,15 +78,4 @@ class UserEvent
         return $this;
     }
 
-    public function getUserEmail(): ?string
-    {
-        return $this->userEmail;
-    }
-
-    public function setUserEmail(?string $userEmail): static
-    {
-        $this->userEmail = $userEmail;
-
-        return $this;
-    }
 }

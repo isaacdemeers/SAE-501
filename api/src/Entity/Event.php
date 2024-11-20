@@ -116,10 +116,6 @@ class Event
     #[Groups(['event:read', 'event:create'])]
     private ?string $location = null;
 
-    #[ORM\Column]
-    #[Groups(['event:read', 'event:create'])]
-    private ?bool $visibility = null;
-
     #[ORM\Column(length: 255)]
     #[Groups(['event:read', 'event:create'])]
     private ?string $sharelink = null;
@@ -135,6 +131,12 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['event:read'])]
     private ?\DateTimeInterface $deleted_date = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $visibility = null;
 
     
 
@@ -204,18 +206,6 @@ class Event
         return $this;
     }
 
-    public function isVisibility(): ?bool
-    {
-        return $this->visibility;
-    }
-
-    public function setVisibility(bool $visibility): static
-    {
-        $this->visibility = $visibility;
-
-        return $this;
-    }
-
     public function getSharelink(): ?string
     {
         return $this->sharelink;
@@ -260,6 +250,30 @@ class Event
     public function setDeletedDate(?\DateTimeInterface $deleted_date): static
     {
         $this->deleted_date = $deleted_date;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getVisibility(): ?int
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(int $visibility): static
+    {
+        $this->visibility = $visibility;
 
         return $this;
     }
