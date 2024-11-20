@@ -55,18 +55,31 @@ Voici une liste qui liste les informations nécessaire pour l'utilisation du pro
  
  ### - Changelog
 
- ### - Changelog
-
-#### Fonctionnalités déjà présentes
+#### Updated
 - inscription
 - connexion
 - Vérification d'email
 - réinitialisation de mot de passe
 
-#### Fonctionnalités ajoutées et fonctionnelles
+#### Added
 - création d'un évènement public
 - visualisation de l'évènement
 - système de détection si l'utilisateur est connecté ou non pour la page principale
 - affichage des évènements suggérés (correspond aux évènements qui commencent bientôt)
+
+## [Rendu 2 - Semaine du 18 Novembre]
+
+### - Links
+  
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU2)
+ 
+ ### - Changelog
+
+#### Updated
+- Search bar mise à jour, affiche les event et filtres
+- 
+
+#### Added
+-
   
 
