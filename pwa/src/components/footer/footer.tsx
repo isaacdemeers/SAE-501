@@ -31,7 +31,7 @@ export default function Footer() {
                         <h3 className="text-xl font-semibold mb-4 text-slate-50">Important Links</h3>
                         <ul className="space-y-2">
                             <li><Link href="/privacy-policy" className="hover:underline text-slate-50">Privacy Policy</Link></li>
-                            <li><Link href="/terms-conditions" className="hover:underline text-slate-50">Terms & Conditions</Link></li>
+                            <li><Link href="/cgu" className="hover:underline text-slate-50">Terms & Conditions</Link></li>
                             <li><Link href="/help-support" className="hover:underline text-slate-50">Help & Support</Link></li>
                             <li><Link href="/about-licenses" className="hover:underline text-slate-50">About Licenses</Link></li>
                         </ul>

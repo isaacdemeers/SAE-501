@@ -26,9 +26,8 @@ export default function Home() {
             <EventCard title="Event sjhdfgkjsGFKSGKDJFHSDKGQFJHGDKJFHQGSDKJHFGSD1" date="10 janvier 3000" isPublic={false} attendees={30} imageUrl="/img.jpg" /> */}
             {/* <Component /> */}
             {/* <SearchResult /> */}
-            <Header />
             <Calendar />
-            <EventSideShow />
+
 
         </div>
     )

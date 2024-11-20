@@ -150,6 +150,7 @@ export async function Newpass(data: any) {
   }
 }
 
+
 export async function GetEvent(id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
@@ -160,6 +161,38 @@ export async function GetEvent(id: number) {
     });
     return await response.json();
   } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+}
+    
+export async function GetAllEvents() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+}
+
+export async function GetUserEvents() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
     console.error("Error getting event:", error);
     throw error;
   }

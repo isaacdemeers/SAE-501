@@ -9,7 +9,7 @@ import eventImage from "@/image_mairie_limoges.png"
 
 export default function HoverEventCard() {
   return (
-    <Card className="flex flex-col w-full h-full max-w-sm bg-white shadow-lg">
+    <Card className="flex flex-col w-full h-full max-w-sm bg-white shadow-lg border-none p-0">
       <CardHeader className="flex h-fit flex-row items-center justify-between px-4  border-b">
         <CardTitle className="text-xl font-bold text-slate-600">Event 1</CardTitle>
       </CardHeader>
@@ -30,8 +30,8 @@ export default function HoverEventCard() {
         <h3 className="font-semibold mb-2 text-sm">Tags</h3>
 
         <div className="flex items-center justify-start gap-2  mb-4">
-          <CustomBadge icon={<Users />} content="23" color="red" />
-          <CustomBadge icon={<Lock />} content="PUBLIC" color="blue" />
+          <CustomBadge icon={<Users />} content="23" color={0} />
+          <CustomBadge icon={<Lock />} content="PUBLIC" color={1} />
         </div>
         <h3 className="font-semibold mb-2 text-sm">Informations</h3>
         <ul className="flex flex-col gap-2">
