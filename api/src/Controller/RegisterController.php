@@ -90,6 +90,7 @@ class RegisterController extends AbstractController
         $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
         $user->setLastname($data['lastname'] ?? 'DefaultLastname');
         $user->setUsername($data['username'] ?? 'DefaultUsername');
+        $user->setRoles(['ROLE_USER']);
         $user->setCreatedAt(new \DateTimeImmutable());
         // Génération du token de confirmation d'email
         $confirmationToken = Uuid::v4()->toRfc4122();

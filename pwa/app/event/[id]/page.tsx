@@ -22,7 +22,7 @@ import { Dialog, DialogTrigger, DialogContent , DialogHeader , DialogFooter } fr
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { IsAuthentificated, JoinEvent } from "@/lib/request";
+import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConenctedUser , unsubscribeConnectedUser , unsubscribeUUID } from "@/lib/request";
 import { DialogClose } from "@radix-ui/react-dialog";
 
 interface EventPageProps {
@@ -40,37 +40,42 @@ export default function EventPage({ params }: EventPageProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
+    const checkAuthenticationAndSubscription = async () => {
       let isAuthenticated = await IsAuthentificated();
       if (isAuthenticated.isValid) {
         setIsAuthenticated(true);
-      }
-    };
-
-    checkAuthentication();
-  }, []);
-
-  useEffect(() => {
-    const checkUserSubscription = async () => {
-      if (isAuthenticated) {
-        const response = await fetch(`https://caverned-incantation-r4gq9q597xqq3wr-443.app.github.dev/userevents/${id}`);
-        const data = await response.json();
+        const data = await VerifyConnectionConenctedUser(id);
         if (data.isLog) {
           setIsSubscribed(true);
         }
       }
     };
 
-    checkUserSubscription();
-  }, [id, isAuthenticated]);
+    checkAuthenticationAndSubscription();
+  }, [id]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const connection = urlParams.get("connection");
     if (connection) {
       setConnectionuuid(connection);
+      verifyConnectionUUID(connection , id);
     }
   }, []);
+
+  async function verifyConnectionUUID(connectionUUID: string , id : number) {
+    try {
+      const response = await VerifyConnectionUUID(connectionUUID , id);
+      if (response.isValid) {
+        console.log("Connection UUID is valid" );
+        setIsSubscribed(true);
+      } else {
+        console.log("Connection UUID is invalid");
+      }
+    } catch (error) {
+      console.error("Error verifying connection UUID:", error);
+    }
+  }
 
   async function handleSubscribe() {
     let sub = await JoinEvent(id , email);
@@ -86,6 +91,29 @@ export default function EventPage({ params }: EventPageProps) {
       console.log(sub);
     }
   }
+
+  async function handleUnsubscribe() {
+    if(isAuthenticated) {
+      let unsub  = await unsubscribeConnectedUser(id);
+      if (unsub.message === "User successfully unjoined the event") {
+        setIsDialogOpen(false);
+        setIsSubscribed(false);
+        console.log("Vous vous êtes désinscrit avec succès");
+      } else {
+        console.log(unsub);
+      }
+  }
+  else if (connectionuuid !== "" && isSubscribed) {
+    let unsub = await unsubscribeUUID(connectionuuid , id);
+    if (unsub.message === "User successfully unjoined the event") {
+      setIsDialogOpen(false);
+      setIsSubscribed(false);
+      console.log("Vous vous êtes désinscrit avec succès");
+    } else {
+      console.log(unsub);
+    }
+  }
+}
 
   return (
     <div className="max-w-2xl p-4 mt-20 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
@@ -165,7 +193,7 @@ export default function EventPage({ params }: EventPageProps) {
          <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
            Annuler
          </Button>
-         <Button variant="destructive">
+         <Button variant="destructive" onClick={handleUnsubscribe}>
            Se désinscrire
          </Button>
        </DialogFooter>

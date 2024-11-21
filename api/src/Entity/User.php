@@ -154,7 +154,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct()
     {
-        $this->setRoles(['ROLE_USER']);  
         $this->setEmailverify(false);
     }
     #[ORM\Id]
@@ -235,7 +234,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
