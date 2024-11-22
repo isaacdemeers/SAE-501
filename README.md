@@ -69,6 +69,8 @@ Voici une liste qui liste les informations nécessaire pour l'utilisation du pro
 
 ## [Rendu 2 - Semaine du 18 Novembre]
 
+Travaille sur la structure des fichiers, correction de bugs et lancement des nouvelle fonctionnalités
+
 ### - Links
   
   - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU2)
@@ -76,10 +78,10 @@ Voici une liste qui liste les informations nécessaire pour l'utilisation du pro
  ### - Changelog
 
 #### Updated
-- Search bar mise à jour, affiche les event et filtres
-- 
+- Nom des composents pour respecter une camelCase
+- Structure des fichiers pour une meilleur organisation
 
 #### Added
--
+- affiche les event et filtres dans la Searchbar. Permet de filtrer les événements.
   
 
