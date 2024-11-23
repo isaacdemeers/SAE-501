@@ -212,10 +212,25 @@ export async function IsAuthentificated() {
   }
 }
 
-
-export async function VerifyConnectionConenctedUser(id:number){
+export async function NewConnectionUUID(uuid: string , id: number) {
   try {
-    const response = await fetch(`https://caverned-incantation-r4gq9q597xqq3wr-443.app.github.dev/userevents/${id}`);
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/new-connection-uuid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"uuid": uuid}),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating new connection UUID:', error);
+  }
+}
+
+
+export async function VerifyConnectionConnectedUser(id:number){
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -227,11 +242,12 @@ export async function VerifyConnectionConenctedUser(id:number){
 
 export async function VerifyConnectionUUID(uuid: string , id: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/usereventss/${id}/verify-connection-uuid/${uuid}`, {
-      method: 'GET',
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/verify-connection-uuid`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      body: JSON.stringify({"uuid": uuid}),
       credentials: 'include'
     });
     return await response.json();
@@ -259,11 +275,12 @@ export async function unsubscribeConnectedUser(id:number){
 
 export async function unsubscribeUUID(uuid: string , id: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/${uuid}/leave`, {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      body: JSON.stringify({ "uuid": uuid }),
     });
     return await response.json();
   } catch (error) {

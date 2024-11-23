@@ -22,7 +22,7 @@ import { Dialog, DialogTrigger, DialogContent , DialogHeader , DialogFooter } fr
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConenctedUser , unsubscribeConnectedUser , unsubscribeUUID } from "@/lib/request";
+import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConnectedUser , unsubscribeConnectedUser , unsubscribeUUID , NewConnectionUUID } from "@/lib/request";
 import { DialogClose } from "@radix-ui/react-dialog";
 
 interface EventPageProps {
@@ -35,6 +35,7 @@ export default function EventPage({ params }: EventPageProps) {
   const { id } = params;
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [Role, setRole] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [connectionuuid , setConnectionuuid] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,9 +45,10 @@ export default function EventPage({ params }: EventPageProps) {
       let isAuthenticated = await IsAuthentificated();
       if (isAuthenticated.isValid) {
         setIsAuthenticated(true);
-        const data = await VerifyConnectionConenctedUser(id);
+        const data = await VerifyConnectionConnectedUser(id);
         if (data.isLog) {
           setIsSubscribed(true);
+          setRole(data.Role);
         }
       }
     };
@@ -60,6 +62,12 @@ export default function EventPage({ params }: EventPageProps) {
     if (connection) {
       setConnectionuuid(connection);
       verifyConnectionUUID(connection , id);
+    }
+    const newconnection = urlParams.get("newconnection");
+    if (newconnection) {
+      setConnectionuuid(newconnection);
+      NewConnectionUUID(newconnection , id);
+      verifyConnectionUUID(newconnection , id);
     }
   }, []);
 
@@ -95,7 +103,7 @@ export default function EventPage({ params }: EventPageProps) {
   async function handleUnsubscribe() {
     if(isAuthenticated) {
       let unsub  = await unsubscribeConnectedUser(id);
-      if (unsub.message === "User successfully unjoined the event") {
+      if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
         console.log("Vous vous êtes désinscrit avec succès");
@@ -105,7 +113,7 @@ export default function EventPage({ params }: EventPageProps) {
   }
   else if (connectionuuid !== "" && isSubscribed) {
     let unsub = await unsubscribeUUID(connectionuuid , id);
-    if (unsub.message === "User successfully unjoined the event") {
+    if (unsub.message === "User successfully left the event") {
       setIsDialogOpen(false);
       setIsSubscribed(false);
       console.log("Vous vous êtes désinscrit avec succès");
@@ -129,6 +137,7 @@ export default function EventPage({ params }: EventPageProps) {
             <ArrowLeft className="w-4 h-4 mr-2" /> Retour
           </Button>
         </Link>
+        {Role === "ROLE_ADMIN" ? (
         <Link href={`/event/${id}/edit`}>
           <Button
             // onClick={() => router.push(`/event/${id}/edit`)}
@@ -140,6 +149,7 @@ export default function EventPage({ params }: EventPageProps) {
             Éditer
           </Button>
         </Link>
+        ) : null}
       </header>
 
       <Card className="border-none shadow-none">

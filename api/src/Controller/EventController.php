@@ -34,7 +34,7 @@ class EventController extends AbstractController
  
 
  #[Route('/event/create', name: 'app_event_create', methods: ['POST'])]
- public function createEvent(Request $request, EntityManagerInterface $entityManager , MailerInterface $mailer, ): JsonResponse
+ public function createEvent(Request $request, EntityManagerInterface $entityManager , MailerInterface $mailer,JWTEncoderInterface $jwtEncoder , UserProviderInterface $userProvider ): JsonResponse
  {
     // Set the maximum file size to 10MB
     $maxFileSize = 8 * 1024 * 1024; // 10MB in bytes
@@ -81,33 +81,107 @@ class EventController extends AbstractController
  
     $invitees = json_decode($data['invitees'], true);
 
-    $shareLink = 'https://example.com/event/invite/
+    $shareLink = 'https://example.com/event/
     1' . $event->getId();
 
     $event->setSharelink($shareLink);
-
-    if (!empty($invitees) && is_array($invitees)) {
-        foreach ($invitees as $invitee) {
-            if (filter_var($invitee, FILTER_VALIDATE_EMAIL)) {
-                $email = (new Email())
-                    ->from('no-reply@example.com')
-                    ->to($invitee)
-                    ->subject('You are invited to an event')
-                    ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: ' . $shareLink . '</p>');
-
-                $mailer->send($email);
-            }
-        }
-    }
-
-
     $entityManager->persist($event);
     $entityManager->flush();
+    foreach ($invitees as $invitee) {
+        if (filter_var($invitee, FILTER_VALIDATE_EMAIL)) {
+            $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $invitee]);
+
+            if (!$user) {
+                // Create a new user with ROLE_INVITE
+                $user = new User();
+                $user->setEmail($invitee);
+                $user->setPassword('12345'); // Set a default password or generate a random one
+                $user->setPhoto('default.jpg');
+                $user->setRoles(['ROLE_INVITE']);
+                $user->setCreatedAt(new \DateTimeImmutable());
+                $entityManager->persist($user);
+                $entityManager->flush();
+            }
+
+            // Create a new UserInvitation
+            $uuid = UuidV4::v4();
+            $link = 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid;
+
+            $userInvitation = new UserInvitation();
+            $userInvitation->setEvent($event);
+            $userInvitation->setUserId($user);
+            $userInvitation->setDateInvitation(new \DateTime());
+            $userInvitation->setLink($link);
+            $userInvitation->setExpiration($event->getDateend());
+            $entityManager->persist($userInvitation);
+            $entityManager->flush();
+
+            // Send invitation email
+            $email = (new Email())
+                ->from('no-reply@example.com')
+                ->to($invitee)
+                ->subject('You are invited to an event')
+                ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: ' . $shareLink . '</p><p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>');
+
+            $mailer->send($email);
+        }
+    }
  
+
+// Retrieve the token from the request cookies
+$token = $request->cookies->get('jwt_token');
+
+if (!$token) {
+    return new JsonResponse(['error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+}
+
+try {
+    // Decode the token
+    $payload = $jwtEncoder->decode($token);
+
+    if (!$payload) {
+        return new JsonResponse(['error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
+    }
+
+    // Check if the token is expired
+    $currentTime = time();
+    if ($payload['exp'] < $currentTime) {
+        return new JsonResponse(['error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
+    }
+
+    // Get the identifier from the token payload
+    $identifier = $payload['email'] ?? null;
+
+    if (!$identifier) {
+        return new JsonResponse(['error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Load the user from the UserProvider
+    $user = $userProvider->loadUserByIdentifier($identifier);
+
+    if (!$user) {
+        return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    // Create a new UserEvent with the role ROLE_ADMIN
+    $userEvent = new UserEvent();
+    $userEvent->setEvent($event);
+    $userEvent->setUser($user);
+    $userEvent->setRole('ROLE_ADMIN');
+    $entityManager->persist($userEvent);
+    $entityManager->flush();
+
+} catch (\Exception $e) {
+    return new JsonResponse(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+}
+
+
+
     return new JsonResponse([
         'message' => 'Event created successfully',
     ], Response::HTTP_CREATED);
  }
+
 
 
 #[Route('/event/{event}/join', name: 'app_event_join', methods: ['POST'])]
@@ -183,7 +257,7 @@ public function joinEvent(
         $entityManager->flush();
 
         $uuid = UuidV4::v4();
-        $link = 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid;
+        $link = 'https://example.com/event/' . $event->getId() . '?newconnection=' . $uuid;
 
         $EmailInvitation = new UserInvitation();
         $EmailInvitation->setEvent($event);
@@ -523,49 +597,149 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 return new JsonResponse(['isLog' => false, 'message' => 'User is not joined to the event'], Response::HTTP_BAD_REQUEST);
             }
 
-            // Récupérer tous les utilisateurs inscrits à l'événement
-            $userEvents = $entityManager->getRepository(UserEvent::class)->findBy(['event' => $event]);
-
-            $users = [];
-            foreach ($userEvents as $userEvent) {
-                $users[] = [
-                    'role' => $userEvent->getRole(),
-                ];
-            }
-
-            return new JsonResponse(['isLog' => true, 'users' => $users], JsonResponse::HTTP_OK);
+            $role =  $userEvent->getRole();
+            return new JsonResponse(['isLog' => true, 'Role' => $role], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['isLog' => false, 'error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
 
-    #[Route('/userevents/{event}/verify-connection-uuid/{uuid}', name: 'get_event_users_invited', methods: ['GET'])]
-    public function verifyConnectionUuid($event, $uuid, EntityManagerInterface $entityManager): JsonResponse
-    {
 
-        // Récupérer l'invitation par UUID
+    #[Route('/userevents/{event}/new-connection-uuid', name: 'get_event_newusers_invited', methods: ['POST'])]
+    public function newConnectionUuid($event, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $uuid = $data['uuid'] ?? null;
+        // Retrieve the invitation by UUID
         $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
             'event' => $event,
-            'link' => 'https://example.com/event/' . $event. '?connection=' . $uuid
+            'link' => 'https://example.com/event/' . $event . '?connection=' . $uuid
         ]);
 
         if ($invitation) {
-            return new JsonResponse(['isValid' => true, 'event' => $event, 'uuid' => $uuid], Response::HTTP_OK);
+            $userId = $invitation->getUserId();
+
+            // Check if the user is in the UserEvent table
+            $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+            'event' => $event,
+            'user' => $userId
+            ]);
+
+            if ($userEvent) {
+            return new JsonResponse(['isValid' => true], Response::HTTP_OK);
+            } else {
+            // Mark the UUID as used
+            $invitation->setDateAcceptinvitation(new \DateTime());
+            $entityManager->flush();
+
+            $event = $entityManager->getRepository(Event::class)->find($event);
+            // Add the user to the event
+            $userEvent = new UserEvent();
+            $userEvent->setEvent($event);
+            $userEvent->setUser($userId);
+            $userEvent->setRole('ROLE_USER');
+            $entityManager->persist($userEvent);
+            $entityManager->flush();
+
+            return new JsonResponse(['isValid' => true, 'message' => 'User successfully added to the event'], Response::HTTP_OK);
+            }
         } else {
-            return new JsonResponse(['isValid' => false, 'error' => 'Invalid UUID', 'event' => $event, 'uuid' => $uuid], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['isValid' => false, 'error' => 'Invalid UUID'], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+
+
+
+
+    #[Route('/userevents/{event}/verify-connection-uuid', name: 'get_event_users_invited', methods: ['POST'])]
+    public function verifyConnectionUuid($event, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $uuid = $data['uuid'] ?? null;
+        // Retrieve the invitation by UUID
+        $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+            'event' => $event,
+            'link' => 'https://example.com/event/' . $event . '?connection=' . $uuid
+        ]);
+
+        if ($invitation) {
+            $userId = $invitation->getUserId();
+
+            // Check if the user is in the UserEvent table
+            $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user' => $userId
+            ]);
+
+            if ($userEvent) {
+                return new JsonResponse(['isValid' => true], Response::HTTP_OK);
+            } else {
+                return new JsonResponse(['isValid' => false, 'error' => 'User not found in UserEvent'], Response::HTTP_BAD_REQUEST);
+            }
+        } else {
+            return new JsonResponse(['isValid' => false, 'error' => 'Invalid UUID'], Response::HTTP_BAD_REQUEST);
         }
     }
 
 
      #[Route('/userevents/{event}/leave', name: 'app_event_leave', methods: ['POST'])]
-     public function verifyEmail($event, EntityManagerInterface $entityManager ,Request $request , JWTEncoderInterface $jwtEncoder , UserProviderInterface $userProvider): JsonResponse
+     public function LeaveEventConnecteduser($event, EntityManagerInterface $entityManager ,Request $request , JWTEncoderInterface $jwtEncoder , UserProviderInterface $userProvider): JsonResponse
     {
         // Retrieve the token from the request cookies
         $token = $request->cookies->get('jwt_token');
 
         if (!$token) {
-            return new JsonResponse(['error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+
+            $data = json_decode($request->getContent(), true);
+            $uuid = $data['uuid'] ?? null;
+            if (!$uuid) {
+                return new JsonResponse(['error' => 'UUID is missing'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $event = $entityManager->getRepository(Event::class)->find($event);
+            // Verify if the UUID exists in the UserInvitation table
+            $userInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+                'event' => $event,
+                'link' => 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid
+            ]);
+
+            if (!$userInvitation) {
+                return new JsonResponse(['error' => 'Invalid UUID or invitation not found'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $userid = $userInvitation->getUserId();
+
+            $User = $entityManager->getRepository(User::class)->find($userid);
+            if (!$User) {
+                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            }
+            
+            // Remove the user from the UserEvent table
+            $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user' => $User
+            ]);
+
+            if ($userEvent) {
+                $entityManager->remove($userEvent);
+            }
+
+            // Remove the user from the UserInvitation table if exists
+            $userInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+                'event' => $event,
+                'user_id' => $User
+            ]);
+
+            if ($userInvitation) {
+                $entityManager->remove($userInvitation);
+            }
+
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'User successfully left the event'], Response::HTTP_OK);
+
         }
 
         try {
@@ -631,5 +805,6 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         }
     }
 
-    
+
+
 }
