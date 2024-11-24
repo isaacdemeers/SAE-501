@@ -1,1 +1,136 @@
 mettre quel'uuid dans le link pas besoin du lien complet
+
+
+
+
+'use client'
+import * as React from "react"
+import Link from "next/link"
+import { useState } from "react" 
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { redirect, usePathname } from "next/navigation"
+import { LoginUser } from "@/lib/request"
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { EyeIcon , EyeOffIcon } from "lucide-react"
+
+export default function Loginform(): JSX.Element {
+  const [loginerror, setLoginerror] = useState<boolean>(false);
+  const [logdata, setLogdata] = useState<{ username: string; password: string }>({ username: "", password: "" });
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const returnUrl = searchParams.get('returnUrl') || '/';
+
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setLogdata({ ...logdata, username: e.target.value });
+  };
+
+  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setLogdata({ ...logdata, password: e.target.value });
+  };
+
+  const handleLogin = async() => {
+    // if (!emailRegex.test(logdata.email) || logdata.password === "") {
+    //   errorlog();
+    //   return;
+    // }
+    let log = await LoginUser(logdata);
+    console.log(log)
+    if(log.message === "Invalid credentials."){
+      errorlog();
+    }
+    else if (log.message === "Authentication successful"){
+      router.push(returnUrl)
+    }
+  }; 
+
+  const errorlog = (): void => {
+    setLoginerror(true);
+    setLogdata({ username: "", password: "" });
+    (document.getElementById('email') as HTMLInputElement).value = "";
+    (document.getElementById('password') as HTMLInputElement).value = "";
+    setTimeout(() => {
+      setLoginerror(false);
+    }, 5000);
+  };
+
+  return (
+    <Card className="w-full  md:w-[450px]">
+      <CardHeader>
+        <h1 className="text-4xl font-semibold leading-none tracking-tight my-5">Bienvenue sur Planit</h1>
+      </CardHeader>
+      <CardContent>
+        <form>
+          <div className="grid w-full items-center gap-6">
+            {loginerror ? (
+              <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 text-base md:text-lg w-full">
+                Mot de passe ou email incorrect
+              </div>
+            ) : null}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="email" className="md:text-base">
+                Email
+              </Label>
+              <Input
+                id="email"
+                className={`md:h-12 ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
+                placeholder="utilisateur@email.com"
+                onChange={handleEmail}
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="md:text-base">
+                  Mot de passe
+                </Label>
+              </div>
+                <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
+                  required
+                  className={`md:h-12 text-xs ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
+                  onChange={handlePassword}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+                </div>
+              <Link href={`${pathname}/forgotpassword`} className="text-gray-500 pl-2 text-sm">
+                Mot de passe oublié?
+              </Link>
+            </div>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="flex flex-col gap-2 justify-between">
+        <Button size={"lg"} onClick={() => {  handleLogin(); }} className="w-full md:text-lg">
+          Se connecter
+        </Button>
+        <div className="mt-4 text-center text-sm md:text-md">
+          Pas encore de compte ?{" "}
+          <Link href="/signin" className="underline font-bold">
+            S'inscrire
+          </Link>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
