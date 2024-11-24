@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
-import API_BASE_URL from '../../../utils/apiConfig';
 import { AddEvent } from "@/lib/request"
 
 export default function EventForm() {
@@ -23,6 +22,7 @@ export default function EventForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [invitees, setInvitees] = useState<string[]>([]);
   const [inviteeEmail, setInviteeEmail] = useState('');
+
 
 const handleAddInvitee = () => {
   if (inviteeEmail && !invitees.includes(inviteeEmail)) {
@@ -91,11 +91,11 @@ const handleRemoveInvitee = (email: string) => {
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {errorMessage && (
-            <div className="p-4 text-red-600 bg-red-100 rounded-md">
+            {errorMessage && (
+            <div className={`p-4 rounded-md ${errorMessage === 'Event created successfully' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'}`}>
               {errorMessage}
             </div>
-          )}
+            )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="title">Titre</Label>

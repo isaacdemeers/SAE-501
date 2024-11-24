@@ -121,7 +121,7 @@ class EventController extends AbstractController
                 ->from('no-reply@example.com')
                 ->to($invitee)
                 ->subject('You are invited to an event')
-                ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: ' . $shareLink . '</p><p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>');
+                ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: <a href="' . $shareLink . '">Event Detail</a></p><p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>');
 
             $mailer->send($email);
         }

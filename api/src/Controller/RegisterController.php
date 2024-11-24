@@ -71,16 +71,19 @@ class RegisterController extends AbstractController
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
         
-        // Vérifier que l'utilisateur n'existe pas déjà par email ou username
+        // Vérifier si un utilisateur existe déjà par email
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
 
-        if (null !== $existingUserByEmail || null !== $existingUserByUsername) {
+        if (null !== $existingUserByEmail && in_array('ROLE_INVITE', $existingUserByEmail->getRoles())) {
+            // Mettre à jour les informations de l'utilisateur existant
+            $user = $existingUserByEmail;
+        } elseif (null !== $existingUserByEmail || null !== $existingUserByUsername) {
             return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
+        } else {
+            $user = new User();
+            $user->setEmail($data['email']);
         }
-
-        $user = new User();
-        $user->setEmail($data['email']);
 
         // Hachage du mot de passe
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
@@ -107,7 +110,7 @@ class RegisterController extends AbstractController
                 return $this->json(['message' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
-            $user->setPhoto('/logimg.png');
+            $user->setPhoto('logimg.png');
         }
 
         $entityManager->persist($user);
