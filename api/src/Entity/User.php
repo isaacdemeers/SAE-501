@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
 use App\Controller\RegisterController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
@@ -24,23 +25,62 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[ApiResource(
     operations: [
+        new Patch(
+            uriTemplate: '/users/{id}',
+            controller: RegisterController::class . '::updateUser',
+            openapiContext: [
+                'summary' => 'Partially update a user',
+                'description' => 'This endpoint allows partial updates to user properties such as username, email, firstname, lastname, and password.',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'description' => 'The ID of the user to update',
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ],
+                'requestBody' => [
+                    'description' => 'Fields to update. If updating password, both "oldPassword" and "newPassword" must be provided.',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'username' => ['type' => 'string', 'example' => 'newUsername'],
+                                    'email' => ['type' => 'string', 'example' => 'newemail@example.com'],
+                                    'firstname' => ['type' => 'string', 'example' => 'John'],
+                                    'lastname' => ['type' => 'string', 'example' => 'Doe'],
+                                    'oldPassword' => ['type' => 'string', 'example' => 'currentPassword123'],
+                                    'newPassword' => ['type' => 'string', 'example' => 'newSecurePassword123']
+                                ],
+                                'required' => [] // No field is strictly required for a PATCH
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ),
         new Get(normalizationContext: ['groups' => ['user:read']]),
         new POST(
             uriTemplate: '/users/testemail',
-            controller: RegisterController::class . '::checkEmail', 
-            denormalizationContext:['groups' => ['user:emailverification']],
+            controller: RegisterController::class . '::checkEmail',
+            denormalizationContext: ['groups' => ['user:emailverification']],
         ),
         new POST(
             uriTemplate: '/users/testusername',
-            controller: RegisterController::class . '::checkUsername', 
-            denormalizationContext:['groups' => ['user:usernameverification']],
+            controller: RegisterController::class . '::checkUsername',
+            denormalizationContext: ['groups' => ['user:usernameverification']],
 
         ),
         new Post(
-            uriTemplate: '/verify-email', 
-            controller: RegisterController::class . '::verifyEmail', 
+            uriTemplate: '/verify-email',
+            controller: RegisterController::class . '::verifyEmail',
             openapiContext: [
-            'requestBody' => [
+                'requestBody' => [
                     'content' => [
                         'application/json' => [
                             'schema' => [
@@ -101,26 +141,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: "/reset/passwordemail",
             controller: ResetPasswordController::class . '::resetPasswordEmail',
             openapiContext: [
-            'requestBody' => [
-                'content' => [
-                'application/json' => [
-                    'schema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'email' => [
-                        'type' => 'string',
-                        'example' => 'user@example.com'
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com'
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
-                    ]
                 ]
-                ]
-            ]
             ]
         ),
         new POST(
-            uriTemplate:'/reset/password',
-            controller: ResetPasswordController::class .'::resetPassword',
+            uriTemplate: '/reset/password',
+            controller: ResetPasswordController::class . '::resetPassword',
             openapiContext: [
                 'requestBody' => [
                     'content' => [
@@ -154,7 +194,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct()
     {
-        $this->setRoles(['ROLE_USER']);  
+        $this->setRoles(['ROLE_USER']);
         $this->setEmailverify(false);
     }
     #[ORM\Id]
@@ -163,7 +203,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:create' , 'user:emailverification', 'user:emailresetpassword'])]
+    #[Groups(['user:read', 'user:create', 'user:emailverification', 'user:emailresetpassword'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -171,19 +211,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column]
-    #[Groups(['user:read' , 'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' , 'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  ,'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
+    #[Groups(['user:read', 'user:create', 'user:usernameverification'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
@@ -191,18 +231,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', ])]
+    #[Groups(['user:read',])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
+    #[Groups(['user:read', 'user:create', 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['user:read' ,'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $tokenpassword = null;
 
-    
+
 
     public function getId(): ?int
     {
@@ -253,9 +293,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function eraseCredentials(): void
-    {
-    }
+    public function eraseCredentials(): void {}
 
     public function getFirstname(): ?string
     {
@@ -340,5 +378,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
 }
