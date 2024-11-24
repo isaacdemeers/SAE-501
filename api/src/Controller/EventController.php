@@ -92,20 +92,20 @@ class EventController extends AbstractController
             $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $invitee]);
 
             if (!$user) {
-                // Create a new user with ROLE_INVITE
-                $user = new User();
-                $user->setEmail($invitee);
-                $user->setPassword('12345'); // Set a default password or generate a random one
-                $user->setPhoto('default.jpg');
-                $user->setRoles(['ROLE_INVITE']);
-                $user->setCreatedAt(new \DateTimeImmutable());
-                $entityManager->persist($user);
-                $entityManager->flush();
+            // Create a new user with ROLE_INVITE
+            $user = new User();
+            $user->setEmail($invitee);
+            $user->setPassword('12345'); // Set a default password or generate a random one
+            $user->setPhoto('default.jpg');
+            $user->setRoles(['ROLE_INVITE']);
+            $user->setCreatedAt(new \DateTimeImmutable());
+            $entityManager->persist($user);
+            $entityManager->flush();
             }
 
             // Create a new UserInvitation
             $uuid = UuidV4::v4();
-            $link = 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid;
+            $link = 'https://example.com/event/' . $event->getId() . ($event->getVisibility() ? '?connection=' : '?newconnection=') . $uuid;
 
             $userInvitation = new UserInvitation();
             $userInvitation->setEvent($event);
@@ -117,11 +117,17 @@ class EventController extends AbstractController
             $entityManager->flush();
 
             // Send invitation email
+            $emailContent = '<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: <a href="' . $shareLink . '">Event Detail</a></p>';
+            if ($event->getVisibility() === 0) {
+            $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
+            }
+            $emailContent .= '<p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>';
+
             $email = (new Email())
-                ->from('no-reply@example.com')
-                ->to($invitee)
-                ->subject('You are invited to an event')
-                ->html('<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: <a href="' . $shareLink . '">Event Detail</a></p><p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>');
+            ->from('no-reply@example.com')
+            ->to($invitee)
+            ->subject('You are invited to an event')
+            ->html($emailContent);
 
             $mailer->send($email);
         }
