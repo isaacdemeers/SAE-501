@@ -499,7 +499,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                     'maxparticipant' => $event->getMaxparticipant(),
                     'img' => $imageUrl,
                     'sharelink' => $event->getSharelink(),
-                    'isPublic' => $event->isVisibility()
+                    'isPublic' => $event->getVisibility()
                 ];
             }
 
@@ -722,12 +722,13 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
             }
             
-            // Remove the user from the UserEvent table
+            // Check if the user has the role 'ROLE_ADMIN'
             $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
                 'event' => $event,
                 'user' => $User
             ]);
 
+            // Remove the user from the UserEvent table
             if ($userEvent) {
                 $entityManager->remove($userEvent);
             }
@@ -778,16 +779,21 @@ public function getevent (Request $request, EventRepository $eventRepository): J
 
             // Retrieve the event
             $event = $entityManager->getRepository(Event::class)->find($event);
-
-            if (!$event) {
-                return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            // Remove the user from the UserEvent table
+            // Check if the user has the role 'ROLE_ADMIN'
             $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
                 'event' => $event,
                 'user' => $user
             ]);
+
+            if ($userEvent && $userEvent->getRole() === 'ROLE_ADMIN') {
+                return new JsonResponse(['error' => 'Admin users cannot unsubscribe from the event'], Response::HTTP_FORBIDDEN);
+            }
+
+            // Remove the user from the UserEvent table
+            if ($userEvent) {
+                $entityManager->remove($userEvent);
+            }
+        
 
             if ($userEvent) {
                 $entityManager->remove($userEvent);
