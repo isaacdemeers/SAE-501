@@ -91,25 +91,25 @@ export default function EventCard({ event , type }: EventCardProps) {
                 <CardContent className="p-4 pl-0 flex flex-col">
                     <div className="flex justify-between items-start flex-col gap-2 mx-4 sm:mx-0 sm:gap-4">
 
-                        <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-60 overflow-hidden text-nowrap">{title}</h2>
+                        <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-60 overflow-hidden text-nowrap">{event.title}</h2>
                         <div className="flex items-center sm:mb-0 mb-1 text-sm text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
-                            {date}
+                            {event.date}
                         </div>
                         <div className="flex gap-4">
-                            {isPublic && (
+                            {event.isPublic && (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-semibold">
                                     PUBLIC
                                 </span>
                             )}
-                            {!isPublic && (
+                            {!event.isPublic && (
                                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-md text-xs font-semibold">
                                     PRIVATE
                                 </span>
                             )}
                             <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs font-semibold flex items-center">
                                 <Users className="w-3 h-3 mr-1" />
-                                {attendees}
+                                {event.attendees}
                             </span>
                         </div>
 
