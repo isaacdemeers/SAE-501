@@ -539,7 +539,8 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 'location' => $event->getLocation(),
                 'maxparticipant' => $event->getMaxparticipant(),
                 'img' => $imageUrl,
-                'sharelink' => $event->getSharelink()
+                'sharelink' => $event->getSharelink(),
+                'isPublic' => $event->getVisibility()
             ];
         }
 
@@ -583,14 +584,14 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             $user = $userProvider->loadUserByIdentifier($identifier);
 
             if (!$user) {
-                return new JsonResponse(['isLog' => false, 'error' => 'User not found'], Response::HTTP_NOT_FOUND);
+                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
             }
 
             // Récupérer l'événement
             $event = $entityManager->getRepository(Event::class)->find($eventid);
 
             if (!$event) {
-                return new JsonResponse(['isLog' => true, 'error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+                return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
             }
 
             // Vérifier si l'utilisateur est inscrit à l'événement
@@ -620,7 +621,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         // Retrieve the invitation by UUID
         $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
             'event' => $event,
-            'link' => 'https://example.com/event/' . $event . '?connection=' . $uuid
+            'link' => 'https://example.com/event/' . $event . '?newconnection=' . $uuid
         ]);
 
         if ($invitation) {
@@ -640,6 +641,15 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             $entityManager->flush();
 
             $event = $entityManager->getRepository(Event::class)->find($event);
+            $eventvisibility = $event->getVisibility();
+            if($eventvisibility === 0){
+            if ($userId->getRoles() === ['ROLE_INVITE']) {
+                return new JsonResponse(['isValid' => false, 'message' => 'User with ROLE_INVITE cannot join the event'], Response::HTTP_FORBIDDEN);
+            } else {
+                $invitation->setLink('');
+                $entityManager->flush();
+            }
+            }
             // Add the user to the event
             $userEvent = new UserEvent();
             $userEvent->setEvent($event);
@@ -664,6 +674,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
     {
         $data = json_decode($request->getContent(), true);
         $uuid = $data['uuid'] ?? null;
+
         // Retrieve the invitation by UUID
         $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
             'event' => $event,

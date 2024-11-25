@@ -62,16 +62,41 @@ export default function PageEvent({ params }: EventPageProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
-  // Fetch de l'événement
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventAndCheckAuthentication = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await GetEvent(id); // Appel via request.ts
-        setEvent(data);
-        if(data.visibility === 0){
+        const [eventData, authData] = await Promise.all([GetEvent(id), IsAuthentificated()]);
+        setEvent(eventData);
 
+        if (eventData.visibility === 0 && !authData.isValid) {
+          router.push('/login');
+          return;
+        } else if (authData.isValid) {
+          setIsAuthenticated(true);
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const connection = urlParams.get("connection");
+          if (connection) {
+            setConnectionuuid(connection);
+            await verifyConnectionUUID(connection, id);
+          }
+          const newconnection = urlParams.get("newconnection");
+          if (newconnection) {
+            setConnectionuuid(newconnection);
+           await NewConnectionUUID(newconnection, id);
+          }
+          const subscriptionData = await VerifyConnectionConnectedUser(id);
+          console.log(subscriptionData);
+          if (eventData.visibility === 0 && subscriptionData.message === "User is not joined to the event") {
+             router.push('/');
+            return;
+          } else if (subscriptionData.isLog === true) {
+            setIsSubscribed(true);
+            setRole(subscriptionData.Role);
+            console.log(subscriptionData);
+          }
         }
       } catch (err) {
         setError("Une erreur est survenue lors du chargement de l'événement.");
@@ -81,39 +106,9 @@ export default function PageEvent({ params }: EventPageProps) {
       }
     };
 
-    fetchEvent();
+    fetchEventAndCheckAuthentication();
   }, [id]);
 
-  useEffect(() => {
-    const checkAuthenticationAndSubscription = async () => {
-      let isAuthenticated = await IsAuthentificated();
-      if (isAuthenticated.isValid) {
-        setIsAuthenticated(true);
-        const data = await VerifyConnectionConnectedUser(id);
-        if (data.isLog) {
-          setIsSubscribed(true);
-          setRole(data.Role);
-        }
-      }
-    };
-
-    checkAuthenticationAndSubscription();
-  }, [id]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const connection = urlParams.get("connection");
-    if (connection) {
-      setConnectionuuid(connection);
-      verifyConnectionUUID(connection , id);
-    }
-    const newconnection = urlParams.get("newconnection");
-    if (newconnection) {
-      setConnectionuuid(newconnection);
-      NewConnectionUUID(newconnection , id);
-      verifyConnectionUUID(newconnection , id);
-    }
-  }, []);
 
   async function verifyConnectionUUID(connectionUUID: string , id : number) {
     try {
