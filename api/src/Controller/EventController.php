@@ -22,14 +22,17 @@ use App\Entity\UserEvent;
 use App\Entity\UserInvitation;
 use App\Repository\EventRepository;
 use App\Repository\UserRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class EventController extends AbstractController
 {
  private $s3Service;
+ private $params;
  
- public function __construct(AmazonS3Service $s3Service)
+ public function __construct(AmazonS3Service $s3Service , ParameterBagInterface $params)
  {
     $this->s3Service = $s3Service;
+    $this->params = $params;
  }
  
 
@@ -80,9 +83,8 @@ class EventController extends AbstractController
     }
  
     $invitees = json_decode($data['invitees'], true);
-
-    $shareLink = 'https://example.com/event/
-    1' . $event->getId();
+    $appUrl = $this->params->get('APP_URL');
+    $shareLink = $appUrl . '/events/' . $event->getId();
 
     $event->setSharelink($shareLink);
     $entityManager->persist($event);
@@ -105,7 +107,7 @@ class EventController extends AbstractController
 
             // Create a new UserInvitation
             $uuid = UuidV4::v4();
-            $link = 'https://example.com/event/' . $event->getId() . ($event->getVisibility() ? '?connection=' : '?newconnection=') . $uuid;
+            $link = $appUrl . '/events/' . $event->getId() . ($event->getVisibility() ? '?connection=' : '?newconnection=') . $uuid;
 
             $userInvitation = new UserInvitation();
             $userInvitation->setEvent($event);
@@ -232,10 +234,10 @@ public function joinEvent(
             'event' => $event,
             'user_id' => $user
         ]);
-
+        $appUrl = $this->params->get('APP_URL');
         if ($emailInvitation) {
             $uuid = UuidV4::v4();
-            $link = 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid;
+            $link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
             $emailInvitation->setLink($link);
             $emailInvitation->setDateInvitation(new \DateTime());
             $entityManager->flush();
@@ -263,7 +265,7 @@ public function joinEvent(
         $entityManager->flush();
 
         $uuid = UuidV4::v4();
-        $link = 'https://example.com/event/' . $event->getId() . '?newconnection=' . $uuid;
+        $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
 
         $EmailInvitation = new UserInvitation();
         $EmailInvitation->setEvent($event);
@@ -325,7 +327,8 @@ $entityManager->persist($userEvent);
 $entityManager->flush();
 
 $uuid = UuidV4::v4();
-$link = 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid;
+$appUrl = $this->params->get('APP_URL');
+$link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
 
 $EmailInvitation = new UserInvitation();
 $EmailInvitation->setEvent($event);
@@ -346,6 +349,7 @@ $mailer->send($email);
 
 return $this->json([
     'message' => 'User successfully joined the event',
+    'uuid' => $uuid
 ], Response::HTTP_OK);
 }
     }
@@ -619,9 +623,10 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         $data = json_decode($request->getContent(), true);
         $uuid = $data['uuid'] ?? null;
         // Retrieve the invitation by UUID
+        $appUrl = $this->params->get('APP_URL');
         $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
             'event' => $event,
-            'link' => 'https://example.com/event/' . $event . '?newconnection=' . $uuid
+            'link' => $appUrl . '/events/' . $event . '?newconnection=' . $uuid
         ]);
 
         if ($invitation) {
@@ -676,9 +681,10 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         $uuid = $data['uuid'] ?? null;
 
         // Retrieve the invitation by UUID
+        $appUrl = $this->params->get('APP_URL');
         $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
             'event' => $event,
-            'link' => 'https://example.com/event/' . $event . '?connection=' . $uuid
+            'link' => $appUrl . '/events/' . $event . '?connection=' . $uuid
         ]);
 
         if ($invitation) {
@@ -716,10 +722,11 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             }
 
             $event = $entityManager->getRepository(Event::class)->find($event);
+            $appUrl = $this->params->get('APP_URL');
             // Verify if the UUID exists in the UserInvitation table
             $userInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
                 'event' => $event,
-                'link' => 'https://example.com/event/' . $event->getId() . '?connection=' . $uuid
+                'link' => $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid
             ]);
 
             if (!$userInvitation) {

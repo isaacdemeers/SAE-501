@@ -60,23 +60,25 @@ export default function PageEvent({ params }: EventPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [connectionuuid , setConnectionuuid] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     const fetchEventAndCheckAuthentication = async () => {
       setLoading(true);
       setError(null);
+      const urlParams = new URLSearchParams(window.location.search);
       try {
         const [eventData, authData] = await Promise.all([GetEvent(id), IsAuthentificated()]);
         setEvent(eventData);
 
         if (eventData.visibility === 0 && !authData.isValid) {
-          router.push('/login');
+          const newconnection = urlParams.get("newconnection");
+          router.push(`/login?returnUrl=/events/${id}?newconnection=${newconnection}`);
           return;
         } else if (authData.isValid) {
           setIsAuthenticated(true);
 
-          const urlParams = new URLSearchParams(window.location.search);
           const connection = urlParams.get("connection");
           if (connection) {
             setConnectionuuid(connection);
@@ -98,7 +100,20 @@ export default function PageEvent({ params }: EventPageProps) {
             console.log(subscriptionData);
           }
         }
-      } catch (err) {
+        else if(authData.isValid === false) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const connection = urlParams.get("connection");
+          if (connection) {
+            setConnectionuuid(connection);
+            await verifyConnectionUUID(connection, id);
+          }
+          const newconnection = urlParams.get("newconnection");
+          if (newconnection) {
+            setConnectionuuid(newconnection);
+           await NewConnectionUUID(newconnection, id);
+          }
+      }
+    } catch (err) {
         setError("Une erreur est survenue lors du chargement de l'événement.");
         console.error("Erreur lors du chargement de l'événement:", err);
       } finally {
@@ -129,14 +144,16 @@ export default function PageEvent({ params }: EventPageProps) {
     if (sub.message === "User successfully joined the event") {
       setIsDialogOpen(false);
       setIsSubscribed(true);
-      if(sub.link !== "") {
-      setConnectionuuid(sub.link);      // Replace alert with console log or any other notification method
+      console.log(sub);
+      if(sub.uuid !== "") {
+      setConnectionuuid(sub.uuid);      // Replace alert with console log or any other notification method
       console.log("Vous avez rejoint l'événement avec succès");
     }
   }
-    else  {
+    else if (sub.error) { 
       console.log(sub);
-    }
+      setDialogMessage(sub.error);
+  }
   }
 
   async function handleUnsubscribe() {
@@ -149,7 +166,7 @@ export default function PageEvent({ params }: EventPageProps) {
       }
         if(unsub.error === "Admin users cannot unsubscribe from the event"){
           setIsDialogOpen(false);
-          setError("Le créateur ne peut pas se désinscrire de l'événement");
+          setError(" Le créateur ne peut pas se désinscrire de l'événement");
             setTimeout(() => {
               setError("");
             }, 5000);
@@ -210,7 +227,7 @@ export default function PageEvent({ params }: EventPageProps) {
     <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
     {error ? (
       <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
-        <p className="text-white p-4 bg-red-500">${error}</p>
+        <p className="text-white p-4 bg-red-500 bg-opacity-80 flex justify-center">{error}</p>
       </div>
     ) : null
     }
@@ -305,11 +322,15 @@ export default function PageEvent({ params }: EventPageProps) {
                        <h2 className="text-lg font-bold">S'inscrire à l'évènement</h2>
                      </DialogHeader>
                      <div className="space-y-4">
+                     {dialogMessage ? (
+                        <p className="flex justify-center text-sm text-red-500">{dialogMessage}</p>
+                      ) : null
+                     }
                        <p className="text-sm text-muted-foreground">
                          Pour vous inscrire, connectez-vous.
                        </p>
                        <div className="flex flex-col gap-4">
-                         <Link href={`/login?returnUrl=/event/${id}`} passHref>
+                         <Link href={`/login?returnUrl=/events/${id}`} passHref>
                            <Button className="flex w-full items-center justify-center" variant="secondary">Se connecter</Button>
                          </Link>
                          <p className="text-sm text-muted-foreground">

@@ -149,7 +149,7 @@ export default function DashboardClient() {
                                 Créer un Event
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="w-full max-w-full md:w-3/4 lg:w-1/2">
+                        <DialogContent className="w-full max-w-full md:w-5/6 lg:4/6 h-[95%] overflow-y-auto">
                             <DialogTitle>Créer un Event</DialogTitle>
                             <DialogDescription>
                                 Remplissez le formulaire ci-dessous pour créer un nouvel événement.
@@ -179,6 +179,5 @@ export default function DashboardClient() {
                 />
             </div>
         </div>
-
     );
 }

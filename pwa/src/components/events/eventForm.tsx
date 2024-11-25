@@ -85,7 +85,7 @@ const handleRemoveInvitee = (email: string) => {
   };
 
   return (
-    <Card className="w-full ">
+    <Card className="w-full scroll-m-0">
       <CardHeader>
         <CardTitle className="flex items-center justify-center text-3xl font-bold">Créer un évènement</CardTitle>
       </CardHeader>

@@ -8,26 +8,29 @@ import { Separator } from "@/components/ui/separator"
 
 
 interface EventCardProps {
-    title: string
-    date: string
-    isPublic: boolean
-    attendees: number
-    imageUrl: string
-    type: string
+   event: {
+         id: number;
+         title: string;
+         date: string;
+         isPublic: boolean;
+         attendees: number;
+         imageUrl: string;
+    }
 }
 
 
 
-export default function EventCard({ title, date, isPublic, attendees, imageUrl, type }: EventCardProps) {
+export default function EventCard({ event , type }: EventCardProps) {
     let tags = ''
+    console.log(event, type)
     return (
         type === "searchResult" ? (
             <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
 
                 <section className=" absolute  w-full h-full flex items-center justify-center ">
                     <img
-                        src={imageUrl}
-                        alt={title}
+                        src={event.imageUrl}
+                        alt={event.title}
                         className="brightness-75 rounded-md opacity-70"
                     />
                     <div className=" absolute top-0 left-0 bg-gradient-to-r from-white  via-white to-transparent h-full w-full"></div>
@@ -35,26 +38,26 @@ export default function EventCard({ title, date, isPublic, attendees, imageUrl, 
 
                 <CardContent className="flex z-10 flex-col w-full p-4 gap-2 bg-transparent">
 
-                    <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{title}</h2>
+                    <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{event.title}</h2>
 
                     <div className="flex gap-4 w-full  justify-between items-center">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">
                             <div className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <Clock className="w-4 h-4 mr-1" />
-                                <p className="text-xs text-slate-600">{date}</p>
+                                <p className="text-xs text-slate-600">{event.date}</p>
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <li>
-                                    {isPublic && (
+                                    {event.isPublic && (
                                         <CustomBadge color="blue" content="PUBLIC" icon={<LockOpen />} />
                                     )}
-                                    {!isPublic && (
+                                    {!event.isPublic && (
                                         <CustomBadge color="red" content="PRIVATE" icon={<Lock />} />
                                     )}
                                 </li>
                                  <li>
-                                     <CustomBadge color="green" content={attendees} icon={<Users />} />
+                                     <CustomBadge color="green" content={event.attendees} icon={<Users />} />
                                  </li>
                             </ul>
                         </div>
@@ -78,8 +81,8 @@ export default function EventCard({ title, date, isPublic, attendees, imageUrl, 
                 <ChevronRight className="absolute sm:hidden right-4  h-full stroke-slate-600" />
                 <div className="hidden sm:flex relative h-[calc(100% - 2rem)] w-full bg-slate-300 rounded-md m-4">
                     <Image
-                        src={imageUrl}
-                        alt={title}
+                        src={event.imageUrl}
+                        alt={event.title}
                         layout="fill"
                         objectFit="cover"
                         className="brightness-75 rounded-md"
