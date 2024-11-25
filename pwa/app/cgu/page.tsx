@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -7,14 +5,14 @@ import { ArrowLeft } from "lucide-react";
 export default function CGUPage() {
     return (
         <div className="gap-20 py-20 mt-20 flex flex-col items-center justify-center">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold text-left">
+            <div className="w-full max-w-4xl">
+                <div>
+                    <div className="text-3xl font-bold text-left">
                         Conditions Générales d'Utilisation
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="w-full rounded-md border p-8 max-h-[70vh]">
+                    </div>
+                </div>
+                <div>
+                    <div className="w-full rounded-md border mt-8 p-8">
                         <div className="space-y-6">
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">1. Objet</h2>
@@ -27,14 +25,14 @@ export default function CGUPage() {
 
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">2. Services Proposés</h2>
-                                <p className="text-muted-foreground">
+                                <div className="text-muted-foreground">
                                     Notre application permet aux utilisateurs :
                                     <ul className="list-disc pl-6">
                                         <li>De créer un compte, se connecter et gérer leur profil.</li>
                                         <li>De créer, modifier, visualiser et gérer des événements.</li>
                                         <li>De téléverser des fichiers, tels que des images de profil ou des visuels d’événements.</li>
                                     </ul>
-                                </p>
+                                </div>
                             </section>
 
                             <section>
@@ -90,9 +88,9 @@ export default function CGUPage() {
                                 </p>
                             </section>
                         </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
+                    </div>
+                </div>
+            </div>
 
             <Button>
                 <Link href="/" className="flex items-center">

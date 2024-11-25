@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -7,14 +5,14 @@ import { ArrowLeft } from "lucide-react";
 export default function PrivacyPolicyPage() {
     return (
         <div className="gap-20 py-20 mt-20 flex flex-col items-center justify-center">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold text-left">
+            <div className="w-full max-w-4xl">
+                <div>
+                    <div className="text-3xl font-bold text-left">
                         Politique de Confidentialité
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="w-full rounded-md border p-8 max-h-[70vh]">
+                    </div>
+                </div>
+                <div>
+                    <div className="w-full rounded-md border mt-8 p-8 ">
                         <div className="space-y-6">
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
@@ -27,7 +25,7 @@ export default function PrivacyPolicyPage() {
 
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">2. Données Collectées</h2>
-                                <p className="text-muted-foreground">
+                                <div className="text-muted-foreground">
                                     Les données que nous collectons incluent :
                                     <ul className="list-disc pl-6">
                                         <li><strong>Données d'inscription :</strong> nom, adresse e-mail, mot de passe.</li>
@@ -35,12 +33,12 @@ export default function PrivacyPolicyPage() {
                                         <li><strong>Données techniques :</strong> adresse IP, type de navigateur, données de
                                             connexion.</li>
                                     </ul>
-                                </p>
+                                </div>
                             </section>
 
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">3. Utilisation des Données</h2>
-                                <p className="text-muted-foreground">
+                                <div className="text-muted-foreground">
                                     Les données collectées sont utilisées pour :
                                     <ul className="list-disc pl-6">
                                         <li>Fournir et améliorer nos services.</li>
@@ -48,12 +46,12 @@ export default function PrivacyPolicyPage() {
                                         <li>Garantir la sécurité et le bon fonctionnement de l'application.</li>
                                         <li>Envoyer des notifications et communications importantes.</li>
                                     </ul>
-                                </p>
+                                </div>
                             </section>
 
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">4. Partage des Données</h2>
-                                <p className="text-muted-foreground">
+                                <div className="text-muted-foreground">
                                     Vos données personnelles ne sont jamais vendues à des tiers. Cependant, elles peuvent être
                                     partagées avec :
                                     <ul className="list-disc pl-6">
@@ -61,7 +59,7 @@ export default function PrivacyPolicyPage() {
                                         <li>Partenaires techniques pour le traitement des données.</li>
                                         <li>Autorités légales en cas d'obligation légale.</li>
                                     </ul>
-                                </p>
+                                </div>
                             </section>
 
                             <section>
@@ -75,7 +73,7 @@ export default function PrivacyPolicyPage() {
 
                             <section>
                                 <h2 className="text-xl font-semibold mb-3">6. Droits des Utilisateurs</h2>
-                                <p className="text-muted-foreground">
+                                <div className="text-muted-foreground">
                                     En conformité avec le RGPD, vous disposez des droits suivants :
                                     <ul className="list-disc pl-6">
                                         <li><strong>Droit d'accès :</strong> demander l'accès à vos données personnelles.</li>
@@ -86,7 +84,7 @@ export default function PrivacyPolicyPage() {
                                         <li><strong>Droit de portabilité :</strong> recevoir vos données dans un format
                                             structuré.</li>
                                     </ul>
-                                </p>
+                                </div>
                             </section>
 
                             <section>
@@ -101,13 +99,13 @@ export default function PrivacyPolicyPage() {
                                 <h2 className="text-xl font-semibold mb-3">8. Contact</h2>
                                 <p className="text-muted-foreground">
                                     Pour toute question concernant cette politique de confidentialité ou pour exercer vos droits, veuillez nous contacter à :
-                                    <strong> privacy@plan-it.com</strong>.
+                                    <strong> privacy@planit.com</strong>.
                                 </p>
                             </section>
                         </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
+                    </div>
+                </div>
+            </div>
 
             <Button>
                 <Link href="/" className="flex items-center">
