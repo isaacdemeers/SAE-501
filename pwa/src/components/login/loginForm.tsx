@@ -13,21 +13,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { redirect, usePathname } from "next/navigation"
 import { LoginUser } from "@/lib/request"
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { EyeIcon , EyeOffIcon } from "lucide-react"
+
 
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
   const [logdata, setLogdata] = useState<{ email: string; password: string }>({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+const pathname = usePathname();
 
-  const returnUrl = searchParams.get('returnUrl') || '/';
-
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setLogdata({ ...logdata, email: e.target.value });
   };
@@ -36,21 +29,21 @@ export default function Loginform(): JSX.Element {
     setLogdata({ ...logdata, password: e.target.value });
   };
 
-  const handleLogin = async() => {
-    if (!emailRegex.test(logdata.email) || logdata.password === "") {
-      errorlog();
-      return;
-    }
-    let log = await LoginUser(logdata);
-    console.log(log)
-    if(log.message === "Invalid credentials."){
-      errorlog();
-    }
-    else if (log.message === "Authentication successful"){
-      router.push(returnUrl)
-    }
-  }; 
-
+    const handleLogin = async() => {
+      if (!emailRegex.test(logdata.email) || logdata.password === "") {
+        errorlog();
+        return;
+      }
+      let log = await LoginUser(logdata);
+      console.log(log)
+      if(log.message === "Invalid credentials."){
+        errorlog();
+      }
+      else if (log.message === "Authentication successful"){
+       window.location.href = "/";
+      }
+    }; 
+  // function to handle the error message when the user input is in
   const errorlog = (): void => {
     setLoginerror(true);
     setLogdata({ email: "", password: "" });
@@ -69,6 +62,16 @@ export default function Loginform(): JSX.Element {
       <CardContent>
         <form>
           <div className="grid w-full items-center gap-6">
+            {/* <div className="flex flex-col space-y-1.5">
+              <Button variant="outline" size="lg" className="w-full font-bold text-lg">
+                Login with Google
+              </Button>
+            </div>
+            <p className="flex items-center justify-center w-full text-gray-500 my-2">
+              <span className="flex-grow border-t border-gray-300"></span>
+              <span className="mx-2">or continue with</span>
+              <span className="flex-grow border-t border-gray-300"></span>
+            </p> */}
             {loginerror ? (
               <div className="text-red-600 flex items-center justify-center bg-red-300 h-12 text-base md:text-lg w-full">
                 Mot de passe ou email incorrect
@@ -86,28 +89,19 @@ export default function Loginform(): JSX.Element {
               />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <Label htmlFor="password" className="md:text-base">
                   Mot de passe
                 </Label>
               </div>
-                <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
-                  required
-                  className={`md:h-12 text-xs ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
-                  onChange={handlePassword}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                >
-                  {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                </button>
-                </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
+                required
+                className={`md:h-12 text-xs ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
+                onChange={handlePassword}
+              />
               <Link href={`${pathname}/forgotpassword`} className="text-gray-500 pl-2 text-sm">
                 Mot de passe oublié?
               </Link>
