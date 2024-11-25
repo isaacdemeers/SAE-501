@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import listPlugin from '@fullcalendar/list';
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -10,6 +12,8 @@ import CalendarCustomBtn from './customButtons';
 import FullCalendar from '@fullcalendar/react'
 import { Separator } from "@/components/ui/separator"
 import { abhayalibre } from "@/lib/fonts"
+import { GetAllEvents } from "@/lib/request"
+
 
 
 const randomColor = () => {
@@ -17,9 +21,37 @@ const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
+// Add this function before the Calendar component
+function transformEvents(events: any[]) {
+    return events.map(event => ({
+        id: event.id,
+        title: event.title,
+        start: event.datestart.replace(' ', 'T'),  // Convert "2024-11-26 08:39:00" to "2024-11-26T08:39:00"
+        end: event.dateend.replace(' ', 'T'),
+        color: randomColor(),
+        extendedProps: {  // Store additional properties
+            description: event.description,
+            location: event.location,
+            maxparticipant: event.maxparticipant,
+            sharelink: event.sharelink,
+            img: event.img,
+            isPublic: event.isPublic,
+            id: event.id
+        }
+    }));
+}
+
 export function Calendar() {
     const calendarRef = useRef<FullCalendar>(null);
     const [currentTitle, setCurrentTitle] = useState('');
+    const [events, setEvents] = useState<any[]>([]);
+
+    useEffect(() => {
+        GetAllEvents().then((data) => {
+            const transformedEvents = transformEvents(data);
+            setEvents(transformedEvents);
+        });
+    }, []);
 
     return (
 
@@ -57,23 +89,7 @@ export function Calendar() {
                     center: '',
                     end: '' // dayGridMonth,timeGridWeek,dayGridDay,listWeek prev,today,next
                 }}
-                events={[
-                    { title: 'event 1', start: '2024-10-31', end: '2024-11-30', color: randomColor() },
-                    { title: 'event 2', start: '2024-10-31', end: '2024-11-10', color: randomColor() },
-                    { title: 'event 2', start: '2024-09-31', end: '2024-10-13', color: randomColor() },
-                    { title: 'event 2', start: '2024-10-20', end: '2024-10-25', color: randomColor() },
-                    { title: 'event 2', date: '2024-10-31 ', color: randomColor() },
-                    { title: 'event 2', date: '2024-10-31', color: randomColor() },
-                    { title: 'event 2', date: '2024-10-31', color: randomColor() },
-                    { title: 'event 2', date: '2024-10-31', color: randomColor() },
-                    //event avec heure format UTC
-                    { title: 'event 3', start: '2024-10-31T10:00:00', end: '2024-10-31T12:00:00', color: randomColor() },
-                    { title: 'event 4', start: '2024-10-30T14:00:00', end: '2024-10-30T16:00:00', color: randomColor() },
-                    { title: 'event 5', start: '2024-10-29T18:00:00', end: '2024-10-31T20:00:00', color: randomColor() },
-
-
-
-                ]}
+                events={events}
 
                 eventTimeFormat={{
                     hour: 'numeric',
@@ -107,12 +123,12 @@ export function Calendar() {
                 selectable={true}
 
 
-                dateClick={function (info) {
-                    // alert('Clicked on: ' + info.dateStr);
-                    // alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-                    // alert('Current view: ' + info.view.type);
-                    info.dayEl.style.backgroundColor = 'red';
-                }}
+                // dateClick={function (info) {
+                //     // alert('Clicked on: ' + info.dateStr);
+                //     // alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                //     // alert('Current view: ' + info.view.type);
+                //     info.dayEl.style.backgroundColor = 'red';
+                // }}
 
                 eventMouseEnter={renderEventContent}
                 selectMinDistance={40}
