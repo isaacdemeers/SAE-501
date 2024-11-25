@@ -20,27 +20,28 @@ interface EventCardProps {
 export default function EventCard({ title, date, isPublic, attendees, imageUrl, type }: EventCardProps) {
     return (
         type === "searchResult" ? (
-            <Card className={`w-full flex relative text-slate-600 overflow-hidden`}>
-                {/* Image de fond */}
-                <section className="absolute w-full h-full flex items-center justify-center">
+            <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
+
+                <section className="absolute flex items-center justify-center w-full h-full ">
                     <Image
                         src={imageUrl}
                         alt={title}
-                        fill
-                        className="brightness-75 rounded-md opacity-70 object-cover"
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-md brightness-75 opacity-70"
                     />
-                    <div className="absolute top-0 left-0 bg-gradient-to-r from-white via-white to-transparent h-full w-full"></div>
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white via-white to-transparent"></div>
                 </section>
 
                 {/* Contenu */}
-                <CardContent className="flex z-10 flex-col w-full p-4 gap-2 bg-transparent">
-                    <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{title}</h2>
+                <CardContent className="z-10 flex flex-col w-full gap-2 p-4 bg-transparent">
+                    <h2 className="w-11/12 overflow-hidden text-lg font-bold sm:text-xl text-ellipsis text-nowrap">{title}</h2>
+                    <p className="w-5/12 overflow-hidden text-xs text-slate-600 text-ellipsis text-nowrap">{description}</p>
 
-                    <div className="flex gap-4 w-full justify-between items-center">
-                        {/* Informations */}
-                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
+                    <div className="flex items-center justify-between w-full gap-4">
+                        <div className="flex flex-col items-start justify-start gap-4 lg:flex-row lg:items-center">
+                            <div className="flex items-center justify-between h-10 gap-2 rounded-lg">
+                                <Clock className="w-4 h-4 mr-1" />
                                 <p className="text-xs text-slate-600">{date}</p>
                             </div>
                             <Separator orientation="vertical" className="h-5" />
@@ -53,13 +54,15 @@ export default function EventCard({ title, date, isPublic, attendees, imageUrl, 
                                     )}
                                 </li>
                                 <li>
-                                    <CustomBadge color="green" content={attendees.toString()} icon={<Users />} />
+                                    {attendees > 0 && (
+                                        <CustomBadge color={2} content={attendees.toString()} icon={<Users />} />
+                                    )}
                                 </li>
                             </ul>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex flex-col lg:flex-row gap-2 items-end lg:items-center">
+                        <div className="flex flex-col items-end gap-2 lg:flex-row lg:items-center">
                             <Button variant="outline">
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir l&apos;événement

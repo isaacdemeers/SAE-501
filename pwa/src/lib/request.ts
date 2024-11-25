@@ -22,8 +22,8 @@ export async function AddUser(data: any) {
 
 export async function VerifyEmailToken(data: string) {
   let formData = {
-    emailtoken: data
-  }
+    emailtoken: data,
+  };
   try {
     console.log(data);
     const response = await fetch(`${API_BASE_URL}/verify-email`, {
@@ -59,8 +59,8 @@ export async function LoginUser(data: any) {
 
 export async function TestEmail(data: string) {
   let formData = {
-    email: data
-  }
+    email: data,
+  };
   try {
     console.log(formData);
     const response = await fetch(`${API_BASE_URL}/users/testemail`, {
@@ -79,8 +79,8 @@ export async function TestEmail(data: string) {
 
 export async function TestUsername(data: string) {
   let formData = {
-    username: data
-  }
+    username: data,
+  };
   try {
     console.log(formData);
     const response = await fetch(`${API_BASE_URL}/users/testusername`, {
@@ -99,12 +99,16 @@ export async function TestUsername(data: string) {
 
 export async function GetGrettings() {
   try {
-    const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1] || '';
+    const jwtToken =
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("jwt_token="))
+        ?.split("=")[1] || "";
     const response = await fetch(`${API_BASE_URL}/greetings`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": jwtToken
+        Authorization: jwtToken,
       },
     });
     return await response.json();
@@ -145,6 +149,57 @@ export async function Newpass(data: any) {
     throw error;
   }
 }
+
+
+export async function GetEvent(id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+}
+    
+export async function GetAllEvents() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+}
+
+export async function GetUserEvents() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    console.error("Error getting event:", error);
+    throw error;
+  }
+}
+
+
+
 
 export async function AddEvent(formData: any) {
   try {

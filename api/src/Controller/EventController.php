@@ -469,7 +469,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
 
             $events = $queryBuilder->getQuery()->getResult();
 
-           
+
             // Get total count for pagination
             $totalQueryBuilder = $entityManager->createQueryBuilder();
             $totalQueryBuilder
@@ -488,7 +488,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             foreach ($events as $event) {
                 $imageName = $event->getImg();
                 $imageUrl = $this->s3Service->getObjectUrl($imageName);
-                
+
                 $formattedEvents[] = [
                     'id' => $event->getId(),
                     'title' => $event->getTitle(),
@@ -498,7 +498,8 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                     'location' => $event->getLocation(),
                     'maxparticipant' => $event->getMaxparticipant(),
                     'img' => $imageUrl,
-                    'sharelink' => $event->getSharelink()
+                    'sharelink' => $event->getSharelink(),
+                    'isPublic' => $event->isVisibility()
                 ];
             }
 
@@ -511,7 +512,6 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                     'events_per_page' => $limit
                 ]
             ]);
-
         } catch (\Exception $e) {
             return new JsonResponse([
                 'message' => 'An error occurred while fetching events',
