@@ -5,38 +5,16 @@ import PersonnalInfo from "@/components/login/personnalInfo";
 import Addimage from "@/components/login/imageProfile";
 import SignRecap from "@/components/login/signInRecap";
 import { AddUser } from "@/lib/request";
-import { useEffect } from "react";
-import { IsAuthentificated } from "@/lib/request";
-import { useRouter } from 'next/navigation';
-
 interface SignData {
     [key: string]: any;
     image?: File;
 }
 
 export default function Signin() {
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
     const [signdata, setSigndata] = useState<SignData>({});
     const [personnalinfo, setPersonnalinfo] = useState<boolean>(false);
     const [addimage, setAddimage] = useState<boolean>(false);
     const [recap, setRecap] = useState<boolean>(false);
-
-    useEffect(() => {
-        async function checkAuth() {
-            const isAuth = await IsAuthentificated();
-            if (isAuth.isValid === true) {
-                router.push('/');
-            } else {
-                setLoading(false); // Arrêtez le loader si non authentifié
-            }
-        }
-        checkAuth();
-    }, [router]);
-
-    if (loading) {
-        return <div>Loading...</div>; // Loader temporaire
-    }
 
     const handleSignData = (data: SignData) => {
         setSigndata((prevData: SignData) => ({ ...prevData, ...data }));
@@ -76,7 +54,7 @@ export default function Signin() {
         console.log(formData);
         const data = await AddUser(signdata);
         if (data.message === "User created successfully") {
-            router.push('/login');
+            window.location.href = "/login";
         }
     }
 

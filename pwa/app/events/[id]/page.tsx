@@ -8,5 +8,4 @@ interface EventPageProps {
 
 export default function Page({ params }: EventPageProps) {
   return <EventPage params={params} />;
-  
 }

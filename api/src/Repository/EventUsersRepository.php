@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\UserInvitation;
+use App\Entity\EventUsers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<UserInvitation>
+ * @extends ServiceEntityRepository<EventUsers>
  */
-class UserInvitationRepository extends ServiceEntityRepository
+class EventUsersRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, UserInvitation::class);
+        parent::__construct($registry, EventUsers::class);
     }
 
     //    /**
-    //     * @return UserInvitation[] Returns an array of UserInvitation objects
+    //     * @return EventUsers[] Returns an array of EventUsers objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
+    //        return $this->createQueryBuilder('e')
+    //            ->andWhere('e.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
+    //            ->orderBy('e.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?UserInvitation
+    //    public function findOneBySomeField($value): ?EventUsers
     //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
+    //        return $this->createQueryBuilder('e')
+    //            ->andWhere('e.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()
