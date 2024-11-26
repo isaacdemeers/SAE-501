@@ -2,7 +2,7 @@ import EventPage from "@/components/events/eventPage";
 
 interface EventPageProps {
   params: {
-    id: string;
+    id: number;
   };
 }
 
