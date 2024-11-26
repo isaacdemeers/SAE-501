@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import PasswordStrengthBar from 'react-password-strength-bar';
 import { TestEmail } from "@/lib/request"
+import { EyeIcon , EyeOffIcon } from "lucide-react"
+
 interface SigninformProps {
   handleSignData: (data: { email: string; password: string }) => void;
 }
@@ -23,7 +25,10 @@ export default function Signinform({ handleSignData }: SigninformProps): JSX.Ele
   const [signdata, setSigndata] = useState<{ email: string; password: string }>({ email: "", password: "" });
   const [emailerror, setEmailerror] = useState<boolean>(false);
   const [termserror, setTermserror] = useState<boolean>(false);
-const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSigndata({ ...signdata, email: e.target.value });
   };
@@ -75,17 +80,6 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       <CardContent className="pb-2">
         <form>
           <div className="grid w-full items-center gap-6">
-            {/* Connection avec google 
-            <div className="flex flex-col space-y-1.5">
-              <Button variant="outline" size="lg" className="w-full font-bold text-lg">
-                Sign Up with Google
-              </Button>
-            </div>
-            <p className="flex items-center justify-center w-full text-gray-500 my-2">
-              <span className="flex-grow border-t border-gray-300"></span>
-              <span className="mx-2">or continue with</span>
-              <span className="flex-grow border-t border-gray-300"></span>
-            </p> */}
             {emailerror ? (
               <div className="text-red-600 flex items-center justify-center bg-red-300 h-full px-4 py-2 text-base md:text-lg w-full">
                 Un compte exite déjà avec cet email
@@ -108,19 +102,28 @@ const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
               />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
+              <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="md:text-base">
                   Créer un mot de passe*
                 </Label>
               </div>
+              <div className="relative">
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
                 required
                 className={`md:h-12 text-xs ${loginerror ? 'border-red-500 placeholder-red-500' : ''}`}
                 onChange={handlePassword}
               />
+               <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+               </div>
                <PasswordStrengthBar password={signdata.password} />
             </div>
           </div>

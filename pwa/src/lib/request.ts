@@ -197,3 +197,152 @@ export async function GetUserEvents() {
     throw error;
   }
 }
+
+
+
+
+export async function AddEvent(formData: any) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event/create`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    const result = await response.json();
+    return result;
+} catch (error) {
+    console.error('Error creating event:', error);
+}
+}
+
+export async function JoinEvent(event: number , email: string) {
+  if(email === "") {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error joining event:', error);
+  }
+}
+else {
+  
+  const formData = new FormData();
+  formData.append("email", email);
+  try {
+    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error joining event:', error);
+  }
+}
+}
+
+export async function IsAuthentificated() {
+  try {
+    const response = await fetch('/api/auth/validate-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error authenticating user:', error);
+  }
+}
+
+export async function NewConnectionUUID(uuid: string , id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/new-connection-uuid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"uuid": uuid}),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating new connection UUID:', error);
+  }
+}
+
+
+export async function VerifyConnectionConnectedUser(id:number){
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error verifying connection for connected user:', error);
+    throw error;
+  }
+}
+
+
+export async function VerifyConnectionUUID(uuid: string , id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/verify-connection-uuid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"uuid": uuid}),
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error verifying connection UUID:', error);
+  }
+}
+
+
+export async function unsubscribeConnectedUser(id:number){
+  try {
+    const response = await fetch(`https://caverned-incantation-r4gq9q597xqq3wr-443.app.github.dev/userevents/${id}/leave`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error unsubscribing connected user:', error);
+  }
+}
+
+
+export async function unsubscribeUUID(uuid: string , id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ "uuid": uuid }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error unsubscribing UUID:', error);
+  }
+}
+
+// stocker les users qu'on invite pour event privé 
+// stocker id + email + uuid pour le lien de pas connecter
+// pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte
