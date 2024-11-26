@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -70,7 +71,7 @@ class RegisterController extends AbstractController
         // Récupérer les données JSON et le fichier
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
-        
+
         // Vérifier si un utilisateur existe déjà par email
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
@@ -142,7 +143,7 @@ class RegisterController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $token = $data['emailtoken'] ?? null;
-        
+
         if (null === $token) {
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
         }
