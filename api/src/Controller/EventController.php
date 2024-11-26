@@ -416,12 +416,23 @@ return $this->json([
 
 
 #[Route('/event/{id}', name: 'app_event_get', methods: ['POST'])]
-public function getevent (Request $request, EventRepository $eventRepository): JsonResponse
+public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
 {
     $event = $eventRepository->find($request->get('id'));
     if (!$event) {
         return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
     }
+    // Retrieve the email of the event creator (ROLE_ADMIN)
+    $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+        'event' => $event,
+        'role' => 'ROLE_ADMIN'
+    ]);
+
+    $adminEmail = $adminUserEvent ? $adminUserEvent->getUser()->getEmail() : null;
+    $adminUsername = $adminUserEvent ? $adminUserEvent->getUser()->getUsername() : null;
+
+    // Count the number of users registered for the event
+    $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
 
     $eventData = [
         'id' => $event->getId(),
@@ -433,6 +444,9 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         'maxparticipant' => $event->getMaxparticipant(),
         'visibility' => $event->getVisibility(),
         'sharelink' => $event->getSharelink(),
+        'adminEmail' => $adminEmail,
+        'adminUsername' => $adminUsername,
+        'userCount' => $userCount
     ];
 
     // Get the image URL from AWS S3

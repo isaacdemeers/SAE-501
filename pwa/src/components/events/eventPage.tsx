@@ -42,9 +42,12 @@ interface Event {
   datestart: string;
   dateend: string;
   location: string;
-  maxparticipant: number;
+  maxparticipant: string;
   img: string;
   visibility: boolean;
+  adminEmail: string;
+  adminUsername: string;
+  userCount: number;
 }
 
 export default function PageEvent({ params }: EventPageProps) {
@@ -270,7 +273,7 @@ export default function PageEvent({ params }: EventPageProps) {
                 variant="default"
                 className="bg-green-500 md:flex hover:bg-green-400"
               >
-                <Users className="w-4 h-4 mr-2" /> 23
+                <Users className="w-4 h-4 mr-2" /> {event.userCount}
               </Button>
               <Button variant="default" className="">
                 <Share2 className="w-4 h-4 mr-2" /> Partager
@@ -420,21 +423,21 @@ export default function PageEvent({ params }: EventPageProps) {
                   <Mail />
                   <h3 className="font-semibold">E-mail</h3>
                 </div>
-                <p>github.git@github.com</p>
+                <p>{event.adminEmail}</p>
               </div>
               <div>
                 <div className="flex gap-2 pb-2">
                   <Users />
-                  <h3 className="font-semibold">Places restantes</h3>
+                  <h3 className="font-semibold">Places</h3>
                 </div>
-                <p>30 / {event.maxparticipant} places</p>
+              <p> {event.userCount} / {Number(event.maxparticipant) === 0 ? "infini" : event.maxparticipant}</p>
               </div>
               <div>
                 <div className="flex gap-2 pb-2">
                   <UserCog />
                   <h3 className="font-semibold">Organisateurs</h3>
                 </div>
-                <p>@MairieDeLimoges</p>
+                <p>@{event.adminUsername}</p>
               </div>
               <div>
                 <div className="flex gap-2 pb-2">
