@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Pencil } from "lucide-react";
+import { ProfilePhotoUpload } from "./changePhoto";
 
 const animateHeight =
   "transition-[max-height] duration-300 ease-in-out overflow-hidden";
@@ -22,7 +23,7 @@ interface AuthResponse {
     username: string;
     firstName: string;
     lastName: string;
-    photoUrl?: string; // Ajout d'un champ pour l'URL de la photo de profil
+    photo: string;
   };
 }
 
@@ -38,6 +39,7 @@ export default function ProfileSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   // Fonction pour récupérer les données utilisateur
   const fetchUserData = async () => {
@@ -50,14 +52,23 @@ export default function ProfileSettings() {
         credentials: "include",
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
       const data: AuthResponse = await response.json();
-      setUserData(data.user);
-      setFormData((prev) => ({
-        ...prev,
-        firstname: data.user.firstName,
-        lastname: data.user.lastName,
-        username: data.user.username,
-      }));
+      console.log("Fetched user data:", data);
+
+      if (data.user) {
+        setUserData(data.user);
+        // Initialiser le formData avec les données de l'utilisateur
+        setFormData(prev => ({
+          ...prev,
+          firstname: data.user.firstName || "",
+          lastname: data.user.lastName || "",
+          username: data.user.username || "",
+        }));
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -128,6 +139,18 @@ export default function ProfileSettings() {
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
+      {isPhotoModalOpen && (
+        <ProfilePhotoUpload
+          userId={userData?.id}
+          onUpload={async () => {
+            await fetchUserData();
+            setIsPhotoModalOpen(false);
+          }}
+          onCancel={() => {
+            setIsPhotoModalOpen(false);
+          }}
+        />
+      )}
       <Tabs defaultValue="compte" className={cn("w-full", animateHeight)}>
         <TabsList className="justify-start w-full h-auto p-0 bg-transparent border-b rounded-none">
           <TabsTrigger
@@ -155,8 +178,12 @@ export default function ProfileSettings() {
             <div className="relative">
               <Avatar className="w-32 h-32">
                 <AvatarImage
-                  src={userData?.photoUrl || "/placeholder.svg"}
+                  src={userData?.photo}
                   alt="Photo de profil"
+                  onError={(e) => {
+                    console.error('Error loading image:', e);
+                  }}
+                  crossOrigin="anonymous"
                 />
                 <AvatarFallback>
                   {userData?.firstName?.charAt(0).toUpperCase() || ""}
@@ -167,6 +194,7 @@ export default function ProfileSettings() {
                 size="icon"
                 variant="secondary"
                 className="absolute bottom-0 right-0 rounded-full"
+                onClick={() => setIsPhotoModalOpen(true)}
               >
                 <Pencil className="w-4 h-4" />
               </Button>
@@ -182,6 +210,7 @@ export default function ProfileSettings() {
                 id="firstname"
                 value={formData.firstname}
                 onChange={handleInputChange}
+                placeholder={userData?.firstName || ""}
               />
             </div>
             <div className="space-y-2">
@@ -190,6 +219,7 @@ export default function ProfileSettings() {
                 id="lastname"
                 value={formData.lastname}
                 onChange={handleInputChange}
+                placeholder={userData?.lastName || ""}
               />
             </div>
             <div className="space-y-2">
@@ -198,6 +228,7 @@ export default function ProfileSettings() {
                 id="username"
                 value={formData.username}
                 onChange={handleInputChange}
+                placeholder={userData?.username || ""}
               />
             </div>
             <Button className="w-full mt-6" onClick={handleUpdateAccount}>
