@@ -15,6 +15,8 @@ import {
   Eye,
   UserCog,
   Check,
+  Instagram,
+  Link2,
 } from "lucide-react";
 import Link from "next/link";
 import { GetEvent } from "@/lib/request"; // Utilisation de votre fichier request.ts
@@ -24,11 +26,13 @@ import eventImage from "@images/event-background-desktop.png";
 import { Dialog, DialogTrigger, DialogContent , DialogHeader , DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConnectedUser , unsubscribeConnectedUser , unsubscribeUUID , NewConnectionUUID } from "@/lib/request";
 import { DialogClose } from "@radix-ui/react-dialog";
-
-
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Clipboard } from "lucide-react";
+import { FacebookIcon, FacebookShareButton, TwitterShareButton, XIcon } from "react-share";
+import LinkIcon from "@images/link.png";
+import { ShareInvitation } from "@/lib/request";
 interface EventPageProps {
   params: {
     id: number;
@@ -64,6 +68,9 @@ export default function PageEvent({ params }: EventPageProps) {
   const [connectionuuid , setConnectionuuid] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const [inviteeEmail, setInviteeEmail] = useState("");
+  const [invitees, setInvitees] = useState<string[]>([]);
+  const [isCopied, setIsCopied] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -254,6 +261,40 @@ export default function PageEvent({ params }: EventPageProps) {
     );
   }
 
+
+
+  const handleAddInvitee = () => {
+    if (inviteeEmail && !invitees.includes(inviteeEmail)) {
+      setInvitees([...invitees, inviteeEmail]);
+      setInviteeEmail('');
+    }
+  };
+  
+  const handleRemoveInvitee = (email: string) => {
+    setInvitees(invitees.filter(invitee => invitee !== email));
+  };
+
+  
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    console.log("Lien copié dans le presse-papiers");
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 3000);
+  };
+
+
+  const handleSendInvitations = async (e: React.FormEvent) => {
+    console.log(invitees , inviteeEmail)
+    let invitation = await ShareInvitation(id , invitees);
+    if (invitation.message === "Invitations sent successfully") {
+      console.log("Invitations envoyées avec succès");
+    } else {
+      console.log(invitation);
+    }
+  };
+
   // Gestion des cas de chargement ou d'erreur
   if (loading) {
     return <p>Chargement de l'événement...</p>;
@@ -313,9 +354,75 @@ export default function PageEvent({ params }: EventPageProps) {
               >
                 <Users className="w-4 h-4 mr-2" /> {event.userCount}
               </Button>
-              <Button variant="default" className="">
-                <Share2 className="w-4 h-4 mr-2" /> Partager
-              </Button>
+                <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="default">
+                  <Share2 className="w-4 h-4 mr-2" /> Partager
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="flex w-fit gap-4">
+                  {event.visibility ? (
+                  <>
+                  <div className="flex flex-col gap-2 w-fit h-fit items-center justify-center">
+                    <Image src={LinkIcon} className="flex items-center justify-center cursor-pointer" onClick={handleCopyLink} alt="Link" width={32} height={32} />
+                    {isCopied ? (
+                      <p className="flex items-center text-green-500">
+                        <Clipboard className="w-4 h-4 mr-2" /> Copié !
+                      </p>
+                    ) : null}
+                    </div>
+                    <FacebookShareButton url={window.location.href}>
+                    <FacebookIcon size={32} round={true} />
+                    </FacebookShareButton>
+                    <TwitterShareButton url={window.location.href}>
+                    <XIcon size={32} round={true} />
+                    </TwitterShareButton>
+                  </>
+                  ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="invitee">Inviter des personnes</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="invitee"
+                            type="email"
+                            placeholder="Adresse mail de l'invité"
+                            value={inviteeEmail}
+                            onChange={(e) => setInviteeEmail(e.target.value)}
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleAddInvitee}
+                            disabled={!inviteeEmail || invitees.includes(inviteeEmail)}
+                          >
+                            Ajouter
+                          </Button>
+                        </div>
+                        {invitees.length > 0 && (
+                          <ul className="mt-2 space-y-2">
+                            {invitees.map((email, index) => (
+                              <li
+                                key={index}
+                                className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full"
+                              >
+                                <span className="pr-3">{email}</span>
+                                <Button
+                                  className="rounded-full bg-inherit hover:text-white text-black"
+                                  size="icon"
+                                  onClick={() => handleRemoveInvitee(email)}
+                                >
+                                  <XIcon className="w-4 h-4 rounded-full font-bold" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        <Button onClick={handleSendInvitations} className="w-full" type="submit">
+                          Envoyer les invitations
+                        </Button>
+                      </div>
+                  )}
+                </PopoverContent>
+                </Popover>
               {isSubscribed ? (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

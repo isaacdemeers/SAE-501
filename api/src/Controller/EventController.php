@@ -123,7 +123,7 @@ class EventController extends AbstractController
             if ($event->getVisibility() === 0) {
             $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
             }
-            $emailContent .= '<p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>';
+            $emailContent .= "<p>To join the event, please click on the following link: <a href=\"{$link}\">Join Event</a></p>";
 
             $email = (new Email())
             ->from('no-reply@example.com')
@@ -889,5 +889,69 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     }
 
 
+    #[Route('/userevents/{id}/share', name: 'share_event', methods: ['POST'])]
+    public function shareEvent($id, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
+    {
+        $event = $entityManager->getRepository(Event::class)->find($id);
 
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($event->getVisibility() !== 0) {
+            return new JsonResponse(['error' => 'Event is not private'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $data = json_decode($request->getContent(), true);
+            $emails = $data['emails'] ?? null;
+
+        if (empty($emails) || !is_array($emails)) {
+            return new JsonResponse(['error' => 'Invalid email list'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $appUrl = $this->params->get('APP_URL');
+
+        foreach ($emails as $email) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+                if (!$user) {
+                    $user = new User();
+                    $user->setEmail($email);
+                    $user->setPassword('12345');
+                    $user->setPhoto('default.jpg');
+                    $user->setRoles(['ROLE_INVITE']);
+                    $user->setCreatedAt(new \DateTimeImmutable());
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                }
+
+                $uuid = UuidV4::v4();
+                $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
+
+                $userInvitation = new UserInvitation();
+                $userInvitation->setEvent($event);
+                $userInvitation->setUserId($user);
+                $userInvitation->setDateInvitation(new \DateTime());
+                $userInvitation->setLink($link);
+                $userInvitation->setExpiration($event->getDateend());
+                $entityManager->persist($userInvitation);
+                $entityManager->flush();
+
+                $emailContent = '<p>You have been invited to the event: ' . $event->getTitle() . '</p>';
+                $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
+                $emailContent .= '<p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>';
+
+                $emailMessage = (new Email())
+                    ->from('no-reply@example.com')
+                    ->to($email)
+                    ->subject('You are invited to an event')
+                    ->html($emailContent);
+
+                $mailer->send($emailMessage);
+            }
+        }
+
+        return new JsonResponse(['message' => 'Invitations sent successfully'], Response::HTTP_OK);
+    }
 }
