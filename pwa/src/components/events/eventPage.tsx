@@ -90,8 +90,17 @@ export default function PageEvent({ params }: EventPageProps) {
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-           await NewConnectionUUID(newconnection, id);
+           let connected = await NewConnectionUUID(newconnection, id);
+            if(connected.isValid) {
+              setIsSubscribed(true);
+              setEvent((prevEvent) => {
+                if (prevEvent) {
+                  return { ...prevEvent, userCount: prevEvent.userCount + 1 };
+                }
+                return prevEvent;
+              });
           }
+        }
           const subscriptionData = await VerifyConnectionConnectedUser(id);
           console.log(subscriptionData);
           if (eventData.visibility === 0 && subscriptionData.message === "User is not joined to the event") {
@@ -108,16 +117,31 @@ export default function PageEvent({ params }: EventPageProps) {
           const connection = urlParams.get("connection");
           if (connection) {
             setConnectionuuid(connection);
-            await verifyConnectionUUID(connection, id);
+            let connected = await verifyConnectionUUID(connection, id);
+            if(connected.isValid) {
+              setIsSubscribed(true);
+            }
           }
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-           await NewConnectionUUID(newconnection, id);
+           let connected = await NewConnectionUUID(newconnection, id);
+            if(connected.isValid) {
+              setIsSubscribed(true);
+              setEvent((prevEvent) => {
+                if (prevEvent) {
+                  return { ...prevEvent, userCount: prevEvent.userCount + 1 };
+                }
+                return prevEvent;
+              });
           }
       }
+    }
     } catch (err) {
         setError("Une erreur est survenue lors du chargement de l'événement.");
+        setTimeout(() => {
+          setError(null);
+        }, 5000);
         console.error("Erreur lors du chargement de l'événement:", err);
       } finally {
         setLoading(false);
@@ -137,8 +161,10 @@ export default function PageEvent({ params }: EventPageProps) {
       } else {
         console.log("Connection UUID is invalid");
       }
+      return response;
     } catch (error) {
       console.error("Error verifying connection UUID:", error);
+      return { isValid: false };
     }
   }
 
@@ -165,6 +191,12 @@ export default function PageEvent({ params }: EventPageProps) {
       if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
+        setEvent((prevEvent) => {
+          if (prevEvent) {
+            return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+          }
+          return prevEvent;
+        });
         console.log("Vous vous êtes désinscrit avec succès");
       }
         if(unsub.error === "Admin users cannot unsubscribe from the event"){
@@ -180,6 +212,12 @@ export default function PageEvent({ params }: EventPageProps) {
     if (unsub.message === "User successfully left the event") {
       setIsDialogOpen(false);
       setIsSubscribed(false);
+      setEvent((prevEvent) => {
+        if (prevEvent) {
+          return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+        }
+        return prevEvent;
+      });
       console.log("Vous vous êtes désinscrit avec succès");
     } else {
       console.log(unsub);

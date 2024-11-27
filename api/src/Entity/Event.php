@@ -120,10 +120,6 @@ class Event
     #[Groups(['event:read', 'event:create'])]
     private ?string $sharelink = null;
 
-    #[ORM\Column(type: Types::BIGINT)]
-    #[Groups(['event:read', 'event:create'])]
-    private ?string $maxparticipant = null;
-
     #[ORM\Column(length: 255)]
     #[Groups(['event:read', 'event:create'])]
     private ?string $img = null;
@@ -137,6 +133,9 @@ class Event
 
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $visibility = null;
+
+    #[ORM\Column]
+    private ?int $maxparticipant = null;
 
     
 
@@ -218,18 +217,6 @@ class Event
         return $this;
     }
 
-    public function getMaxparticipant(): ?string
-    {
-        return $this->maxparticipant;
-    }
-
-    public function setMaxparticipant(string $maxparticipant): static
-    {
-        $this->maxparticipant = $maxparticipant;
-
-        return $this;
-    }
-
     public function getImg(): ?string
     {
         return $this->img;
@@ -274,6 +261,18 @@ class Event
     public function setVisibility(int $visibility): static
     {
         $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getMaxparticipant(): ?int
+    {
+        return $this->maxparticipant;
+    }
+
+    public function setMaxparticipant(int $maxparticipant): static
+    {
+        $this->maxparticipant = $maxparticipant;
 
         return $this;
     }

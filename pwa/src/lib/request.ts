@@ -314,7 +314,7 @@ export async function VerifyConnectionUUID(uuid: string , id: number) {
 
 export async function unsubscribeConnectedUser(id:number){
   try {
-    const response = await fetch(`https://caverned-incantation-r4gq9q597xqq3wr-443.app.github.dev/userevents/${id}/leave`, {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
