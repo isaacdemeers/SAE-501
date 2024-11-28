@@ -2,15 +2,23 @@
 
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import { HydraAdmin } from "@api-platform/admin";
 
 const Admin = () => {
-  // Load the admin client-side
   const [DynamicAdmin, setDynamicAdmin] = useState(<p>Loading...</p>);
   useEffect(() => {
     (async () => {
-      const HydraAdmin = (await import("@api-platform/admin")).HydraAdmin;
-
-      setDynamicAdmin(<HydraAdmin entrypoint={window.origin}></HydraAdmin>);
+      const response = await fetch(`${window.origin}/docs`, {
+        headers: { Accept: "application/ld+json" },
+      });
+      const data = await response.json();
+      console.log(data["hydra:entrypoint"]);
+    })();
+  }, []);
+  
+  useEffect(() => {
+    (async () => {
+      setDynamicAdmin(<HydraAdmin entrypoint={window.origin} />);
     })();
   }, []);
 
@@ -19,9 +27,9 @@ const Admin = () => {
       <Head>
         <title>API Platform Admin</title>
       </Head>
-
       {DynamicAdmin}
     </>
   );
 };
+
 export default Admin;
