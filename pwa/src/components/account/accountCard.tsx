@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { editUser } from "@/lib/request";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface AuthResponse {
 }
 
 export default function ProfileSettings() {
+  const router = useRouter();
   const [userData, setUserData] = useState<AuthResponse["user"] | null>(null);
   const [formData, setFormData] = useState({
     firstname: "",
@@ -57,27 +59,33 @@ export default function ProfileSettings() {
       }
 
       const data: AuthResponse = await response.json();
-      console.log("Fetched user data:", data);
-
-      if (data.user) {
-        setUserData(data.user);
-        // Initialiser le formData avec les données de l'utilisateur
-        setFormData((prev) => ({
-          ...prev,
-          firstname: data.user.firstName || "",
-          lastname: data.user.lastName || "",
-          username: data.user.username || "",
-        }));
+      
+      if (!data.isValid || !data.user) {
+        router.push("/login");
+        return;
       }
+
+      setUserData(data.user);
+      setFormData((prev) => ({
+        ...prev,
+        firstname: data.user.firstName || "",
+        lastname: data.user.lastName || "",
+        username: data.user.username || "",
+      }));
     } catch (error) {
       console.error("Error fetching user data:", error);
+      router.push("/login");
     }
   };
 
   // Charger les données utilisateur au montage du composant
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [router]);
+
+  if (!userData) {
+    return null;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
