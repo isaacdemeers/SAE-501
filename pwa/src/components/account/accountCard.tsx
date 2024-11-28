@@ -196,7 +196,7 @@ export default function ProfileSettings() {
               <Button
                 size="icon"
                 variant="secondary"
-                className="absolute bottom-0 right-0 rounded-full hover:bg-primary hover:text-white"
+                className="absolute bottom-0 right-0 rounded-full"
                 onClick={() => setIsPhotoModalOpen(true)}
               >
                 <Pencil className="w-4 h-4" />
