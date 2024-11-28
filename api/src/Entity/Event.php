@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
 use App\Controller\EventController;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -80,6 +81,67 @@ use Symfony\Component\Serializer\Annotation\Groups;
                                     ]
                                 ],
                                 'required' => ['title', 'description', 'datestart', 'dateend', 'location', 'visibility', 'sharelink', 'maxparticipant', 'img']
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ),
+        new Patch(
+            uriTemplate: '/events/{id}',
+            controller: EventController::class . '::editEvent',
+            normalizationContext: ['groups' => ['event:edit']],
+            openapiContext: [
+                'summary' => 'Edit an event',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'title' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Event Title'
+                                    ],
+                                    'description' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Event Description'
+                                    ],
+                                    'datestart' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2024-01-01T00:00:00Z'
+                                    ],
+                                    'dateend' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2024-01-01T23:59:59Z'
+                                    ],
+                                    'location' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Location'
+                                    ],
+                                    'visibility' => [
+                                        'type' => 'string',
+                                        'enum' => ['public', 'private'],
+                                        'example' => 'public'
+                                    ],
+                                    'maxparticipant' => [
+                                        'type' => 'integer',
+                                        'example' => 150
+                                    ]
+                                ]
+                            ]
+                        ],
+                        'multipart/form-data' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'img' => [
+                                        'type' => 'string',
+                                        'format' => 'binary'
+                                    ]
+                                ]
                             ]
                         ]
                     ]

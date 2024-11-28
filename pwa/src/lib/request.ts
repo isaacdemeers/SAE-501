@@ -346,3 +346,25 @@ export async function unsubscribeUUID(uuid: string , id: number) {
 // stocker les users qu'on invite pour event privé 
 // stocker id + email + uuid pour le lien de pas connecter
 // pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte
+
+export async function UpdateEvent(id: string, data: any): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update event');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+}

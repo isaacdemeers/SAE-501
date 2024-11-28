@@ -835,6 +835,71 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         }
     }
 
+    #[Route('/event/{id}', name: 'app_event_edit', methods: ['PATCH'])]
+    public function editEvent(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $event = $entityManager->getRepository(Event::class)->find($id);
+        
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+        }
 
+        $data = json_decode($request->getContent(), true);
+
+        // Mise à jour des champs si présents dans la requête
+        if (isset($data['title'])) {
+            $event->setTitle($data['title']);
+        }
+        if (isset($data['description'])) {
+            $event->setDescription($data['description']);
+        }
+        if (isset($data['datestart'])) {
+            $event->setDatestart(new \DateTime($data['datestart']));
+        }
+        if (isset($data['dateend'])) {
+            $event->setDateend(new \DateTime($data['dateend']));
+        }
+        if (isset($data['location'])) {
+            $event->setLocation($data['location']);
+        }
+        if (isset($data['maxparticipant'])) {
+            $event->setMaxparticipant($data['maxparticipant']);
+        }
+        if (isset($data['visibility'])) {
+            $event->setVisibility($data['visibility']);
+        }
+
+        // Gestion de l'image si présente
+        $file = $request->files->get('img');
+        if ($file) {
+            $maxFileSize = 8 * 1024 * 1024; // 8MB
+            if ($file->getSize() > $maxFileSize) {
+                return new JsonResponse(['error' => 'File size exceeds the maximum limit of 8MB.'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $imageName = uniqid() . '.' . $file->guessExtension();
+            $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
+            
+            if ($uploaded) {
+                // Supprimer l'ancienne image si elle existe
+                if ($event->getImg() && $event->getImg() !== 'event-background-desktop.png') {
+                    $this->s3Service->deleteObject($event->getImg());
+                }
+                $event->setImg($imageName);
+            } else {
+                return new JsonResponse(['error' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Event updated successfully'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'An error occurred while updating the event'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
