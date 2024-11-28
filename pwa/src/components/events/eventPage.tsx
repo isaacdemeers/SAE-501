@@ -42,6 +42,7 @@ import {
 } from "@/lib/request";
 import { DialogClose } from "@radix-ui/react-dialog";
 import EventForm from "./eventEdit"; // Ajoutez cet import
+import EventModerate from "./eventModerate";
 
 interface EventPageProps {
   params: {
@@ -77,6 +78,7 @@ export default function PageEvent({ params }: EventPageProps) {
   const [dialogMessage, setDialogMessage] = useState("");
   const router = useRouter();
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showModerateDialog, setShowModerateDialog] = useState(false);
 
   useEffect(() => {
     const fetchEventAndCheckAuthentication = async () => {
@@ -267,21 +269,38 @@ export default function PageEvent({ params }: EventPageProps) {
           </Button>
         </Link>
         {Role === "ROLE_ADMIN" ? (
-          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="md:flex">
-                <Edit className="w-4 h-4 mr-2" />
-                Éditer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <EventForm
-                event={event}
-                onClose={() => setShowEditDialog(false)}
-                onUpdate={refreshEventData}
-              />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" className="md:flex">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Éditer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <EventForm
+                  event={event}
+                  onClose={() => setShowEditDialog(false)}
+                  onUpdate={refreshEventData}
+                />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={showModerateDialog}
+              onOpenChange={setShowModerateDialog}
+            >
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" className="md:flex">
+                  <UserCog className="w-4 h-4 mr-2" />
+                  Modérer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <EventModerate />
+              </DialogContent>
+            </Dialog>
+          </div>
         ) : null}
       </header>
 
