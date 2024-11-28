@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Clock, Users } from "lucide-react"
 import Component from "@/components/events/eventForm"
-import { Calendar, EventSideShow } from "@/components/calendar/calendar"
+import { Calendar, RenderedEventSideShow } from "@/components/calendar/calendar"
 import SearchResult from "@/components/search/searchResult"
 import Header from "@/components/header/header"
 
@@ -26,7 +26,7 @@ export default function Home() {
             {/* <Component /> */}
             {/* <SearchResult /> */}
             <Calendar />
-            <EventSideShow />
+            {/* <RenderedEventSideShow /> */}
 
 
         </div>

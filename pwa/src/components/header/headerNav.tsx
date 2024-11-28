@@ -47,7 +47,7 @@ export default function Nav() {
                     </li>
                     <li className={elementStyle}>
                         <Calendar className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/">Mon Agenda</Link>
+                        <Link className={`text-xl font-bold text-slate-600 `} href="/calendar">Mon Agenda</Link>
                     </li>
                     <li className={elementStyle}>
                         <CirclePlus className="h-8 w-8 stroke-slate-600" />
