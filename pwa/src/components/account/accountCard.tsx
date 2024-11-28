@@ -42,10 +42,11 @@ export default function ProfileSettings() {
     confirmPassword: "",
   });
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mémoriser fetchUserData avec useCallback
   const fetchUserData = useCallback(async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/auth/validate-token", {
         method: "POST",
         headers: {
@@ -55,12 +56,13 @@ export default function ProfileSettings() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user data");
+        router.push("/login");
+        return;
       }
 
       const data: AuthResponse = await response.json();
 
-      if (!data.isValid || !data.user) {
+      if (!data.isValid) {
         router.push("/login");
         return;
       }
@@ -75,12 +77,18 @@ export default function ProfileSettings() {
     } catch (error) {
       console.error("Error fetching user data:", error);
       router.push("/login");
+    } finally {
+      setIsLoading(false);
     }
   }, [router]);
 
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
 
   if (!userData) {
     return null;
