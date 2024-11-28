@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Service\AmazonS3Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,11 +13,20 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class AuthController extends AbstractController
 {
+
+    private $s3Service;
+
+    public function __construct(AmazonS3Service $s3Service)
+    {
+        $this->s3Service = $s3Service;
+    }
+
     #[Route('/api/auth/validate-token', name: 'validate_token', methods: ['POST'])]
     public function validateToken(
         Request $request,
         JWTEncoderInterface $jwtEncoder,
-        UserProviderInterface $userProvider
+        UserProviderInterface $userProvider,
+        AmazonS3Service $s3Service
     ): JsonResponse {
         // Récupérer le token JWT depuis le cookie
         $token = $request->cookies->get('jwt_token');
@@ -38,7 +49,7 @@ class AuthController extends AbstractController
                 return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
             }
 
-            $identifier = $payload['email'] ?? null; // ou remplacez 'username' par l'identifiant utilisé dans vos tokens
+            $identifier = $payload['email'] ?? null;
 
             if (!$identifier) {
                 return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
@@ -47,21 +58,30 @@ class AuthController extends AbstractController
             // Charger l'utilisateur à partir du UserProvider
             $user = $userProvider->loadUserByIdentifier($identifier);
 
-            if (!$user) {
+            if (!$user || !$user instanceof User) {
                 return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
             }
 
+            // Préparer les données utilisateur
+            $userData = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'firstName' => $user->getFirstname(),
+                'lastName' => $user->getLastname(),
+            ];
+
+            // Get the image URL from AWS S3
+            $photoName = $user->getPhoto();
+            if ($photoName) {
+                $photoUrl = $this->s3Service->getObjectUrl($photoName);
+                $userData['photo'] = $photoUrl;
+            } else {
+                $userData['photo'] = null;
+            }
+
             // Répondre avec les informations utilisateur
-            return $this->json([
-                'isValid' => true,
-                'user' => [
-                    'id' => $user->getId(),
-                    'username' => $user->getUsername(),
-                    'email' => $user->getEmail(),
-                    'firstName' => $user->getFirstName(),
-                    'lastName' => $user->getLastName(),
-                ],
-            ]);
+            return $this->json(['isValid' => true, 'user' => $userData], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }

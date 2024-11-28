@@ -62,7 +62,7 @@ export default function ProfileSettings() {
       if (data.user) {
         setUserData(data.user);
         // Initialiser le formData avec les données de l'utilisateur
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           firstname: data.user.firstName || "",
           lastname: data.user.lastName || "",
@@ -178,12 +178,11 @@ export default function ProfileSettings() {
             <div className="relative">
               <Avatar className="w-32 h-32">
                 <AvatarImage
-                  src={userData?.photo}
+                  src={userData?.photo || ""}
                   alt="Photo de profil"
                   onError={(e) => {
-                    console.error('Error loading image:', e);
+                    console.error("Error loading image:", e);
                   }}
-                  crossOrigin="anonymous"
                 />
                 <AvatarFallback>
                   {userData?.firstName?.charAt(0).toUpperCase() || ""}
