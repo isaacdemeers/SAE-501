@@ -5,19 +5,26 @@ import { UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import API_BASE_URL from "../../../utils/apiConfig";
 import { editUser } from "@/lib/request";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ProfilePhotoUploadProps {
   userId?: number;
   onUpload: (file: File) => void;
   onCancel: () => void;
+  open: boolean;
 }
 
 export function ProfilePhotoUpload({
   userId,
   onUpload,
   onCancel,
+  open
 }: ProfilePhotoUploadProps) {
   const [dragActive, setDragActive] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -111,39 +118,13 @@ export function ProfilePhotoUpload({
     }
   };
 
-  const handleCancel = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    onCancel();
-  };
-
-  // Cleanup preview URL on component unmount
-  React.useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-md relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2"
-          onClick={onCancel}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        <CardHeader>
-          <CardTitle>Changer photo de profil</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Changer photo de profil</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
           {previewUrl ? (
             <div className="relative w-full h-64">
               <Image
@@ -183,15 +164,15 @@ export function ProfilePhotoUpload({
             </div>
           )}
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button variant="outline" onClick={onCancel}>
               Annuler
             </Button>
             <Button onClick={handleUpload} disabled={!selectedFile}>
               Enregistrer
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

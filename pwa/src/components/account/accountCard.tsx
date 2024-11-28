@@ -139,18 +139,15 @@ export default function ProfileSettings() {
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
-      {isPhotoModalOpen && (
-        <ProfilePhotoUpload
-          userId={userData?.id}
-          onUpload={async () => {
-            await fetchUserData();
-            setIsPhotoModalOpen(false);
-          }}
-          onCancel={() => {
-            setIsPhotoModalOpen(false);
-          }}
-        />
-      )}
+      <ProfilePhotoUpload
+        userId={userData?.id}
+        onUpload={async () => {
+          await fetchUserData();
+          setIsPhotoModalOpen(false);
+        }}
+        onCancel={() => setIsPhotoModalOpen(false)}
+        open={isPhotoModalOpen}
+      />
       <Tabs defaultValue="compte" className={cn("w-full", animateHeight)}>
         <TabsList className="justify-start w-full h-auto p-0 bg-transparent border-b rounded-none">
           <TabsTrigger
