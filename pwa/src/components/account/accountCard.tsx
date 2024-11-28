@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { editUser } from "@/lib/request";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,8 +43,8 @@ export default function ProfileSettings() {
   });
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
-  // Fonction pour récupérer les données utilisateur
-  const fetchUserData = async () => {
+  // Mémoriser fetchUserData avec useCallback
+  const fetchUserData = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/validate-token", {
         method: "POST",
@@ -59,7 +59,7 @@ export default function ProfileSettings() {
       }
 
       const data: AuthResponse = await response.json();
-      
+
       if (!data.isValid || !data.user) {
         router.push("/login");
         return;
@@ -76,12 +76,11 @@ export default function ProfileSettings() {
       console.error("Error fetching user data:", error);
       router.push("/login");
     }
-  };
+  }, [router]);
 
-  // Charger les données utilisateur au montage du composant
   useEffect(() => {
     fetchUserData();
-  }, [router]);
+  }, [fetchUserData]);
 
   if (!userData) {
     return null;
@@ -197,7 +196,7 @@ export default function ProfileSettings() {
               <Button
                 size="icon"
                 variant="secondary"
-                className="absolute bottom-0 right-0 rounded-full"
+                className="absolute bottom-0 right-0 rounded-full hover:bg-primary hover:text-white"
                 onClick={() => setIsPhotoModalOpen(true)}
               >
                 <Pencil className="w-4 h-4" />
