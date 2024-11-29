@@ -129,7 +129,7 @@ class RegisterController extends AbstractController
         // Récupérer les données JSON et le fichier
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
-        
+
         // Vérifier si un utilisateur existe déjà par email
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);

@@ -80,7 +80,7 @@ export default function SearchBar() {
                     id="search"
                     value={searchValue}
                     onChange={handleInputChange}
-                    placeholder="Search..."
+                    placeholder="Rechercher..."
                     className="ring-none placeholder:text-slate-600 text-slate-600 text-sm w-full border-none text-ellipsis focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none rounded-md"
                     onClick={handleClick}
                 />

@@ -336,7 +336,7 @@ export async function VerifyConnectionUUID(uuid: string , id: number) {
 
 export async function unsubscribeConnectedUser(id:number){
   try {
-    const response = await fetch(`https://caverned-incantation-r4gq9q597xqq3wr-443.app.github.dev/userevents/${id}/leave`, {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -365,6 +365,23 @@ export async function unsubscribeUUID(uuid: string , id: number) {
   }
 }
 
+
+export async function ShareInvitation(id: number ,emails: string[]) {
+  let formData = new FormData();
+  formData.append('emails', JSON.stringify(emails));
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/share`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"emails": emails}),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error sharing invitation:', error);
+  }
+}
 // stocker les users qu'on invite pour event privé 
 // stocker id + email + uuid pour le lien de pas connecter
 // pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte

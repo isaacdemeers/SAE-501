@@ -107,7 +107,7 @@ class EventController extends AbstractController
 
             // Create a new UserInvitation
             $uuid = UuidV4::v4();
-            $link = $appUrl . '/events/' . $event->getId() . ($event->getVisibility() ? '?connection=' : '?newconnection=') . $uuid;
+            $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
 
             $userInvitation = new UserInvitation();
             $userInvitation->setEvent($event);
@@ -123,7 +123,7 @@ class EventController extends AbstractController
             if ($event->getVisibility() === 0) {
             $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
             }
-            $emailContent .= '<p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>';
+            $emailContent .= "<p>To join the event, please click on the following link: <a href=\"{$link}\">Join Event</a></p>";
 
             $email = (new Email())
             ->from('no-reply@example.com')
@@ -216,30 +216,138 @@ public function joinEvent(
                 return $this->json(['error' => 'Account exists with this email, please log in'], Response::HTTP_BAD_REQUEST);
             }
             try {
-            // Récupérer l'événement
-        $event = $eventRepository->find($request->get('event'));
+                // Récupérer l'événement
+                $event = $eventRepository->find($request->get('event'));
 
-        if (!$event) {
-            return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
-        }
+                if (!$event) {
+                    return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+                }
 
-        // Vérifier si l'utilisateur est déjà inscrit à l'événement
-        $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
-            'event' => $event,
-            'user' => $user
-        ]);
+                // Vérifier le nombre de participants
+                $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
+                if ($userCount >= $event->getMaxparticipant()) {
+                    return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+                }
 
-        if ($existingUserEvent) {
-        $emailInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
-            'event' => $event,
-            'user_id' => $user
-        ]);
-        $appUrl = $this->params->get('APP_URL');
-        if ($emailInvitation) {
+                // Vérifier si l'utilisateur est déjà inscrit à l'événement
+                $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                    'event' => $event,
+                    'user' => $user
+                ]);
+
+                if ($existingUserEvent) {
+                    $emailInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+                        'event' => $event,
+                        'user_id' => $user
+                    ]);
+                    $appUrl = $this->params->get('APP_URL');
+                    if ($emailInvitation) {
+                        $uuid = UuidV4::v4();
+                        $link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
+                        $emailInvitation->setLink($link);
+                        $emailInvitation->setDateInvitation(new \DateTime());
+                        $entityManager->flush();
+
+                        $email = (new Email())
+                            ->from('noreply@exemple.fr')
+                            ->to($user->getEmail())
+                            ->subject('You have joined an event')
+                            ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
+
+                        $mailer->send($email);
+
+                        return $this->json([
+                            'message' => 'User successfully joined the event',
+                        ], Response::HTTP_OK);
+                    }
+                }
+
+                // Ajouter l'utilisateur à l'événement
+                $userEvent = new UserEvent();
+                $userEvent->setEvent($event);
+                $userEvent->setUser($user);
+                $userEvent->setRole('ROLE_USER');
+                $entityManager->persist($userEvent);
+                $entityManager->flush();
+
+                $uuid = UuidV4::v4();
+                $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
+
+                $EmailInvitation = new UserInvitation();
+                $EmailInvitation->setEvent($event);
+                $EmailInvitation->setUserId($user);
+                $EmailInvitation->setDateInvitation(new \DateTime());
+                $EmailInvitation->setLink($link);
+                $EmailInvitation->setExpiration($event->getDateend());
+                $entityManager->persist($EmailInvitation);
+                $entityManager->flush();
+
+                $email = (new Email())
+                    ->from('noreply@exemple.fr')
+                    ->to($user->getEmail())
+                    ->subject('You have joined an event')
+                    ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
+                   
+                $mailer->send($email);
+                return $this->json([
+                    'message' => 'User successfully joined the event',
+                ], Response::HTTP_OK);
+            } catch (\Exception $e) {
+                return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            // Créer un utilisateur dans la table user avec le role ROLE_INVITE
+            $user = new User();
+            $user->setEmail($email);
+            $user->setPassword('12345');
+            $user->setPhoto('default.jpg');
+            $user->setRoles(['ROLE_INVITE']);
+            $user->setCreatedAt(new \DateTimeImmutable());
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            // Execute the rest of the function
+            $event = $eventRepository->find($request->get('event'));
+
+            if (!$event) {
+                return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier le nombre de participants
+            $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
+            if ($userCount >= $event->getMaxparticipant()) {
+                return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Vérifier si l'utilisateur est déjà inscrit à l'événement
+            $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user' => $user
+            ]);
+
+            if ($existingUserEvent) {
+                return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Ajouter l'utilisateur à l'événement
+            $userEvent = new UserEvent();
+            $userEvent->setEvent($event);
+            $userEvent->setUser($user);
+            $userEvent->setRole('ROLE_USER');
+            $entityManager->persist($userEvent);
+            $entityManager->flush();
+
             $uuid = UuidV4::v4();
+            $appUrl = $this->params->get('APP_URL');
             $link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
-            $emailInvitation->setLink($link);
-            $emailInvitation->setDateInvitation(new \DateTime());
+
+            $EmailInvitation = new UserInvitation();
+            $EmailInvitation->setEvent($event);
+            $EmailInvitation->setUserId($user);
+            $EmailInvitation->setDateInvitation(new \DateTime());
+            $EmailInvitation->setLink($link);
+            $EmailInvitation->setExpiration($event->getDateend());
+            $entityManager->persist($EmailInvitation);
             $entityManager->flush();
 
             $email = (new Email())
@@ -252,106 +360,9 @@ public function joinEvent(
 
             return $this->json([
                 'message' => 'User successfully joined the event',
+                'uuid' => $uuid
             ], Response::HTTP_OK);
         }
-    }
-
-        // Ajouter l'utilisateur à l'événement
-        $userEvent = new UserEvent();
-        $userEvent->setEvent($event);
-        $userEvent->setUser($user);
-        $userEvent->setRole('ROLE_USER');
-        $entityManager->persist($userEvent);
-        $entityManager->flush();
-
-        $uuid = UuidV4::v4();
-        $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
-
-        $EmailInvitation = new UserInvitation();
-        $EmailInvitation->setEvent($event);
-        $EmailInvitation->setUserId($user);
-        $EmailInvitation->setDateInvitation(new \DateTime());
-        $EmailInvitation->setLink($link);
-        $EmailInvitation->setExpiration($event->getDateend());
-        $entityManager->persist($EmailInvitation);
-        $entityManager->flush();
-
-        $email = (new Email())
-            ->from('noreply@exemple.fr')
-            ->to($user->getEmail())
-            ->subject('You have joined an event')
-            ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
-           
-            $mailer->send($email);
-        return $this->json([
-            'message' => 'User successfully joined the event',
-        ], Response::HTTP_OK);
-    } catch (\Exception $e) {
-        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-}
-else{
-    "créer un utilisateur dans la table user avec le role ROLE_INVITE";
-$user = new User();
-$user->setEmail($email);
-$user->setPassword('12345');
-$user->setPhoto('default.jpg');
-$user->setRoles(['ROLE_INVITE']);
-$user->setCreatedAt(new \DateTimeImmutable());
-$entityManager->persist($user);
-$entityManager->flush();
-
-// Execute the rest of the function
-$event = $eventRepository->find($request->get('event'));
-
-if (!$event) {
-    return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
-}
-
-// Vérifier si l'utilisateur est déjà inscrit à l'événement
-$existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
-    'event' => $event,
-    'user' => $user
-]);
-
-if ($existingUserEvent) {
-    return $this->json(['error' => 'User is already joined to the event'], Response::HTTP_BAD_REQUEST);
-}
-
-// Ajouter l'utilisateur à l'événement
-$userEvent = new UserEvent();
-$userEvent->setEvent($event);
-$userEvent->setUser($user);
-$userEvent->setRole('ROLE_USER');
-$entityManager->persist($userEvent);
-$entityManager->flush();
-
-$uuid = UuidV4::v4();
-$appUrl = $this->params->get('APP_URL');
-$link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
-
-$EmailInvitation = new UserInvitation();
-$EmailInvitation->setEvent($event);
-$EmailInvitation->setUserId($user);
-$EmailInvitation->setDateInvitation(new \DateTime());
-$EmailInvitation->setLink($link);
-$EmailInvitation->setExpiration($event->getDateend());
-  $entityManager->persist($EmailInvitation);
-        $entityManager->flush();
-
-$email = (new Email())
-    ->from('noreply@exemple.fr')
-    ->to($user->getEmail())
-    ->subject('You have joined an event')
-    ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>' );
-
-$mailer->send($email);
-
-return $this->json([
-    'message' => 'User successfully joined the event',
-    'uuid' => $uuid
-], Response::HTTP_OK);
-}
     }
     try {
         // Décoder le token
@@ -388,6 +399,12 @@ return $this->json([
             return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
         }
 
+        // Vérifier le nombre de participants
+        $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
+        if ($userCount >= $event->getMaxparticipant()) {
+            return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+        }
+
         // Vérifier si l'utilisateur est déjà inscrit à l'événement
         $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
             'event' => $event,
@@ -414,14 +431,24 @@ return $this->json([
     }
 }
 
-
 #[Route('/event/{id}', name: 'app_event_get', methods: ['POST'])]
-public function getevent (Request $request, EventRepository $eventRepository): JsonResponse
+public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
 {
     $event = $eventRepository->find($request->get('id'));
     if (!$event) {
         return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
     }
+    // Retrieve the email of the event creator (ROLE_ADMIN)
+    $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+        'event' => $event,
+        'role' => 'ROLE_ADMIN'
+    ]);
+
+    $adminEmail = $adminUserEvent ? $adminUserEvent->getUser()->getEmail() : null;
+    $adminUsername = $adminUserEvent ? $adminUserEvent->getUser()->getUsername() : null;
+
+    // Count the number of users registered for the event
+    $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
 
     $eventData = [
         'id' => $event->getId(),
@@ -433,6 +460,9 @@ public function getevent (Request $request, EventRepository $eventRepository): J
         'maxparticipant' => $event->getMaxparticipant(),
         'visibility' => $event->getVisibility(),
         'sharelink' => $event->getSharelink(),
+        'adminEmail' => $adminEmail,
+        'adminUsername' => $adminUsername,
+        'userCount' => $userCount
     ];
 
     // Get the image URL from AWS S3
@@ -618,7 +648,7 @@ public function getevent (Request $request, EventRepository $eventRepository): J
 
 
     #[Route('/userevents/{event}/new-connection-uuid', name: 'get_event_newusers_invited', methods: ['POST'])]
-    public function newConnectionUuid($event, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function newConnectionUuid($event, Request $request, EntityManagerInterface $entityManager , MailerInterface $mailer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $uuid = $data['uuid'] ?? null;
@@ -641,6 +671,15 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             if ($userEvent) {
             return new JsonResponse(['isValid' => true], Response::HTTP_OK);
             } else {
+
+
+              // Check the number of participants before adding the user to the event
+    $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
+    $eventObject = $entityManager->getRepository(Event::class)->find($event);
+    if ($userCount >= $eventObject->getMaxparticipant()) {
+        return new JsonResponse(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+    }
+
             // Mark the UUID as used
             $invitation->setDateAcceptinvitation(new \DateTime());
             $entityManager->flush();
@@ -654,6 +693,24 @@ public function getevent (Request $request, EventRepository $eventRepository): J
                 $invitation->setLink('');
                 $entityManager->flush();
             }
+            }
+            if($eventvisibility === 1){
+ // Generate a new UUID for the connection link
+ $uuid = UuidV4::v4();
+ $link = $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid;
+
+ // Update the invitation link with the new UUID
+ $invitation->setLink($link);
+ $entityManager->flush();
+
+ // Send an email with the new connection link
+ $email = (new Email())
+     ->from('noreply@exemple.fr')
+     ->to($userId->getEmail())
+     ->subject('You have joined an event')
+     ->html('<p>You have successfully joined the event: ' . $event->getTitle() . '</p><p>To join the event like an connected person, please click on the following link: <a href="' . $link . '">Join Event</a></p>');
+
+ $mailer->send($email);
             }
             // Add the user to the event
             $userEvent = new UserEvent();
@@ -669,10 +726,6 @@ public function getevent (Request $request, EventRepository $eventRepository): J
             return new JsonResponse(['isValid' => false, 'error' => 'Invalid UUID'], Response::HTTP_BAD_REQUEST);
         }
     }
-
-
-
-
 
     #[Route('/userevents/{event}/verify-connection-uuid', name: 'get_event_users_invited', methods: ['POST'])]
     public function verifyConnectionUuid($event, Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -836,5 +889,69 @@ public function getevent (Request $request, EventRepository $eventRepository): J
     }
 
 
+    #[Route('/userevents/{id}/share', name: 'share_event', methods: ['POST'])]
+    public function shareEvent($id, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
+    {
+        $event = $entityManager->getRepository(Event::class)->find($id);
 
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($event->getVisibility() !== 0) {
+            return new JsonResponse(['error' => 'Event is not private'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $data = json_decode($request->getContent(), true);
+            $emails = $data['emails'] ?? null;
+
+        if (empty($emails) || !is_array($emails)) {
+            return new JsonResponse(['error' => 'Invalid email list'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $appUrl = $this->params->get('APP_URL');
+
+        foreach ($emails as $email) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+                if (!$user) {
+                    $user = new User();
+                    $user->setEmail($email);
+                    $user->setPassword('12345');
+                    $user->setPhoto('default.jpg');
+                    $user->setRoles(['ROLE_INVITE']);
+                    $user->setCreatedAt(new \DateTimeImmutable());
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                }
+
+                $uuid = UuidV4::v4();
+                $link = $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid;
+
+                $userInvitation = new UserInvitation();
+                $userInvitation->setEvent($event);
+                $userInvitation->setUserId($user);
+                $userInvitation->setDateInvitation(new \DateTime());
+                $userInvitation->setLink($link);
+                $userInvitation->setExpiration($event->getDateend());
+                $entityManager->persist($userInvitation);
+                $entityManager->flush();
+
+                $emailContent = '<p>You have been invited to the event: ' . $event->getTitle() . '</p>';
+                $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
+                $emailContent .= '<p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a></p>';
+
+                $emailMessage = (new Email())
+                    ->from('no-reply@example.com')
+                    ->to($email)
+                    ->subject('You are invited to an event')
+                    ->html($emailContent);
+
+                $mailer->send($emailMessage);
+            }
+        }
+
+        return new JsonResponse(['message' => 'Invitations sent successfully'], Response::HTTP_OK);
+    }
 }

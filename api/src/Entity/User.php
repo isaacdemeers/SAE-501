@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
@@ -24,6 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[ApiResource(
+    mercure: true,
     operations: [
         new Patch(
             uriTemplate: '/users/{id}',
@@ -184,8 +187,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 ]
             ]
         ),
-        new Put(denormalizationContext: ['groups' => ['user:write']]),
-        new Delete()
+        new Get(),
+        new Post(),
+        new Put(),
+        new Patch(),
+        new Delete(),
+        new GetCollection()
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
@@ -244,9 +251,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['user:read' ,'user:create'])]
     private ?\DateTimeInterface $deleted_at = null;
 
     #[ORM\Column]
+    #[Groups(['user:read' ,'user:create'])]
     private ?\DateTimeImmutable $created_at = null;
 
   
