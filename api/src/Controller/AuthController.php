@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use App\Service\AmazonS3Service;
 
 class AuthController extends AbstractController
 {
@@ -65,7 +64,7 @@ class AuthController extends AbstractController
             }
 
             // Charger l'utilisateur à partir du UserProvider
-                $user = $userProvider->loadUserByIdentifier($identifier);
+            $user = $userProvider->loadUserByIdentifier($identifier);
 
             if (!$user || !$user instanceof User) {
                 return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
