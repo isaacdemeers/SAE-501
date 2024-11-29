@@ -9,7 +9,7 @@ export default function Footer() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
-                        <h3 className="text-xl font-semibold mb-4 text-slate-50">A propos</h3>
+                        <h3 className="text-xl font-semibold mb-4 text-slate-50">A Propos</h3>
                         <p className="text-slate-50">
                             Organisez, découvrez et participez à des événements en toute simplicité grâce à notre application intuitive et sécurisée.
                         </p>
