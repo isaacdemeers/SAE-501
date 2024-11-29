@@ -111,7 +111,6 @@
 }
 
 #sideShow.active {
-  filter: blur(0px);
   opacity: 1;
   filter: blur(0px);
   visibility: visible;
