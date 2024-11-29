@@ -6,13 +6,15 @@ import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-r
 import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
 import eventImage from "@/image_mairie_limoges.png"
-
+import Link from "next/link"
 interface Event {
+  id: string;
   title: string;
   image: string;
   dates: string;
   participants: number;
   visibility: string;
+  location: string;
   // Add other properties your event object has
 }
 
@@ -44,7 +46,7 @@ export default function EventSideShow({ event }: { event: Event }) {
             type="full"
             title="Lieu"
             icon={<MapPin />}
-            content="24 Avenue du maréchal Juffre"
+            content={event.location}
           />
           <EventInfoTag
             type="full"
@@ -82,8 +84,10 @@ export default function EventSideShow({ event }: { event: Event }) {
 
 
         <Button variant="default" className="w-full text-sm font-semibold">
-          <Eye className="w-4 h-4 mr-2 " />
-          Voir l&apos;événement
+          <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
+            <Eye className="w-4 h-4 mr-2 " />
+            Voir l&apos;événement
+          </Link>
         </Button>
 
       </CardFooter>

@@ -23,6 +23,7 @@ const randomColor = () => {
 
 // Add this function before the Calendar component
 function transformEvents(events: any[]) {
+    console.log(events);
     return events.map(event => ({
         id: event.id,
         title: event.title,
@@ -43,11 +44,13 @@ function transformEvents(events: any[]) {
 
 // Add this interface before the EventSideShow component
 interface Event {
+    id: string;
     title: string;
     image: string;
     dates: string;
     participants: number;
     visibility: string;
+    location: string;
     // Add other properties your event object has
 }
 
@@ -185,8 +188,10 @@ export function Calendar() {
                         };
 
                         let event = {
+                            id: info.event.extendedProps.id,
                             title: info.event.title,
                             image: info.event.extendedProps.img,
+                            location: info.event.extendedProps.location,
                             dates: (() => {
                                 const start = formatDate(info.event.startStr);
                                 const end = formatDate(info.event.endStr);
