@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -38,7 +39,7 @@ class RegisterController extends AbstractController
 
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-        if (null !== $user) {
+        if (null !== $user && in_array('ROLE_USER', $user->getRoles())) {
             return $this->json(['message' => 'Email already exists'], Response::HTTP_CONFLICT);
         }
 
@@ -70,17 +71,20 @@ class RegisterController extends AbstractController
         // Récupérer les données JSON et le fichier
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
-        
-        // Vérifier que l'utilisateur n'existe pas déjà par email ou username
+
+        // Vérifier si un utilisateur existe déjà par email
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
 
-        if (null !== $existingUserByEmail || null !== $existingUserByUsername) {
+        if (null !== $existingUserByEmail && in_array('ROLE_INVITE', $existingUserByEmail->getRoles())) {
+            // Mettre à jour les informations de l'utilisateur existant
+            $user = $existingUserByEmail;
+        } elseif (null !== $existingUserByEmail || null !== $existingUserByUsername) {
             return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
+        } else {
+            $user = new User();
+            $user->setEmail($data['email']);
         }
-
-        $user = new User();
-        $user->setEmail($data['email']);
 
         // Hachage du mot de passe
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
@@ -90,7 +94,8 @@ class RegisterController extends AbstractController
         $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
         $user->setLastname($data['lastname'] ?? 'DefaultLastname');
         $user->setUsername($data['username'] ?? 'DefaultUsername');
-
+        $user->setRoles(['ROLE_USER']);
+        $user->setCreatedAt(new \DateTimeImmutable());
         // Génération du token de confirmation d'email
         $confirmationToken = Uuid::v4()->toRfc4122();
         $user->setEmaillink($confirmationToken);
@@ -106,7 +111,7 @@ class RegisterController extends AbstractController
                 return $this->json(['message' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
-            $user->setPhoto('/logimg.png');
+            $user->setPhoto('logimg.png');
         }
 
         $entityManager->persist($user);
@@ -138,7 +143,7 @@ class RegisterController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $token = $data['emailtoken'] ?? null;
-        
+
         if (null === $token) {
             return $this->json(['message' => 'Token is missing'], Response::HTTP_BAD_REQUEST);
         }

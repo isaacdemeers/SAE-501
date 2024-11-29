@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
@@ -18,6 +19,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 #[ApiResource(
     operations: [
+        new Post(),
+        new Put(),
+        new Delete(),
+        new GetCollection(),
+        new Get(
+            uriTemplate: '/events/{id}',
+            controller: EventController::class . '::getEvent',
+            normalizationContext: ['groups' => ['event:read']]
+        ),
         new Get(
             uriTemplate: '/events/{id}',
             controller: EventController::class . '::getEvent',
@@ -25,7 +35,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Get(
             uriTemplate: '/events',
-            controller: EventController::class . '::getAllEvents',
+            controller: EventController::class .'::getAllEvents',
             normalizationContext: ['groups' => ['event:read']]
         ),
         new Post(
@@ -80,61 +90,67 @@ use Symfony\Component\Serializer\Annotation\Groups;
                     ]
                 ]
             ]
-        )
+        ),
     ]
+    
 )]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['event:read'])]
+    #[Groups(['event:read' , 'event:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read','event:write', 'event:create'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read','event:write', 'event:create'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read','event:write', 'event:create'])]
     private ?\DateTimeInterface $datestart = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read','event:write', 'event:create'])]
     private ?\DateTimeInterface $dateend = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read', 'event:write','event:create'])]
     private ?string $location = null;
 
-    #[ORM\Column]
-    #[Groups(['event:read', 'event:create'])]
-    private ?bool $visibility = null;
-
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read', 'event:write','event:create'])]
     private ?string $sharelink = null;
 
-    #[ORM\Column(type: Types::BIGINT)]
-    #[Groups(['event:read', 'event:create'])]
-    private ?string $maxparticipant = null;
-
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read', 'event:create'])]
+    #[Groups(['event:read','event:write', 'event:create'])]
     private ?string $img = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['event:read'])]
+    #[Groups(['event:read', 'event:write'])]
     private ?\DateTimeInterface $deleted_date = null;
 
+    #[ORM\Column]
+    #[Groups(['event:read','event:write'])]
 
+    private ?\DateTimeImmutable $created_at = null;
 
+    #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['event:read','event:write'])]
 
+    private ?int $visibility = null;
 
+    #[ORM\Column]
+    #[Groups(['event:read', 'event:write','event:create'])]
+    private ?int $maxparticipant = null;
+
+    
+
+  
     public function getId(): ?int
     {
         return $this->id;
@@ -200,18 +216,6 @@ class Event
         return $this;
     }
 
-    public function isVisibility(): ?bool
-    {
-        return $this->visibility;
-    }
-
-    public function setVisibility(bool $visibility): static
-    {
-        $this->visibility = $visibility;
-
-        return $this;
-    }
-
     public function getSharelink(): ?string
     {
         return $this->sharelink;
@@ -220,18 +224,6 @@ class Event
     public function setSharelink(string $sharelink): static
     {
         $this->sharelink = $sharelink;
-
-        return $this;
-    }
-
-    public function getMaxparticipant(): ?string
-    {
-        return $this->maxparticipant;
-    }
-
-    public function setMaxparticipant(string $maxparticipant): static
-    {
-        $this->maxparticipant = $maxparticipant;
 
         return $this;
     }
@@ -259,4 +251,41 @@ class Event
 
         return $this;
     }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getVisibility(): ?int
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(int $visibility): static
+    {
+        $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getMaxparticipant(): ?int
+    {
+        return $this->maxparticipant;
+    }
+
+    public function setMaxparticipant(int $maxparticipant): static
+    {
+        $this->maxparticipant = $maxparticipant;
+
+        return $this;
+    }
+
 }

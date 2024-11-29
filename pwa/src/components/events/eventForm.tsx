@@ -2,43 +2,83 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { CalendarIcon, UploadIcon, X } from "lucide-react"
-import API_BASE_URL from '../../../utils/apiConfig';
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { cn } from "@/lib/utils"
+import { AddEvent } from "@/lib/request"
 
-export default function EventForm() {
+export default function EventForm({ onClose }: { onClose: () => void }) {
   const [eventName, setEventName] = useState('');
-  const [eventStartDate, setEventStartDate] = useState('');
-  const [eventEndDate, setEventEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date>();
+  const [startTime, setStartTime] = useState('12:00');
+  const [endDate, setEndDate] = useState<Date>();
+  const [endTime, setEndTime] = useState('12:00');
   const [eventLocation, setEventLocation] = useState('');
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [eventDescription, setEventDescription] = useState('');
   const [eventVisibility, setEventVisibility] = useState('public');
   const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [invitees, setInvitees] = useState<string[]>([]);
+  const [inviteeEmail, setInviteeEmail] = useState('');
+
+
+  const handleAddInvitee = () => {
+    if (inviteeEmail && !invitees.includes(inviteeEmail)) {
+      setInvitees([...invitees, inviteeEmail]);
+      setInviteeEmail('');
+    }
+  };
+
+  const handleRemoveInvitee = (email: string) => {
+    setInvitees(invitees.filter(invitee => invitee !== email));
+  };
+
+  // Function to combine date and time
+  const combineDateAndTime = (date: Date | undefined, time: string): Date | undefined => {
+    if (!date) return undefined;
+    const [hours, minutes] = time.split(':').map(Number);
+    const newDate = new Date(date);
+    newDate.setHours(hours, minutes);
+    return newDate;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const today = new Date().toISOString().split('T')[0];
-    if (eventStartDate < today) {
-      setErrorMessage('Event start date cannot be before today.');
+    if (!startDate || !endDate) {
+      setErrorMessage('Veuillez sélectionner les dates de début et de fin.');
       return;
     }
 
-    if (eventEndDate <= eventStartDate) {
-      setErrorMessage('Event end date must be after the start date.');
+    const fullStartDate = combineDateAndTime(startDate, startTime);
+    const fullEndDate = combineDateAndTime(endDate, endTime);
+
+    if (!fullStartDate || !fullEndDate) {
+      setErrorMessage('Dates invalides.');
+      return;
+    }
+
+    if (fullEndDate <= fullStartDate) {
+      setErrorMessage('La date de fin doit être après la date de début.');
       return;
     }
 
     const formData = new FormData();
     formData.append('title', eventName);
-    formData.append('datestart', new Date(eventStartDate).toISOString());
-    formData.append('dateend', new Date(eventEndDate).toISOString());
+    formData.append('datestart', fullStartDate.toISOString());
+    formData.append('dateend', fullEndDate.toISOString());
     formData.append('location', eventLocation);
     if (eventImage) {
       formData.append('img', eventImage, eventImage.name);
@@ -46,21 +86,13 @@ export default function EventForm() {
     formData.append('description', eventDescription);
     formData.append('visibility', eventVisibility);
     formData.append('maxparticipant', maxParticipants.toString());
+    formData.append('invitees', JSON.stringify(invitees));
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/events`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const result = await response.json();
-      console.log('Event created successfully:', result);
-    } catch (error) {
-      console.error('Error creating event:', error);
+    let response = await AddEvent(formData);
+    if (response.message === "Event created successfully") {
+      onClose();
+    } else {
+      setErrorMessage('An error occurred while adding the event. Please try again.');
     }
   };
 
@@ -79,91 +111,235 @@ export default function EventForm() {
   };
 
   return (
-    <Card className=" w-full  ">
-      <CardHeader>
-        <CardTitle className="flex justify-center items-center text-3xl font-bold">Créer un évènement</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {errorMessage && (
-            <div className="p-4 text-red-600 bg-red-100 rounded-md">
-              {errorMessage}
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="w-full">
+      <form onSubmit={handleSubmit}>
+        {errorMessage && (
+          <div className={`mb-4 p-4 rounded-md ${errorMessage === 'Event created successfully' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'}`}>
+            {errorMessage}
+          </div>
+        )}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Left Column */}
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Titre</Label>
               <Input id="title" placeholder="Titre de l'évènement" value={eventName} onChange={(e) => setEventName(e.target.value)} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="image">Donner une image à votre évènement :</Label>
+              <Label htmlFor="description">Description</Label>
+              <Textarea id="description" placeholder="Votre description..." className="h-32" value={eventDescription} onChange={(e) => setEventDescription(e.target.value)} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="location">Lieu</Label>
+              <Input id="location" placeholder="Limoges, vejvre rve33v 3wevfg" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image">Image de l'évènement</Label>
               <div className="flex items-center space-x-2">
                 <Label htmlFor="image" className="cursor-pointer">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md">
+                  <div className="flex items-center px-4 py-2 space-x-2 rounded-md bg-secondary text-secondary-foreground">
                     <UploadIcon className="w-5 h-5" />
-                    <span>Cliquez pour télécharger</span>
+                    <span>Télécharger</span>
                   </div>
                 </Label>
                 <Input id="image" type="file" className="hidden" onChange={handleImageChange} accept="image/png,image/jpeg" />
                 {eventImage && (
                   <div className="flex items-center space-x-2">
-                    <span>{eventImage.name}</span>
+                    <span className="text-sm">{eventImage.name}</span>
                     <Button variant="ghost" size="icon" onClick={() => setEventImage(null)}>
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">ou faites glisser et déposez un PNG ou JPEG (max. 10 Mo)</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="Votre description..." className="h-32" value={eventDescription} onChange={(e) => setEventDescription(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Lieu</Label>
-              <Input id="location" placeholder="Limoges, vejvre rve33v 3wevfg" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="max-attendees">Nombre de personne maximum</Label>
-              <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value === '' ? '' : parseInt(e.target.value))} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="visibility">Visibilité</Label>
-              <Select value={eventVisibility} onValueChange={setEventVisibility}>
-                <SelectTrigger id="visibility">
-                  <SelectValue placeholder="Public" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="private">Privé</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Date de début</Label>
-              <div className="flex items-center">
-                <Input id="start-date" type="datetime-local" className="w-full" value={eventStartDate} onChange={(e) => setEventStartDate(e.target.value)} />
-                <CalendarIcon className="w-5 h-5 ml-2 text-muted-foreground" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="end-date">Date de fin</Label>
-              <div className="flex items-center">
-                <Input id="end-date" type="datetime-local" className="w-full" value={eventEndDate} onChange={(e) => setEventEndDate(e.target.value)} />
-                <CalendarIcon className="w-5 h-5 ml-2 text-muted-foreground" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="invitee">Invité des personnes</Label>
-              <Input id="invitee" type="email" placeholder="Adresse mail de l'inviter" />
+              <p className="text-xs text-muted-foreground">PNG ou JPEG (max. 10 Mo)</p>
             </div>
           </div>
-          <Button className="w-full" type="submit">
-            Publier l'évènement
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+
+          {/* Right Column */}
+          <div className="flex flex-col space-y-6">
+            <div className="space-y-6 flex-1">
+              {/* Date inputs */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date et heure de début</Label>
+                  <div className="flex flex-col gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                          locale={fr}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-20">Heure :</Label>
+                      <Select
+                        value={startTime}
+                        onValueChange={setStartTime}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, hour) => (
+                            Array.from({ length: 4 }, (_, quarterHour) => {
+                              const minutes = quarterHour * 15;
+                              const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                              return (
+                                <SelectItem key={timeString} value={timeString}>
+                                  {timeString}
+                                </SelectItem>
+                              );
+                            })
+                          )).flat()}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Date et heure de fin</Label>
+                  <div className="flex flex-col gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !endDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {endDate ? format(endDate, "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                          locale={fr}
+                          disabled={(date) =>
+                            startDate ? date < startDate : false
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-20">Heure :</Label>
+                      <Select
+                        value={endTime}
+                        onValueChange={setEndTime}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, hour) => (
+                            Array.from({ length: 4 }, (_, quarterHour) => {
+                              const minutes = quarterHour * 15;
+                              const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                              return (
+                                <SelectItem key={timeString} value={timeString}>
+                                  {timeString}
+                                </SelectItem>
+                              );
+                            })
+                          )).flat()}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Max attendees and visibility */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="max-attendees">Nombre maximum</Label>
+                  <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value === '' ? '' : parseInt(e.target.value))} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="visibility">Visibilité</Label>
+                  <Select value={eventVisibility} onValueChange={setEventVisibility}>
+                    <SelectTrigger id="visibility">
+                      <SelectValue placeholder="Public" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Privé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Invitees section */}
+              <div className="space-y-2">
+                <Label htmlFor="invitee">Inviter des personnes</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="invitee"
+                    type="email"
+                    placeholder="Adresse mail de l'invité"
+                    value={inviteeEmail}
+                    onChange={(e) => setInviteeEmail(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddInvitee}
+                    disabled={!inviteeEmail || invitees.includes(inviteeEmail)}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+                {invitees.length > 0 && (
+                  <ul className="mt-2 space-y-2">
+                    {invitees.map((email, index) => (
+                      <li key={index} className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full">
+                        <span className="pr-3">{email}</span>
+                        <Button
+                          className="rounded-full bg-inherit hover:text-white text-black"
+                          size="icon"
+                          onClick={() => handleRemoveInvitee(email)}
+                        >
+                          <X className="w-4 h-4 rounded-full font-bold" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {/* Publish button at the bottom */}
+            <div className="flex justify-end">
+              <Button type="submit" className="w-1/2">
+                Publier l'évènement
+              </Button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   )
 }

@@ -1,1 +1,2 @@
 npx shadcn@latest add tooltip; 
+npx shadcn@latest add popover
