@@ -61,32 +61,27 @@ export default function DashboardClient() {
         }
     };
 
-    // Fetch user's events from the backend
+    // Function to fetch user events
     const fetchUserEvents = async (userId: number) => {
         try {
             const response = await fetch(`/user/${userId}/events`);
-            if (!response.ok) throw new Error('Failed to fetch user events');
-
+            if (!response.ok) throw new Error('Failed to fetch events');
             const data = await response.json();
-            // console.log("Fetched user events:", data);
-
-            const formattedEvents = data.map((event: any) => ({
-                eventId: event.eventId,
-                title: event.title,
-                description: event.description,
-                date: event.datestart,
-                location: event.location,
-                imageUrl: event.img
-            }));
-
-            // console.log("Formatted events with images:", formattedEvents);
-            setMyEvents(formattedEvents);
+            setMyEvents(data);
         } catch (error) {
             console.error('Error fetching user events:', error);
         }
     };
 
-    // console.log("My events:", myEvents);
+    // Function to refresh all events
+    const refreshEvents = async () => {
+        if (userId) {
+            await Promise.all([
+                fetchUserEvents(userId),
+                fetchUpcomingEvents()
+            ]);
+        }
+    };
 
     useEffect(() => {
         const authenticateUser = async () => {
@@ -123,12 +118,16 @@ export default function DashboardClient() {
 
     return (
         <div className="container mt-16 mx-auto p-4 md:p-8 lg:p-12">
+
             <h1 className="text-4xl font-bold mb-8">
                 {isAuthenticated ? `Bienvenue, ${username} 👋` : "Bienvenue sur Plan-It 👋"}
             </h1>
             <div className="grid grid-cols-1 lg:grid-cols-[3fr_4fr] gap-8">
                 {isAuthenticated ? (
-                    <MyEvents events={myEvents} />
+                    <MyEvents
+                        events={myEvents}
+                        onEventCreated={refreshEvents}
+                    />
                 ) : (
                     <AuthPrompt />
                 )}

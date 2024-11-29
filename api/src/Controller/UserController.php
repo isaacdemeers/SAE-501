@@ -8,6 +8,7 @@ use App\Service\AmazonS3Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use DateTime;
 
 class UserController extends AbstractController
 {
@@ -21,7 +22,12 @@ class UserController extends AbstractController
     #[Route('/user/{id}/events', name: 'get_user_events', methods: ['GET'])]
     public function getUserEvents(int $id, UserEventRepository $userEventRepository): JsonResponse
     {
-        $userEvents = $userEventRepository->findBy(['user' => $id]);
+        $currentDate = new DateTime();
+        $userEvents = $userEventRepository->findUpcomingEvents($id, $currentDate);
+
+        // Debug information
+        error_log('Current date: ' . $currentDate->format('Y-m-d H:i:s'));
+        error_log('Number of events found: ' . count($userEvents));
 
         if (!$userEvents) {
             return $this->json(['message' => 'No events found for this user'], JsonResponse::HTTP_NOT_FOUND);
