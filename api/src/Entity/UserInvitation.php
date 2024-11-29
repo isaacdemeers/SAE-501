@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
@@ -13,7 +14,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ApiResource(
     operations: [
-        new Get( ),
+        new Get(),
+        new Delete(),
+        new Post(),
+        new Put(),
+        new GetCollection(),
     ])]
 #[ORM\Entity(repositoryClass: UserInvitationRepository::class)]
 class UserInvitation
