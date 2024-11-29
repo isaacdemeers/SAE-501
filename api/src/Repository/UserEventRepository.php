@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\UserEvent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use DateTime;
 
 /**
  * @extends ServiceEntityRepository<UserEvent>
@@ -16,28 +17,16 @@ class UserEventRepository extends ServiceEntityRepository
         parent::__construct($registry, UserEvent::class);
     }
 
-//    /**
-//     * @return UserEvent[] Returns an array of UserEvent objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?UserEvent
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findUpcomingEvents(int $userId, DateTime $currentDate)
+    {
+        return $this->createQueryBuilder('ue')
+            ->join('ue.event', 'e')
+            ->where('ue.user = :userId')
+            ->andWhere('e.dateend >= :currentDate')
+            ->setParameter('userId', $userId)
+            ->setParameter('currentDate', $currentDate)
+            ->orderBy('e.datestart', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
