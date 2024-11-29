@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use App\Service\AmazonS3Service;
 
 class AuthController extends AbstractController
 {
@@ -32,7 +33,9 @@ class AuthController extends AbstractController
         $token = $request->cookies->get('jwt_token');
 
         if (!$token) {
-            return $this->json(['error' => 'Token is missing'], JsonResponse::HTTP_UNAUTHORIZED);
+            return $this->json([
+                'isValid' => false,
+            ]);
         }
 
         try {
@@ -40,27 +43,37 @@ class AuthController extends AbstractController
             $payload = $jwtEncoder->decode($token);
 
             if (!$payload) {
-                return $this->json(['error' => 'Invalid token'], JsonResponse::HTTP_UNAUTHORIZED);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Vérifier que le token n'est pas expiré
             $currentTime = time();
             if ($payload['exp'] < $currentTime) {
-                return $this->json(['error' => 'Token has expired'], JsonResponse::HTTP_UNAUTHORIZED);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             $identifier = $payload['email'] ?? null;
 
             if (!$identifier) {
-                return $this->json(['error' => 'Identifier not found in token'], JsonResponse::HTTP_BAD_REQUEST);
+                return $this->json([
+                    'isValid' => false,
+                ]);
             }
 
             // Charger l'utilisateur à partir du UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
+                $user = $userProvider->loadUserByIdentifier($identifier);
 
             if (!$user || !$user instanceof User) {
                 return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
             }
+
+            // Obtenir l'URL de l'image via AmazonS3Service
+            $imageName = $user->getPhoto();
+            $imageUrl = $imageName ? $this->s3Service->getObjectUrl($imageName) : null;
 
             // Préparer les données utilisateur
             $userData = [
@@ -83,7 +96,9 @@ class AuthController extends AbstractController
             // Répondre avec les informations utilisateur
             return $this->json(['isValid' => true, 'user' => $userData], JsonResponse::HTTP_OK);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json([
+                'isValid' => false,
+            ]);
         }
     }
 }

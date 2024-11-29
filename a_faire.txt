@@ -1,3 +1,8 @@
+mettre quel'uuid dans le link pas besoin du lien complet
+
+
+
+
 'use client'
 import * as React from "react"
 import Link from "next/link"
@@ -19,7 +24,7 @@ import { EyeIcon , EyeOffIcon } from "lucide-react"
 
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
-  const [logdata, setLogdata] = useState<{ email: string; password: string }>({ email: "", password: "" });
+  const [logdata, setLogdata] = useState<{ username: string; password: string }>({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,7 +34,7 @@ export default function Loginform(): JSX.Element {
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setLogdata({ ...logdata, email: e.target.value });
+    setLogdata({ ...logdata, username: e.target.value });
   };
 
   const handlePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -37,10 +42,10 @@ export default function Loginform(): JSX.Element {
   };
 
   const handleLogin = async() => {
-    if (!emailRegex.test(logdata.email) || logdata.password === "") {
-      errorlog();
-      return;
-    }
+    // if (!emailRegex.test(logdata.email) || logdata.password === "") {
+    //   errorlog();
+    //   return;
+    // }
     let log = await LoginUser(logdata);
     console.log(log)
     if(log.message === "Invalid credentials."){
@@ -53,7 +58,7 @@ export default function Loginform(): JSX.Element {
 
   const errorlog = (): void => {
     setLoginerror(true);
-    setLogdata({ email: "", password: "" });
+    setLogdata({ username: "", password: "" });
     (document.getElementById('email') as HTMLInputElement).value = "";
     (document.getElementById('password') as HTMLInputElement).value = "";
     setTimeout(() => {

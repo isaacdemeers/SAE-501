@@ -5,36 +5,32 @@ import { Circle, CirclePlus, Clock, Users, ChevronRight, Eye, Lock, LockOpen } f
 import CustomBadge from "@/components/utils/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { Separator } from "@/components/ui/separator"
-import Link from "next/link"
 
 
 interface EventCardProps {
-    key?: string;
-    event: {
-        id: string;
-        title: string;
-        date: string;
-        isPublic: boolean;
-        attendees: number;
-        imageUrl: string;
-        description: string;
-    };
-    type: string;
+   event: {
+         id: number;
+         title: string;
+         date: string;
+         isPublic: boolean;
+         attendees: number;
+         imageUrl: string;
+    }
 }
 
 
 
-export default function EventCard({ key, event, type }: EventCardProps) {
-    const { id, title, date, isPublic, attendees, imageUrl, description } = event
+export default function EventCard({ event , type }: EventCardProps) {
     let tags = ''
+    console.log(event, type)
     return (
         type === "searchResult" ? (
-            <Card className={`w-full flex relative text-slate-600  overflow-hidden animate-show transition-transform duration-300`}>
+            <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>
 
                 <section className=" absolute  w-full h-full flex items-center justify-center ">
                     <img
-                        src={imageUrl}
-                        alt={title}
+                        src={event.imageUrl}
+                        alt={event.title}
                         className="brightness-75 rounded-md opacity-70"
                     />
                     <div className=" absolute top-0 left-0 bg-gradient-to-r from-white  via-white to-transparent h-full w-full"></div>
@@ -42,44 +38,37 @@ export default function EventCard({ key, event, type }: EventCardProps) {
 
                 <CardContent className="flex z-10 flex-col w-full p-4 gap-2 bg-transparent">
 
-                    <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{title}</h2>
-                    <p className="text-xs text-slate-600 text-ellipsis w-5/12 overflow-hidden text-nowrap">{description}</p>
+                    <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-11/12 overflow-hidden text-nowrap">{event.title}</h2>
 
                     <div className="flex gap-4 w-full  justify-between items-center">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">
                             <div className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <Clock className="w-4 h-4 mr-1" />
-                                <p className="text-xs text-slate-600">{date.split(' ')[0]}</p>
+                                <p className="text-xs text-slate-600">{event.date}</p>
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <li>
-                                    {isPublic && (
-                                        <CustomBadge color={1} content="PUBLIC" icon={<LockOpen />} />
+                                    {event.isPublic && (
+                                        <CustomBadge color="blue" content="PUBLIC" icon={<LockOpen />} />
                                     )}
-                                    {!isPublic && (
-                                        <CustomBadge color={0} content="PRIVATE" icon={<Lock />} />
-                                    )}
-                                </li>
-                                <li>
-                                    {attendees > 0 && (
-                                        <CustomBadge color={2} content={attendees.toString()} icon={<Users />} />
+                                    {!event.isPublic && (
+                                        <CustomBadge color="red" content="PRIVATE" icon={<Lock />} />
                                     )}
                                 </li>
+                                 <li>
+                                     <CustomBadge color="green" content={event.attendees} icon={<Users />} />
+                                 </li>
                             </ul>
                         </div>
                         <div className="flex flex-col lg:flex-row gap-2 items-end justify-center lg:items-center   rounded-lg">
                             <Button variant="outline">
-                                <Link href={`/events/${id}`} className="flex items-center justify-center">
-                                    <Eye className="w-4 h-4 mr-2 " />
-                                    Voir l&apos;événement
-                                </Link>
+                                <Eye className="w-4 h-4 mr-2 " />
+                                Voir l&apos;événement
                             </Button>
                             <Button className="flex gap-2">
-                                <Link href={`/users/${id}`} className="flex items-center justify-center">
-                                    <CirclePlus size={16} className=" mr-2 stroke-white" />
-                                    S'inscrire
-                                </Link>
+                                <CirclePlus size={16} className=" stroke-white" />
+                                S'inscrire
                             </Button>
                         </div>
 
@@ -92,8 +81,8 @@ export default function EventCard({ key, event, type }: EventCardProps) {
                 <ChevronRight className="absolute sm:hidden right-4  h-full stroke-slate-600" />
                 <div className="hidden sm:flex relative h-[calc(100% - 2rem)] w-full bg-slate-300 rounded-md m-4">
                     <Image
-                        src={imageUrl}
-                        alt={title}
+                        src={event.imageUrl}
+                        alt={event.title}
                         layout="fill"
                         objectFit="cover"
                         className="brightness-75 rounded-md"
@@ -102,25 +91,25 @@ export default function EventCard({ key, event, type }: EventCardProps) {
                 <CardContent className="p-4 pl-0 flex flex-col">
                     <div className="flex justify-between items-start flex-col gap-2 mx-4 sm:mx-0 sm:gap-4">
 
-                        <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-60 overflow-hidden text-nowrap">{title}</h2>
+                        <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-60 overflow-hidden text-nowrap">{event.title}</h2>
                         <div className="flex items-center sm:mb-0 mb-1 text-sm text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
-                            {date}
+                            {event.date}
                         </div>
                         <div className="flex gap-4">
-                            {isPublic && (
+                            {event.isPublic && (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-semibold">
                                     PUBLIC
                                 </span>
                             )}
-                            {!isPublic && (
+                            {!event.isPublic && (
                                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-md text-xs font-semibold">
                                     PRIVATE
                                 </span>
                             )}
                             <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs font-semibold flex items-center">
                                 <Users className="w-3 h-3 mr-1" />
-                                {attendees}
+                                {event.attendees}
                             </span>
                         </div>
 

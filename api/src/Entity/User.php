@@ -214,28 +214,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:create'])]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:create'])]
+    #[ORM\Column(length: 255 , nullable: true)]
+    #[Groups(['user:read' , 'user:create'])]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:create'])]
+    #[ORM\Column(length: 255 , nullable: true)]
+    #[Groups(['user:read'  ,'user:create'])]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:create', 'user:usernameverification'])]
+    #[ORM\Column(length: 255 , nullable: true)]
+    #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:read'])]
     private ?string $photo = null;
 
-    #[ORM\Column]
-    #[Groups(['user:read',])]
+    #[ORM\Column( nullable: true)]
+    #[Groups(['user:read'])]
     private ?bool $emailverify = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:create', 'user:emailconfirmation'])]
+    #[ORM\Column(length: 255 , nullable: true)]
+    #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -243,8 +243,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $tokenpassword = null;
 
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deleted_at = null;
 
-    public function getId(): ?int
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
+
+  
+        public function getId(): ?int
     {
         return $this->id;
     }
@@ -269,7 +275,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -378,4 +383,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+ 
 }
