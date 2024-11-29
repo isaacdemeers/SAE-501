@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use Aws\S3\S3Client;
