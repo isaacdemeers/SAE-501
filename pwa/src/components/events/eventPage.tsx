@@ -35,7 +35,6 @@ import {
   IsAuthentificated,
   JoinEvent,
   VerifyConnectionUUID,
-  VerifyConnectionConnectedUser,
   unsubscribeConnectedUser,
   unsubscribeUUID,
   NewConnectionUUID,
@@ -43,6 +42,7 @@ import {
 import { DialogClose } from "@radix-ui/react-dialog";
 import EventForm from "./eventEdit"; // Ajoutez cet import
 import EventModerate from "./eventModerate";
+import { GetEventAdmin } from "@/lib/request"; // Ajoutez cet import
 
 interface EventPageProps {
   params: {
@@ -62,6 +62,11 @@ interface Event {
   visibility: boolean;
 }
 
+interface Admin {
+  id: number;
+  email: string;
+}
+
 export default function PageEvent({ params }: EventPageProps) {
   const { id } = params;
 
@@ -79,6 +84,8 @@ export default function PageEvent({ params }: EventPageProps) {
   const router = useRouter();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showModerateDialog, setShowModerateDialog] = useState(false);
+  const [eventAdmin, setEventAdmin] = useState<Admin | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchEventAndCheckAuthentication = async () => {
@@ -86,11 +93,13 @@ export default function PageEvent({ params }: EventPageProps) {
       setError(null);
       const urlParams = new URLSearchParams(window.location.search);
       try {
-        const [eventData, authData] = await Promise.all([
+        const [eventData, authData, adminData] = await Promise.all([
           GetEvent(id),
           IsAuthentificated(),
+          GetEventAdmin(id)
         ]);
         setEvent(eventData);
+        setEventAdmin(adminData.admin);
 
         if (eventData.visibility === 0 && !authData.isValid) {
           const newconnection = urlParams.get("newconnection");
@@ -100,6 +109,12 @@ export default function PageEvent({ params }: EventPageProps) {
           return;
         } else if (authData.isValid) {
           setIsAuthenticated(true);
+          console.log('Admin Data:', adminData);
+          console.log('Auth Data:', authData);
+          if (adminData.admin && authData.user && authData.user.email === adminData.admin.email) {
+            setIsAdmin(true);
+            setIsSubscribed(true);
+          }
 
           const connection = urlParams.get("connection");
           if (connection) {
@@ -110,19 +125,6 @@ export default function PageEvent({ params }: EventPageProps) {
           if (newconnection) {
             setConnectionuuid(newconnection);
             await NewConnectionUUID(newconnection, id);
-          }
-          const subscriptionData = await VerifyConnectionConnectedUser(id);
-          console.log(subscriptionData);
-          if (
-            eventData.visibility === 0 &&
-            subscriptionData.message === "User is not joined to the event"
-          ) {
-            router.push("/");
-            return;
-          } else if (subscriptionData.isLog === true) {
-            setIsSubscribed(true);
-            setRole(subscriptionData.Role);
-            console.log(subscriptionData);
           }
         } else if (authData.isValid === false) {
           const urlParams = new URLSearchParams(window.location.search);
@@ -268,7 +270,7 @@ export default function PageEvent({ params }: EventPageProps) {
             <ArrowLeft className="w-4 h-4 mr-2" /> Retour
           </Button>
         </Link>
-        {Role === "ROLE_ADMIN" ? (
+        {isAdmin && (
           <div className="flex gap-2">
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
               <DialogTrigger asChild>
@@ -297,11 +299,11 @@ export default function PageEvent({ params }: EventPageProps) {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <EventModerate />
+                <EventModerate eventId={Number(event.id)} />
               </DialogContent>
             </Dialog>
           </div>
-        ) : null}
+        )}
       </header>
 
       <Card className="border-none shadow-none">
@@ -491,7 +493,7 @@ export default function PageEvent({ params }: EventPageProps) {
                   <UserCog />
                   <h3 className="font-semibold">Organisateur</h3>
                 </div>
-                <p>@MairieDeLimoges</p>
+                <p>{eventAdmin?.email || "Non spécifié"}</p>
               </div>
               <div>
                 <div className="flex gap-2 pb-2">

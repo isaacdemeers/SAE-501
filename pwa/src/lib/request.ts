@@ -283,18 +283,6 @@ export async function NewConnectionUUID(uuid: string , id: number) {
 }
 
 
-export async function VerifyConnectionConnectedUser(id:number){
-  try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error verifying connection for connected user:', error);
-    throw error;
-  }
-}
-
-
 export async function VerifyConnectionUUID(uuid: string , id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}/verify-connection-uuid`, {
@@ -365,6 +353,42 @@ export async function UpdateEvent(id: string, data: any): Promise<any> {
     return await response.json();
   } catch (error) {
     console.error('Error updating event:', error);
+    throw error;
+  }
+}
+
+export async function GetEventAdmin(id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${id}/admin`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch event admin');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching event admin:', error);
+    throw error;
+  }
+}
+
+export async function GetEventUsers(eventId: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/users`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch event users');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching event users:', error);
     throw error;
   }
 }
