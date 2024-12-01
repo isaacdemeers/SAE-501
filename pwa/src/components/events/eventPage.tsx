@@ -96,7 +96,7 @@ export default function PageEvent({ params }: EventPageProps) {
         const [eventData, authData, adminData] = await Promise.all([
           GetEvent(id),
           IsAuthentificated(),
-          GetEventAdmin(id)
+          GetEventAdmin(id),
         ]);
         setEvent(eventData);
         setEventAdmin(adminData.admin);
@@ -109,9 +109,13 @@ export default function PageEvent({ params }: EventPageProps) {
           return;
         } else if (authData.isValid) {
           setIsAuthenticated(true);
-          console.log('Admin Data:', adminData);
-          console.log('Auth Data:', authData);
-          if (adminData.admin && authData.user && authData.user.email === adminData.admin.email) {
+          console.log("Admin Data:", adminData);
+          console.log("Auth Data:", authData);
+          if (
+            adminData.admin &&
+            authData.user &&
+            authData.user.email === adminData.admin.email
+          ) {
             setIsAdmin(true);
             setIsSubscribed(true);
           }
@@ -265,7 +269,7 @@ export default function PageEvent({ params }: EventPageProps) {
         </div>
       ) : null}
       <header className="flex justify-between mb-8">
-        <Link href="/dashboard">
+        <Link href="/">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" /> Retour
           </Button>
