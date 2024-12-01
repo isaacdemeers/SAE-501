@@ -7,8 +7,10 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use App\Controller\EventController;
+use App\Controller\UserEventController;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,11 +21,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(
-            uriTemplate: '/events/{id}',
-            controller: EventController::class . '::getEvent',
-            normalizationContext: ['groups' => ['event:read']]
-        ),
         new Get(
             uriTemplate: '/events/{id}',
             controller: EventController::class . '::getEvent',
@@ -147,6 +144,60 @@ use Symfony\Component\Serializer\Annotation\Groups;
                     ]
                 ]
             ]
+        ),
+        new Get(
+            uriTemplate: '/events/{id}/admin',
+            controller: EventController::class . '::getEventAdmin',
+            normalizationContext: ['groups' => ['event:read']],
+            openapiContext: [
+                'summary' => 'Récupère l\'administrateur d\'un événement',
+                'description' => 'Retourne l\'ID et l\'email de l\'administrateur de l\'événement',
+                'responses' => [
+                    '200' => [
+                        'description' => 'Administrateur trouvé',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'admin' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'integer'],
+                                                'email' => ['type' => 'string']
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '404' => [
+                        'description' => 'Événement ou administrateur non trouvé'
+                    ]
+                ]
+            ]
+        ),
+        new GetCollection(
+            uriTemplate: '/events/{id}/users',
+            controller: UserEventController::class . '::getEventUsers',
+            read: false,
+            deserialize: false,
+            paginationEnabled: false,
+            openapiContext: [
+                'summary' => 'Récupère tous les utilisateurs d\'un événement',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ]
+            ],
+            provider: null
         )
     ]
 )]
@@ -200,9 +251,22 @@ class Event
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $visibility = null;
 
-    
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: UserEvent::class)]
+    private Collection $userevents;
 
-  
+    public function __construct()
+    {
+        $this->userevents = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, UserEvent>
+     */
+    public function getUserevents(): Collection
+    {
+        return $this->userevents;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

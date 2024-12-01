@@ -40,4 +40,29 @@ class UserEventRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findEventAdmin(int $eventId): ?UserEvent
+    {
+        return $this->createQueryBuilder('ue')
+            ->andWhere('ue.event = :eventId')
+            ->andWhere('ue.role = :role')
+            ->setParameter('eventId', $eventId)
+            ->setParameter('role', 'ROLE_ADMIN')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findEventUsers(int $eventId): array
+    {
+        return $this->createQueryBuilder('ue')
+            ->select('ue, u')
+            ->join('ue.user', 'u')
+            ->where('ue.event = :eventId')
+            ->setParameter('eventId', $eventId)
+            ->orderBy('ue.role', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

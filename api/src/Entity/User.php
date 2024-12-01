@@ -154,6 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct()
     {
+        $this->userevents = new ArrayCollection();
         $this->setEmailverify(false);
     }
     #[ORM\Id]
@@ -207,6 +208,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserEvent::class)]
+    private Collection $userevents;
 
   
         public function getId(): ?int
@@ -367,6 +371,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, UserEvent>
+     */
+    public function getUserevents(): Collection
+    {
+        return $this->userevents;
     }
 
  
