@@ -392,3 +392,21 @@ export async function GetEventUsers(eventId: number) {
     throw error;
   }
 }
+
+export async function RemoveEventUser(eventId: number, userId: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/users/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to remove user from event');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error removing user from event:', error);
+    throw error;
+  }
+}

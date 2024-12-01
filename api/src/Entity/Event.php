@@ -198,6 +198,46 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 ]
             ],
             provider: null
+        ),
+        new Delete(
+            uriTemplate: '/events/{eventId}/users/{userId}',
+            controller: EventController::class . '::removeUserFromEvent',
+            read: false,
+            deserialize: false,
+            openapiContext: [
+                'summary' => 'Retire un utilisateur d\'un événement',
+                'description' => 'Supprime un utilisateur d\'un événement (sauf l\'administrateur)',
+                'parameters' => [
+                    [
+                        'name' => 'eventId',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ],
+                    [
+                        'name' => 'userId',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Utilisateur retiré avec succès'
+                    ],
+                    '403' => [
+                        'description' => 'Impossible de supprimer l\'administrateur'
+                    ],
+                    '404' => [
+                        'description' => 'Utilisateur ou événement non trouvé'
+                    ]
+                ]
+            ],
+            provider: null
         )
     ]
 )]

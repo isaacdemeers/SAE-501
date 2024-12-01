@@ -927,4 +927,37 @@ class EventController extends AbstractController
             ]
         ], Response::HTTP_OK);
     }
+
+    #[Route('/events/{eventId}/users/{userId}', name: 'remove_event_user', methods: ['DELETE'])]
+    public function removeUserFromEvent(
+        int $eventId,
+        int $userId,
+        EntityManagerInterface $entityManager,
+        UserEventRepository $userEventRepository
+    ): JsonResponse {
+        try {
+            // Vérifier si l'utilisateur à supprimer existe dans l'événement
+            $userEvent = $userEventRepository->findOneBy([
+                'event' => $eventId,
+                'user' => $userId
+            ]);
+
+            if (!$userEvent) {
+                return new JsonResponse(['error' => 'Utilisateur non trouvé dans cet événement'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier que ce n'est pas l'admin
+            if ($userEvent->getRole() === 'ROLE_ADMIN') {
+                return new JsonResponse(['error' => 'Impossible de supprimer l\'administrateur de l\'événement'], Response::HTTP_FORBIDDEN);
+            }
+
+            // Supprimer l'utilisateur de l'événement
+            $entityManager->remove($userEvent);
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'Utilisateur retiré avec succès']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Une erreur est survenue lors de la suppression'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { GetEventUsers } from "@/lib/request";
+import { GetEventUsers, RemoveEventUser } from "@/lib/request";
 
 interface User {
   id: number;
@@ -65,6 +65,18 @@ export default function EventModerate({ eventId }: EventModerateProps) {
     }
   };
 
+  const handleRemoveUser = async (userId: number) => {
+    try {
+      await RemoveEventUser(eventId, userId);
+      // Rafraîchir la liste des utilisateurs
+      const data = await GetEventUsers(eventId);
+      setUsers(data.users);
+    } catch (error) {
+      setError("Erreur lors de la suppression de l'utilisateur");
+      console.error(error);
+    }
+  };
+
   if (loading) return <div>Chargement...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
@@ -107,9 +119,7 @@ export default function EventModerate({ eventId }: EventModerateProps) {
                         variant="ghost"
                         size="icon"
                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                        onClick={() => {
-                          console.log('Retirer utilisateur:', user.id);
-                        }}
+                        onClick={() => handleRemoveUser(user.id)}
                       >
                         <UserMinus className="h-4 w-4" />
                         <span className="sr-only">Retirer l'utilisateur</span>
