@@ -1,54 +1,62 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { CalendarIcon, UploadIcon, X } from "lucide-react"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { cn } from "@/lib/utils"
-import { AddEvent } from "@/lib/request"
+} from "@/components/ui/popover";
+import { CalendarIcon, UploadIcon, X } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { AddEvent } from "@/lib/request";
 
 export default function EventForm({ onClose }: { onClose: () => void }) {
-  const [eventName, setEventName] = useState('');
+  const [eventName, setEventName] = useState("");
   const [startDate, setStartDate] = useState<Date>();
-  const [startTime, setStartTime] = useState('12:00');
+  const [startTime, setStartTime] = useState("12:00");
   const [endDate, setEndDate] = useState<Date>();
-  const [endTime, setEndTime] = useState('12:00');
-  const [eventLocation, setEventLocation] = useState('');
+  const [endTime, setEndTime] = useState("12:00");
+  const [eventLocation, setEventLocation] = useState("");
   const [eventImage, setEventImage] = useState<File | null>(null);
-  const [eventDescription, setEventDescription] = useState('');
-  const [eventVisibility, setEventVisibility] = useState('public');
-  const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventVisibility, setEventVisibility] = useState("public");
+  const [maxParticipants, setMaxParticipants] = useState<number | "">("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [invitees, setInvitees] = useState<string[]>([]);
-  const [inviteeEmail, setInviteeEmail] = useState('');
-
+  const [inviteeEmail, setInviteeEmail] = useState("");
 
   const handleAddInvitee = () => {
     if (inviteeEmail && !invitees.includes(inviteeEmail)) {
       setInvitees([...invitees, inviteeEmail]);
-      setInviteeEmail('');
+      setInviteeEmail("");
     }
   };
 
   const handleRemoveInvitee = (email: string) => {
-    setInvitees(invitees.filter(invitee => invitee !== email));
+    setInvitees(invitees.filter((invitee) => invitee !== email));
   };
 
   // Function to combine date and time
-  const combineDateAndTime = (date: Date | undefined, time: string): Date | undefined => {
+  const combineDateAndTime = (
+    date: Date | undefined,
+    time: string
+  ): Date | undefined => {
     if (!date) return undefined;
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
     const newDate = new Date(date);
     newDate.setHours(hours, minutes);
     return newDate;
@@ -58,7 +66,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
     e.preventDefault();
 
     if (!startDate || !endDate) {
-      setErrorMessage('Veuillez sélectionner les dates de début et de fin.');
+      setErrorMessage("Veuillez sélectionner les dates de début et de fin.");
       return;
     }
 
@@ -66,43 +74,46 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
     const fullEndDate = combineDateAndTime(endDate, endTime);
 
     if (!fullStartDate || !fullEndDate) {
-      setErrorMessage('Dates invalides.');
+      setErrorMessage("Dates invalides.");
       return;
     }
 
     if (fullEndDate <= fullStartDate) {
-      setErrorMessage('La date de fin doit être après la date de début.');
+      setErrorMessage("La date de fin doit être après la date de début.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', eventName);
-    formData.append('datestart', fullStartDate.toISOString());
-    formData.append('dateend', fullEndDate.toISOString());
-    formData.append('location', eventLocation);
+    formData.append("title", eventName);
+    formData.append("datestart", fullStartDate.toISOString());
+    formData.append("dateend", fullEndDate.toISOString());
+    formData.append("location", eventLocation);
     if (eventImage) {
-      formData.append('img', eventImage, eventImage.name);
+      formData.append("img", eventImage, eventImage.name);
     }
-    formData.append('description', eventDescription);
-    formData.append('visibility', eventVisibility);
-    formData.append('maxparticipant', maxParticipants.toString());
-    formData.append('invitees', JSON.stringify(invitees));
+    formData.append("description", eventDescription);
+    formData.append("visibility", eventVisibility);
+    formData.append("maxparticipant", maxParticipants.toString());
+    formData.append("invitees", JSON.stringify(invitees));
 
     let response = await AddEvent(formData);
     if (response.message === "Event created successfully") {
       onClose();
     } else {
-      setErrorMessage('An error occurred while adding the event. Please try again.');
+      setErrorMessage(
+        "An error occurred while adding the event. Please try again."
+      );
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) { // 8MB in bytes
-        setErrorMessage('File size should not exceed 8MB');
+      if (file.size > 10 * 1024 * 1024) {
+        // 8MB in bytes
+        setErrorMessage("File size should not exceed 8MB");
         setEventImage(null);
-        e.target.value = ''; // Clear the input value
+        e.target.value = ""; // Clear the input value
       } else {
         setErrorMessage(null);
         setEventImage(file);
@@ -114,7 +125,13 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
     <div className="w-full">
       <form onSubmit={handleSubmit}>
         {errorMessage && (
-          <div className={`mb-4 p-4 rounded-md ${errorMessage === 'Event created successfully' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'}`}>
+          <div
+            className={`mb-4 p-4 rounded-md ${
+              errorMessage === "Event created successfully"
+                ? "text-green-600 bg-green-100"
+                : "text-red-600 bg-red-100"
+            }`}
+          >
             {errorMessage}
           </div>
         )}
@@ -123,21 +140,37 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Titre</Label>
-              <Input id="title" placeholder="Titre de l'évènement" value={eventName} onChange={(e) => setEventName(e.target.value)} />
+              <Input
+                id="title"
+                placeholder="Titre de l'évènement"
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="Votre description..." className="h-32" value={eventDescription} onChange={(e) => setEventDescription(e.target.value)} />
+              <Textarea
+                id="description"
+                placeholder="Votre description..."
+                className="h-32"
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="location">Lieu</Label>
-              <Input id="location" placeholder="Limoges, vejvre rve33v 3wevfg" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
+              <Input
+                id="location"
+                placeholder="Limoges, vejvre rve33v 3wevfg"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">Image de l'évènement</Label>
+              <Label htmlFor="image">Image de l&apos;évènement</Label>
               <div className="flex items-center space-x-2">
                 <Label htmlFor="image" className="cursor-pointer">
                   <div className="flex items-center px-4 py-2 space-x-2 rounded-md bg-secondary text-secondary-foreground">
@@ -145,17 +178,29 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                     <span>Télécharger</span>
                   </div>
                 </Label>
-                <Input id="image" type="file" className="hidden" onChange={handleImageChange} accept="image/png,image/jpeg" />
+                <Input
+                  id="image"
+                  type="file"
+                  className="hidden"
+                  onChange={handleImageChange}
+                  accept="image/png,image/jpeg"
+                />
                 {eventImage && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm">{eventImage.name}</span>
-                    <Button variant="ghost" size="icon" onClick={() => setEventImage(null)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEventImage(null)}
+                    >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">PNG ou JPEG (max. 10 Mo)</p>
+              <p className="text-xs text-muted-foreground">
+                PNG ou JPEG (max. 10 Mo)
+              </p>
             </div>
           </div>
 
@@ -177,7 +222,11 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                          {startDate ? (
+                            format(startDate, "PPP", { locale: fr })
+                          ) : (
+                            <span>Sélectionner une date</span>
+                          )}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -192,25 +241,26 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                     </Popover>
                     <div className="flex items-center gap-2">
                       <Label className="w-20">Heure :</Label>
-                      <Select
-                        value={startTime}
-                        onValueChange={setStartTime}
-                      >
+                      <Select value={startTime} onValueChange={setStartTime}>
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Sélectionner l'heure" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 24 }, (_, hour) => (
+                          {Array.from({ length: 24 }, (_, hour) =>
                             Array.from({ length: 4 }, (_, quarterHour) => {
                               const minutes = quarterHour * 15;
-                              const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                              const timeString = `${hour
+                                .toString()
+                                .padStart(2, "0")}:${minutes
+                                .toString()
+                                .padStart(2, "0")}`;
                               return (
                                 <SelectItem key={timeString} value={timeString}>
                                   {timeString}
                                 </SelectItem>
                               );
                             })
-                          )).flat()}
+                          ).flat()}
                         </SelectContent>
                       </Select>
                     </div>
@@ -229,7 +279,11 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                          {endDate ? (
+                            format(endDate, "PPP", { locale: fr })
+                          ) : (
+                            <span>Sélectionner une date</span>
+                          )}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -247,25 +301,26 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                     </Popover>
                     <div className="flex items-center gap-2">
                       <Label className="w-20">Heure :</Label>
-                      <Select
-                        value={endTime}
-                        onValueChange={setEndTime}
-                      >
+                      <Select value={endTime} onValueChange={setEndTime}>
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Sélectionner l'heure" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 24 }, (_, hour) => (
+                          {Array.from({ length: 24 }, (_, hour) =>
                             Array.from({ length: 4 }, (_, quarterHour) => {
                               const minutes = quarterHour * 15;
-                              const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                              const timeString = `${hour
+                                .toString()
+                                .padStart(2, "0")}:${minutes
+                                .toString()
+                                .padStart(2, "0")}`;
                               return (
                                 <SelectItem key={timeString} value={timeString}>
                                   {timeString}
                                 </SelectItem>
                               );
                             })
-                          )).flat()}
+                          ).flat()}
                         </SelectContent>
                       </Select>
                     </div>
@@ -277,11 +332,24 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="max-attendees">Nombre maximum</Label>
-                  <Input id="max-attendees" type="number" placeholder="12" value={maxParticipants} onChange={(e) => setMaxParticipants(e.target.value === '' ? '' : parseInt(e.target.value))} />
+                  <Input
+                    id="max-attendees"
+                    type="number"
+                    placeholder="12"
+                    value={maxParticipants}
+                    onChange={(e) =>
+                      setMaxParticipants(
+                        e.target.value === "" ? "" : parseInt(e.target.value)
+                      )
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="visibility">Visibilité</Label>
-                  <Select value={eventVisibility} onValueChange={setEventVisibility}>
+                  <Select
+                    value={eventVisibility}
+                    onValueChange={setEventVisibility}
+                  >
                     <SelectTrigger id="visibility">
                       <SelectValue placeholder="Public" />
                     </SelectTrigger>
@@ -315,7 +383,10 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                 {invitees.length > 0 && (
                   <ul className="mt-2 space-y-2">
                     {invitees.map((email, index) => (
-                      <li key={index} className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full">
+                      <li
+                        key={index}
+                        className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full"
+                      >
                         <span className="pr-3">{email}</span>
                         <Button
                           className="rounded-full bg-inherit hover:text-white text-black"
@@ -334,12 +405,12 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
             {/* Publish button at the bottom */}
             <div className="flex justify-end">
               <Button type="submit" className="w-1/2">
-                Publier l'évènement
+                Publier l&apos;évènement
               </Button>
             </div>
           </div>
         </div>
       </form>
     </div>
-  )
+  );
 }

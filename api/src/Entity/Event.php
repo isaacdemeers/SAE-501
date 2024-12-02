@@ -8,7 +8,9 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
 use App\Controller\EventController;
+use App\Controller\UserEventController;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -35,7 +37,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Get(
             uriTemplate: '/events',
-            controller: EventController::class .'::getAllEvents',
+            controller: EventController::class . '::getAllEvents',
             normalizationContext: ['groups' => ['event:read']]
         ),
         new Post(
@@ -91,43 +93,198 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 ]
             ]
         ),
+        new Patch(
+            uriTemplate: '/events/{id}',
+            controller: EventController::class . '::editEvent',
+            normalizationContext: ['groups' => ['event:edit']],
+            openapiContext: [
+                'summary' => 'Edit an event',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'title' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Event Title'
+                                    ],
+                                    'description' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Event Description'
+                                    ],
+                                    'datestart' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2024-01-01T00:00:00Z'
+                                    ],
+                                    'dateend' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2024-01-01T23:59:59Z'
+                                    ],
+                                    'location' => [
+                                        'type' => 'string',
+                                        'example' => 'Updated Location'
+                                    ],
+                                    'visibility' => [
+                                        'type' => 'string',
+                                        'enum' => ['public', 'private'],
+                                        'example' => 'public'
+                                    ],
+                                    'maxparticipant' => [
+                                        'type' => 'integer',
+                                        'example' => 150
+                                    ]
+                                ]
+                            ]
+                        ],
+                        'multipart/form-data' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'img' => [
+                                        'type' => 'string',
+                                        'format' => 'binary'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ),
+        new Get(
+            uriTemplate: '/events/{id}/admin',
+            controller: EventController::class . '::getEventAdmin',
+            normalizationContext: ['groups' => ['event:read']],
+            openapiContext: [
+                'summary' => 'Récupère l\'administrateur d\'un événement',
+                'description' => 'Retourne l\'ID et l\'email de l\'administrateur de l\'événement',
+                'responses' => [
+                    '200' => [
+                        'description' => 'Administrateur trouvé',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'admin' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'integer'],
+                                                'email' => ['type' => 'string']
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '404' => [
+                        'description' => 'Événement ou administrateur non trouvé'
+                    ]
+                ]
+            ]
+        ),
+        new GetCollection(
+            uriTemplate: '/events/{id}/users',
+            controller: UserEventController::class . '::getEventUsers',
+            read: false,
+            deserialize: false,
+            paginationEnabled: false,
+            openapiContext: [
+                'summary' => 'Récupère tous les utilisateurs d\'un événement',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ]
+            ],
+            provider: null
+        ),
+        new Delete(
+            uriTemplate: '/events/{eventId}/users/{userId}',
+            controller: EventController::class . '::removeUserFromEvent',
+            read: false,
+            deserialize: false,
+            openapiContext: [
+                'summary' => 'Retire un utilisateur d\'un événement',
+                'description' => 'Supprime un utilisateur d\'un événement (sauf l\'administrateur)',
+                'parameters' => [
+                    [
+                        'name' => 'eventId',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ],
+                    [
+                        'name' => 'userId',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer'
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Utilisateur retiré avec succès'
+                    ],
+                    '403' => [
+                        'description' => 'Impossible de supprimer l\'administrateur'
+                    ],
+                    '404' => [
+                        'description' => 'Utilisateur ou événement non trouvé'
+                    ]
+                ]
+            ],
+            provider: null
+        )
     ]
-    
+
 )]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['event:read' , 'event:write'])]
+    #[Groups(['event:read', 'event:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?\DateTimeInterface $datestart = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?\DateTimeInterface $dateend = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $location = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $sharelink = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $img = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -135,22 +292,36 @@ class Event
     private ?\DateTimeInterface $deleted_date = null;
 
     #[ORM\Column]
-    #[Groups(['event:read','event:write'])]
+    #[Groups(['event:read', 'event:write'])]
 
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    #[Groups(['event:read','event:write'])]
+    #[Groups(['event:read', 'event:write'])]
 
     private ?int $visibility = null;
 
     #[ORM\Column]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?int $maxparticipant = null;
 
-    
 
-  
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: UserEvent::class)]
+    private Collection $userevents;
+
+    public function __construct()
+    {
+        $this->userevents = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, UserEvent>
+     */
+    public function getUserevents(): Collection
+    {
+        return $this->userevents;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -287,5 +458,4 @@ class Event
 
         return $this;
     }
-
 }

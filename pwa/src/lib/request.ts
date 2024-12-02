@@ -220,168 +220,237 @@ export async function GetUserEvents() {
   }
 }
 
-
-
-
 export async function AddEvent(formData: any) {
   try {
     const response = await fetch(`${API_BASE_URL}/event/create`, {
-        method: 'POST',
-        body: formData,
+      method: "POST",
+      body: formData,
     });
 
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+      throw new Error("Network response was not ok");
     }
 
     const result = await response.json();
     return result;
-} catch (error) {
-    console.error('Error creating event:', error);
-}
+  } catch (error) {
+    console.error("Error creating event:", error);
+  }
 }
 
-export async function JoinEvent(event: number , email: string) {
-  if(email === "") {
-  try {
-    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error joining event:', error);
+export async function JoinEvent(event: number, email: string) {
+  if (email === "") {
+    try {
+      const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error joining event:", error);
+    }
+  } else {
+    const formData = new FormData();
+    formData.append("email", email);
+    try {
+      const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Error joining event:", error);
+    }
   }
-}
-else {
-  
-  const formData = new FormData();
-  formData.append("email", email);
-  try {
-    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error joining event:', error);
-  }
-}
 }
 
 export async function IsAuthentificated() {
   try {
-    const response = await fetch('/api/auth/validate-token', {
-      method: 'POST',
+    const response = await fetch("/api/auth/validate-token", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      credentials: 'include'
+      credentials: "include",
     });
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error authenticating user:', error);
+    console.error("Error authenticating user:", error);
   }
 }
 
-export async function NewConnectionUUID(uuid: string , id: number) {
+export async function NewConnectionUUID(uuid: string, id: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/new-connection-uuid`, {
-      method: 'POST',
+    const response = await fetch(
+      `${API_BASE_URL}/userevents/${id}/new-connection-uuid`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uuid: uuid }),
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating new connection UUID:", error);
+  }
+}
+
+export async function VerifyConnectionUUID(uuid: string, id: number) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/userevents/${id}/verify-connection-uuid`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uuid: uuid }),
+        credentials: "include",
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Error verifying connection UUID:", error);
+  }
+}
+
+export async function unsubscribeConnectedUser(id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({"uuid": uuid}),
+      credentials: "include",
     });
     return await response.json();
   } catch (error) {
-    console.error('Error creating new connection UUID:', error);
+    console.error("Error unsubscribing connected user:", error);
   }
 }
 
-
-export async function VerifyConnectionConnectedUser(id:number){
+export async function unsubscribeUUID(uuid: string, id: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
-    const data = await response.json();
-    return data;
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uuid: uuid }),
+    });
+    return await response.json();
   } catch (error) {
-    console.error('Error verifying connection for connected user:', error);
+    console.error("Error unsubscribing UUID:", error);
+  }
+}
+
+export async function ShareInvitation(id: number, emails: string[]) {
+  let formData = new FormData();
+  formData.append("emails", JSON.stringify(emails));
+  try {
+    const response = await fetch(`${API_BASE_URL}/userevents/${id}/share`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ emails: emails }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error sharing invitation:", error);
+  }
+}
+// stocker les users qu'on invite pour event privé
+// stocker id + email + uuid pour le lien de pas connecter
+// pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte
+
+export async function UpdateEvent(id: string, data: any): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to update event");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating event:", error);
     throw error;
   }
 }
 
-
-export async function VerifyConnectionUUID(uuid: string , id: number) {
+export async function GetEventAdmin(id: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/verify-connection-uuid`, {
-      method: 'POST',
+    const response = await fetch(`${API_BASE_URL}/events/${id}/admin`, {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({"uuid": uuid}),
-      credentials: 'include'
+      credentials: "include",
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch event admin");
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Error verifying connection UUID:', error);
+    console.error("Error fetching event admin:", error);
+    throw error;
   }
 }
 
-
-export async function unsubscribeConnectedUser(id:number){
+export async function GetEventUsers(eventId: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/users`, {
+      method: "GET",
+      credentials: "include",
     });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch event users");
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Error unsubscribing connected user:', error);
+    console.error("Error fetching event users:", error);
+    throw error;
   }
 }
 
-
-export async function unsubscribeUUID(uuid: string , id: number) {
+export async function RemoveEventUser(eventId: number, userId: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ "uuid": uuid }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/events/${eventId}/users/${userId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to remove user from event");
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Error unsubscribing UUID:', error);
+    console.error("Error removing user from event:", error);
+    throw error;
   }
 }
-
-
-export async function ShareInvitation(id: number ,emails: string[]) {
-  let formData = new FormData();
-  formData.append('emails', JSON.stringify(emails));
-  try {
-    const response = await fetch(`${API_BASE_URL}/userevents/${id}/share`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({"emails": emails}),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error sharing invitation:', error);
-  }
-}
-// stocker les users qu'on invite pour event privé 
-// stocker id + email + uuid pour le lien de pas connecter
-// pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte
