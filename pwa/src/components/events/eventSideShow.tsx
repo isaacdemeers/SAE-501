@@ -5,7 +5,7 @@ import EventInfoTag from "@/components/events/eventInfoTag"
 import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
 import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
-import eventImage from "@/image_mairie_limoges.png"
+import eventImage from "@images/image_mairie_limoges.png"
 import Link from "next/link"
 interface Event {
   id: string;
@@ -18,6 +18,7 @@ interface Event {
   // Add other properties your event object has
 }
 
+
 export default function EventSideShow({ event }: { event: Event }) {
   return (
     <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
@@ -27,7 +28,7 @@ export default function EventSideShow({ event }: { event: Event }) {
       <CardContent className="flex flex-col h-full overflow-y-scroll p-4">
         {/* image */}
         <div className="w-full h-40 bg-slate-100 rounded-lg mb-4">
-          <img src={event.image} alt="Event" className="w-full h-full object-cover rounded-lg shadow-md" />
+          <img src={eventImage.src} alt="Event" className="w-full h-full object-cover rounded-lg shadow-md" />
         </div>
 
         <h3 className="font-semibold mb-2 text-sm">Dates</h3>

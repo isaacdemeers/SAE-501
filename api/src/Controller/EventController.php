@@ -1059,4 +1059,69 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             );
         }
     }
+
+    #[Route('/events/{eventId}/users/{userId}', name: 'remove_user_from_event', methods: ['DELETE'])]
+    public function removeUserFromEvent(
+        int $eventId,
+        int $userId,
+        EntityManagerInterface $entityManager,
+        UserEventRepository $userEventRepository
+    ): JsonResponse {
+        try {
+            // Vérifier si l'événement existe
+            $event = $entityManager->getRepository(Event::class)->find($eventId);
+            if (!$event) {
+                return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier si l'utilisateur existe
+            $user = $entityManager->getRepository(User::class)->find($userId);
+            if (!$user) {
+                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier si l'utilisateur est inscrit à l'événement
+            $userEvent = $userEventRepository->findOneBy([
+                'event' => $event,
+                'user' => $user
+            ]);
+
+            if (!$userEvent) {
+                return new JsonResponse(['error' => 'User is not registered for this event'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier que l'utilisateur n'est pas l'administrateur
+            if ($userEvent->getRole() === 'ROLE_ADMIN') {
+                return new JsonResponse(
+                    ['error' => 'Cannot remove the event administrator'],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            // Supprimer l'inscription de l'utilisateur
+            $entityManager->remove($userEvent);
+
+            // Supprimer également l'invitation si elle existe
+            $invitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+                'event' => $event,
+                'user_id' => $user
+            ]);
+            
+            if ($invitation) {
+                $entityManager->remove($invitation);
+            }
+
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'User successfully removed from event'
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'An error occurred while removing user from event: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

@@ -23,6 +23,7 @@ import { GetEvent } from "@/lib/request"; // Utilisation de votre fichier reques
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import eventImage from "@images/event-background-desktop.png";
+import CustomBadge from "@/components/utils/badge";
 import {
   Dialog,
   DialogTrigger,
@@ -66,18 +67,19 @@ interface EventPageProps {
 }
 
 interface Event {
-  id: string;
+  id: number;
   title: string;
   description: string;
   datestart: string;
   dateend: string;
   location: string;
-  maxparticipant: string;
+  maxparticipant: number;
   img: string;
+  sharelink: string;
   visibility: boolean;
+  userCount: number;
   adminEmail: string;
   adminUsername: string;
-  userCount: number;
 }
 
 interface Admin {
@@ -415,12 +417,17 @@ export default function PageEvent({ params }: EventPageProps) {
           </CardTitle>
           <div className="flex flex-col justify-between md:flex-row-reverse md:mt-8 lg:mt-12 mb-">
             <div className="flex flex-wrap gap-4 mt-2 mb-8 md:mt-0">
-              <Button
+              {/* <Button
                 variant="default"
                 className="bg-green-500 md:flex hover:bg-green-400"
               >
                 <Users className="w-4 h-4 mr-2" /> {event.userCount}
-              </Button>
+              </Button> */}
+              <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
+                <CustomBadge icon={<Users className="w-6 h-6" />} content={event.userCount.toString()} color={1} />
+                <CustomBadge icon={<Eye className="w-6 h-6" />} content={event.visibility ? "Public" : "Privé"} color={event.visibility ? 1 : 0} />
+              </div>
+
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="default">
@@ -612,13 +619,13 @@ export default function PageEvent({ params }: EventPageProps) {
               <p>
                 {isSameDay(event.datestart, event.dateend)
                   ? `A lieu le ${formatDate(event.datestart)} de ${formatTime(
-                      event.datestart
-                    )} à ${formatTime(event.dateend)}`
+                    event.datestart
+                  )} à ${formatTime(event.dateend)}`
                   : `A lieu du ${formatDate(event.datestart)} à ${formatTime(
-                      event.datestart
-                    )} au ${formatDate(event.dateend)} à ${formatTime(
-                      event.dateend
-                    )}`}
+                    event.datestart
+                  )} au ${formatDate(event.dateend)} à ${formatTime(
+                    event.dateend
+                  )}`}
               </p>
             </div>
           </div>
@@ -646,13 +653,13 @@ export default function PageEvent({ params }: EventPageProps) {
                 <p>
                   {isSameDay(event.datestart, event.dateend)
                     ? `Le ${formatDate(event.datestart)} de ${formatTime(
-                        event.datestart
-                      )} à ${formatTime(event.dateend)}`
+                      event.datestart
+                    )} à ${formatTime(event.dateend)}`
                     : `Du ${formatDate(event.datestart)} à ${formatTime(
-                        event.datestart
-                      )} au ${formatDate(event.dateend)} à ${formatTime(
-                        event.dateend
-                      )}`}
+                      event.datestart
+                    )} au ${formatDate(event.dateend)} à ${formatTime(
+                      event.dateend
+                    )}`}
                 </p>
               </div>
               <div>
