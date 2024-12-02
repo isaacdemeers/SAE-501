@@ -62,7 +62,7 @@ export default function Layout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        {/* <Header /> */}
+
         {children}
         <Toaster />
         <Footer />
