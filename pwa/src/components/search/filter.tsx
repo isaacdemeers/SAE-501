@@ -22,7 +22,7 @@ export const filterOptions = [
     { id: "title", label: "Titre", icon: Heading1, color: "bg-indigo-100" },
     { id: "description", label: "Description", icon: Captions, color: "bg-emerald-100" },
     { id: "date", label: "Date", icon: Clock, color: "bg-orange-100" },
-    { id: "users", label: "NOT WORKING", icon: AtSign, color: "bg-yellow-100" },
+    // { id: "users", label: "NOT WORKING", icon: AtSign, color: "bg-yellow-100" },
     { id: "private", label: "vos événements privés", icon: Lock, color: "bg-red-100" },
 ]
 

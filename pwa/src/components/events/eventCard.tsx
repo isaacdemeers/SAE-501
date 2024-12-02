@@ -8,19 +8,21 @@ import { Separator } from "@/components/ui/separator"
 
 
 interface EventCardProps {
-   event: {
-         id: number;
-         title: string;
-         date: string;
-         isPublic: boolean;
-         attendees: number;
-         imageUrl: string;
-    }
+    event: {
+        id: string;
+        title: string;
+        date: string;
+        isPublic: boolean;
+        attendees: number;
+        imageUrl: string;
+        description: string;
+    };
+    type: string;
 }
 
 
 
-export default function EventCard({ event , type }: EventCardProps) {
+export default function EventCard({ event, type }: EventCardProps) {
     let tags = ''
     console.log(event, type)
     return (
@@ -56,9 +58,9 @@ export default function EventCard({ event , type }: EventCardProps) {
                                         <CustomBadge color="red" content="PRIVATE" icon={<Lock />} />
                                     )}
                                 </li>
-                                 <li>
-                                     <CustomBadge color="green" content={event.attendees} icon={<Users />} />
-                                 </li>
+                                <li>
+                                    <CustomBadge color="green" content={event.attendees} icon={<Users />} />
+                                </li>
                             </ul>
                         </div>
                         <div className="flex flex-col lg:flex-row gap-2 items-end justify-center lg:items-center   rounded-lg">
