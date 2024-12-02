@@ -28,7 +28,8 @@ interface SearchResultProps {
 }
 
 const searchEvents = (search: string, activeFilters: string[]) => {
-    return GetAllEvents().then(events => {
+    return GetAllEvents().then(data => {
+        const events = data['hydra:member'] || [];
         // Filtrer d'abord par visibilité si le filtre private est actif
         let filteredEvents = events;
         if (activeFilters.includes('private')) {
@@ -47,19 +48,24 @@ const searchEvents = (search: string, activeFilters: string[]) => {
             return contentFilters.some(filter => {
                 switch (filter) {
                     case 'title':
-                        return event.title.toLowerCase().includes(search.toLowerCase());
+                        return event.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
                     case 'description':
-                        return event.description.toLowerCase().includes(search.toLowerCase());
+                        return event.description?.toLowerCase().includes(search.toLowerCase()) ?? false;
                     case 'date':
-                        return event.datestart.toLowerCase().includes(search.toLowerCase()) ||
-                            event.dateend.toLowerCase().includes(search.toLowerCase());
+                        return (
+                            (event.datestart?.toLowerCase().includes(search.toLowerCase()) ||
+                                event.dateend?.toLowerCase().includes(search.toLowerCase())) ?? false
+                        );
                     case 'users':
-                        return event.maxparticipant.toString().includes(search);
+                        return event.maxparticipant?.toString().includes(search) ?? false;
                     default:
                         return false;
                 }
             });
         });
+    }).catch(error => {
+        console.error('Error fetching events:', error);
+        return [];
     });
 };
 

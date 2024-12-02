@@ -68,13 +68,20 @@ export default function EventModerate({ eventId }: EventModerateProps) {
 
   const handleRemoveUser = async (userId: number) => {
     try {
-      await RemoveEventUser(eventId, userId);
-      // Rafraîchir la liste des utilisateurs
-      const data = await GetEventUsers(eventId);
-      setUsers(data.users);
-    } catch (error) {
-      setError("Erreur lors de la suppression de l'utilisateur");
-      console.error(error);
+      const response = await RemoveEventUser(eventId, userId);
+      if (response.message) {
+        // Rafraîchir la liste des utilisateurs
+        const data = await GetEventUsers(eventId);
+        setUsers(data.users);
+      }
+    } catch (err) {
+      const error = err as Error;
+      setError(
+        error.message || "Erreur lors de la suppression de l'utilisateur"
+      );
+      console.error("Erreur lors de la suppression:", err);
+      // Optionnel : Faire disparaître le message d'erreur après quelques secondes
+      setTimeout(() => setError(null), 5000);
     }
   };
 

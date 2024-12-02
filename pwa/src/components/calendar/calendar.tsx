@@ -64,7 +64,8 @@ export function Calendar() {
 
     useEffect(() => {
         GetAllEvents().then((data) => {
-            const transformedEvents = transformEvents(data);
+            const eventsArray = data['hydra:member'] || [];
+            const transformedEvents = transformEvents(eventsArray);
             setEvents(transformedEvents);
         });
     }, []);
