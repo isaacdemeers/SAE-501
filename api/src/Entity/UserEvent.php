@@ -3,10 +3,25 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserEventRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserEventRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new Post(),
+        new Put(),
+        new Delete(),
+        new GetCollection()
+
+    ],
+)]   
 class UserEvent
 {
     #[ORM\Id]
@@ -14,7 +29,7 @@ class UserEvent
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userevents')]
+    #[ORM\ManyToOne(inversedBy: 'userevents' , targetEntity: Event::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $event = null;
 

@@ -1,32 +1,41 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, Calendar } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 interface MyEventCardProps {
+    eventId: string
     imageUrl: string
     location: string
     title: string
     date: string
 }
 
-const id = "123"
-
 export default function MyEventCard({
-    imageUrl = "/placeholder.svg?height=200&width=300",
-    location = "Trampoline Park, Limoges",
-    title = "Soirée pote au parc trampoline",
-    date = "18 Octobre 2024 à 16h45",
+    eventId,
+    imageUrl,
+    location,
+    title,
+    date,
 }: MyEventCardProps) {
+    const formattedDate = date ? new Date(date.replace(' ', 'T')).toLocaleString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    }) : 'Date non disponible';
+
+    // console.log("Image URL:", imageUrl); // Log the img to check its value
+
     return (
-        <Link href={`/event/${id}`}>
+        <Link href={`/events/${eventId}`}>
             <Card className="overflow-hidden duration-300 hover:cursor-pointer hover:bg-slate-50">
                 <div className="grid grid-cols-[1fr_2fr] p-4 gap-4">
                     <div className="w-full overflow-hidden aspect-[200/130] rounded-md">
-                        <Image
+                        <img
                             width={200}
                             height={130}
-                            src={imageUrl}
+                            src={imageUrl || '/default-event-image.jpg'}
                             alt="Event"
                             className="object-cover w-full h-full"
                         />
@@ -39,7 +48,7 @@ export default function MyEventCard({
                         <h3 className="text-md leading-tight">{title}</h3>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                             <Calendar size={18} className="text-gray-500" />
-                            <span>{date}</span>
+                            <span>{formattedDate}</span>
                         </div>
                     </CardContent>
                 </div>

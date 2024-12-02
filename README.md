@@ -83,5 +83,25 @@ Travaille sur la structure des fichiers, correction de bugs et lancement des nou
 
 #### Added
 - affiche les event et filtres dans la Searchbar. Permet de filtrer les événements.
+
+## [Rendu 3 - Semaine du 25 Novembre]
+
+### - Links
+  
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU3)
+ 
+ ### - Changelog
+
+#### Updated
+- /calendar : Affiche tout les evenements de la base
+- /calendar : Quand on clique sur l'evenement la side bar affiche correctement les infos de l'event
+
+#### Added
+- Lister les évents au quel un user est inscrit 
+- Les pages légal + text footer 
+- affichage d'un event fini
+- ajout partager l'event et visualisation des élément de la base avec le /admin seulement en localhost pas sur codespace
+- Ajout de la page de profil
+- Possibilité de modifier les informations d’un utilisateur (sauf photo de profil "s3 issue") 
   
 

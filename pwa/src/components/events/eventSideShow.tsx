@@ -6,32 +6,37 @@ import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-r
 import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
 import eventImage from "@/image_mairie_limoges.png"
+import Link from "next/link"
+interface Event {
+  id: string;
+  title: string;
+  image: string;
+  dates: string;
+  participants: number;
+  visibility: string;
+  location: string;
+  // Add other properties your event object has
+}
 
-export default function HoverEventCard() {
+export default function EventSideShow({ event }: { event: Event }) {
   return (
-    <Card className="flex flex-col w-full h-full max-w-sm bg-white shadow-lg border-none p-0">
+    <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
       <CardHeader className="flex h-fit flex-row items-center justify-between px-4  border-b">
-        <CardTitle className="text-xl font-bold text-slate-600">Event 1</CardTitle>
+        <CardTitle className="text-xl font-bold text-slate-600">{event.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col h-full overflow-y-scroll p-4">
         {/* image */}
         <div className="w-full h-40 bg-slate-100 rounded-lg mb-4">
-          <Image
-            src=""
-            alt="Event"
-            width={300}
-            height={160}
-            className="w-full h-full object-cover rounded-lg"
-          />
+          <img src={event.image} alt="Event" className="w-full h-full object-cover rounded-lg shadow-md" />
         </div>
 
         <h3 className="font-semibold mb-2 text-sm">Dates</h3>
-        <p className="text-xs text-slate-600 mb-4">Du 14 au 15 novembre 2024</p>
+        <p className="text-xs text-slate-600 mb-4">{event.dates}</p>
         <h3 className="font-semibold mb-2 text-sm">Tags</h3>
 
         <div className="flex items-center justify-start gap-2  mb-4">
-          <CustomBadge icon={<Users />} content="23" color={0} />
-          <CustomBadge icon={<Lock />} content="PUBLIC" color={1} />
+          <CustomBadge icon={<Users />} content={event.participants.toString()} color={2} />
+          <CustomBadge icon={<Lock />} content={event.visibility === "true" ? "PUBLIC" : "PRIVATE"} color={1} />
         </div>
         <h3 className="font-semibold mb-2 text-sm">Informations</h3>
         <ul className="flex flex-col gap-2">
@@ -41,7 +46,7 @@ export default function HoverEventCard() {
             type="full"
             title="Lieu"
             icon={<MapPin />}
-            content="24 Avenue du maréchal Juffre"
+            content={event.location}
           />
           <EventInfoTag
             type="full"
@@ -79,8 +84,10 @@ export default function HoverEventCard() {
 
 
         <Button variant="default" className="w-full text-sm font-semibold">
-          <Eye className="w-4 h-4 mr-2 " />
-          Voir l&apos;événement
+          <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
+            <Eye className="w-4 h-4 mr-2 " />
+            Voir l&apos;événement
+          </Link>
         </Button>
 
       </CardFooter>

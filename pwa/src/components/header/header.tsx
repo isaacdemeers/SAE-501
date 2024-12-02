@@ -50,8 +50,10 @@ export default function Header() {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" size="icon" className="hidden sm:flex">
-                                    <Calendar className="h-5 w-5 stroke-slate-600" />
-                                    <span className="sr-only">Calendar</span>
+                                    <Link href="/calendar">
+                                        <Calendar className="h-5 w-5 stroke-slate-600" />
+                                        <span className="sr-only">Calendar</span>
+                                    </Link>
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -74,17 +76,23 @@ export default function Header() {
                                         <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem>
-                                            <UserIcon className="mr-2 h-4 w-4" />
-                                            <span>Profil</span>
+                                            <Link href="/account" className="flex items-center justify-start gap-2">
+                                                <UserIcon className="mr-2 h-4 w-4" />
+                                                <span>Profil</span>
+                                            </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            <span>Paramètres</span>
+                                            <Link href="/settings" className="flex items-center justify-start gap-2">
+                                                <Settings className="mr-2 h-4 w-4" />
+                                                <span>Paramètres</span>
+                                            </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem className="text-red-600">
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            <span>Déconnexion</span>
+                                            <Link href="/logout" className="flex items-center justify-start gap-2">
+                                                <LogOut className="mr-2 h-4 w-4" />
+                                                <span>Déconnexion</span>
+                                            </Link>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
