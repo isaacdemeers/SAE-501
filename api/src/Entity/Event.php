@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use App\Controller\EventController;
 use App\Controller\UserEventController;
@@ -38,7 +37,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Get(
             uriTemplate: '/events',
-            controller: EventController::class .'::getAllEvents',
+            controller: EventController::class . '::getAllEvents',
             normalizationContext: ['groups' => ['event:read']]
         ),
         new Post(
@@ -250,42 +249,42 @@ use Symfony\Component\Serializer\Annotation\Groups;
             provider: null
         )
     ]
-    
+
 )]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['event:read' , 'event:write'])]
+    #[Groups(['event:read', 'event:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?\DateTimeInterface $datestart = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?\DateTimeInterface $dateend = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $location = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $sharelink = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['event:read','event:write', 'event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?string $img = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -293,22 +292,19 @@ class Event
     private ?\DateTimeInterface $deleted_date = null;
 
     #[ORM\Column]
-    #[Groups(['event:read','event:write'])]
+    #[Groups(['event:read', 'event:write'])]
 
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    #[Groups(['event:read','event:write'])]
+    #[Groups(['event:read', 'event:write'])]
 
     private ?int $visibility = null;
 
     #[ORM\Column]
-    #[Groups(['event:read', 'event:write','event:create'])]
+    #[Groups(['event:read', 'event:write', 'event:create'])]
     private ?int $maxparticipant = null;
 
-    #[ORM\Column]
-    #[Groups(['event:read', 'event:write','event:create'])]
-    private ?int $maxparticipant = null;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: UserEvent::class)]
     private Collection $userevents;
@@ -325,7 +321,7 @@ class Event
     {
         return $this->userevents;
     }
-    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -462,5 +458,4 @@ class Event
 
         return $this;
     }
-
 }

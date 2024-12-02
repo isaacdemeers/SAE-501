@@ -9,7 +9,6 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\Patch;
 use App\Controller\RegisterController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
@@ -221,28 +220,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:create'])]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255 , nullable: true)]
-    #[Groups(['user:read' , 'user:create'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 255 , nullable: true)]
-    #[Groups(['user:read'  ,'user:create'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255 , nullable: true)]
-    #[Groups(['user:read'  , 'user:create' , 'user:usernameverification'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:create', 'user:usernameverification'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:read'])]
     private ?string $photo = null;
 
-    #[ORM\Column( nullable: true)]
+    #[ORM\Column(nullable: true)]
     #[Groups(['user:read'])]
     private ?bool $emailverify = null;
 
-    #[ORM\Column(length: 255 , nullable: true)]
-    #[Groups(['user:read' ,'user:create' , 'user:emailconfirmation'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:create', 'user:emailconfirmation'])]
     private ?string $emaillink = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -251,18 +250,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['user:read' ,'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?\DateTimeInterface $deleted_at = null;
 
     #[ORM\Column]
-    #[Groups(['user:read' ,'user:create'])]
+    #[Groups(['user:read', 'user:create'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserEvent::class)]
     private Collection $userevents;
 
-  
-        public function getId(): ?int
+
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -427,6 +426,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->userevents;
     }
-
- 
 }

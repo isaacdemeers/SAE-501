@@ -47,19 +47,20 @@ export default function EventModerate({ eventId }: EventModerateProps) {
     fetchUsers();
   }, [eventId]);
 
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.firstname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastname?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.firstname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastname?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatRole = (role: string) => {
     switch (role) {
-      case 'ROLE_ADMIN':
-        return 'Administrateur';
-      case 'ROLE_USER':
-        return 'Participant';
+      case "ROLE_ADMIN":
+        return "Administrateur";
+      case "ROLE_USER":
+        return "Participant";
       default:
         return role;
     }
@@ -87,9 +88,9 @@ export default function EventModerate({ eventId }: EventModerateProps) {
       <div className="space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Rechercher un participant..." 
-            className="pl-10" 
+          <Input
+            placeholder="Rechercher un participant..."
+            className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -100,7 +101,7 @@ export default function EventModerate({ eventId }: EventModerateProps) {
             <TableRow>
               <TableHead>Nom</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Nom d'utilisateur</TableHead>
+              <TableHead>Nom d&apos;utilisateur</TableHead>
               <TableHead>Rôle</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -114,7 +115,7 @@ export default function EventModerate({ eventId }: EventModerateProps) {
                 <TableCell>{formatRole(user.role)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    {user.role !== 'ROLE_ADMIN' && (
+                    {user.role !== "ROLE_ADMIN" && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -122,7 +123,9 @@ export default function EventModerate({ eventId }: EventModerateProps) {
                         onClick={() => handleRemoveUser(user.id)}
                       >
                         <UserMinus className="h-4 w-4" />
-                        <span className="sr-only">Retirer l'utilisateur</span>
+                        <span className="sr-only">
+                          Retirer l&apos;utilisateur
+                        </span>
                       </Button>
                     )}
                   </div>

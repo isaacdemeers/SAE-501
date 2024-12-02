@@ -45,9 +45,20 @@ import EventForm from "./eventEdit"; // Ajoutez cet import
 import EventModerate from "./eventModerate";
 import { GetEventAdmin } from "@/lib/request"; // Ajoutez cet importimport { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Clipboard } from "lucide-react";
-import { FacebookIcon, FacebookShareButton, TwitterShareButton, XIcon } from "react-share";
+import {
+  FacebookIcon,
+  FacebookShareButton,
+  TwitterShareButton,
+  XIcon,
+} from "react-share";
 import LinkIcon from "@images/link.png";
 import { ShareInvitation } from "@/lib/request";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 interface EventPageProps {
   params: {
     id: number;
@@ -106,7 +117,10 @@ export default function PageEvent({ params }: EventPageProps) {
         const [eventData, authData, adminData] = await Promise.all([
           GetEvent(id),
           IsAuthentificated(),
-          GetEventAdmin(id),
+          GetEventAdmin(id).catch(err => {
+            console.warn("Could not fetch admin data:", err);
+            return { admin: null };
+          })
         ]);
         setEvent(eventData);
         setEventAdmin(adminData.admin);
@@ -119,8 +133,6 @@ export default function PageEvent({ params }: EventPageProps) {
           return;
         } else if (authData.isValid) {
           setIsAuthenticated(true);
-          console.log("Admin Data:", adminData);
-          console.log("Auth Data:", authData);
           if (
             adminData.admin &&
             authData.user &&
@@ -138,8 +150,8 @@ export default function PageEvent({ params }: EventPageProps) {
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-           let connected = await NewConnectionUUID(newconnection, id);
-            if(connected.isValid) {
+            let connected = await NewConnectionUUID(newconnection, id);
+            if (connected.isValid) {
               setIsSubscribed(true);
               setEvent((prevEvent) => {
                 if (prevEvent) {
@@ -147,34 +159,27 @@ export default function PageEvent({ params }: EventPageProps) {
                 }
                 return prevEvent;
               });
+            }
           }
-        }
-          const subscriptionData = await VerifyConnectionConnectedUser(id);
-          console.log(subscriptionData);
-          if (eventData.visibility === 0 && subscriptionData.message === "User is not joined to the event") {
-             router.push('/');
+          if (eventData.visibility === 0) {
+            router.push("/");
             return;
-          } else if (subscriptionData.isLog === true) {
-            setIsSubscribed(true);
-            setRole(subscriptionData.Role);
-            console.log(subscriptionData);
           }
-        }
-        else if(authData.isValid === false) {
+        } else if (authData.isValid === false) {
           const urlParams = new URLSearchParams(window.location.search);
           const connection = urlParams.get("connection");
           if (connection) {
             setConnectionuuid(connection);
             let connected = await verifyConnectionUUID(connection, id);
-            if(connected.isValid) {
+            if (connected.isValid) {
               setIsSubscribed(true);
             }
           }
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-           let connected = await NewConnectionUUID(newconnection, id);
-            if(connected.isValid) {
+            let connected = await NewConnectionUUID(newconnection, id);
+            if (connected.isValid) {
               setIsSubscribed(true);
               setEvent((prevEvent) => {
                 if (prevEvent) {
@@ -182,14 +187,11 @@ export default function PageEvent({ params }: EventPageProps) {
                 }
                 return prevEvent;
               });
+            }
           }
-      }
-    }
-    } catch (err) {
+        }
+      } catch (err) {
         setError("Une erreur est survenue lors du chargement de l'événement.");
-        setTimeout(() => {
-          setError(null);
-        }, 5000);
         console.error("Erreur lors du chargement de l'événement:", err);
       } finally {
         setLoading(false);
@@ -258,12 +260,12 @@ export default function PageEvent({ params }: EventPageProps) {
         setIsDialogOpen(false);
         setIsSubscribed(false);
         setEvent((prevEvent) => {
-        if (prevEvent) {
-          return { ...prevEvent, userCount: prevEvent.userCount - 1 };
-        }
-        return prevEvent;
-      });
-      console.log("Vous vous êtes désinscrit avec succès");
+          if (prevEvent) {
+            return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+          }
+          return prevEvent;
+        });
+        console.log("Vous vous êtes désinscrit avec succès");
       } else {
         console.log(unsub);
       }
@@ -308,19 +310,17 @@ export default function PageEvent({ params }: EventPageProps) {
     }
   };
 
-
   const handleAddInvitee = () => {
     if (inviteeEmail && !invitees.includes(inviteeEmail)) {
       setInvitees([...invitees, inviteeEmail]);
-      setInviteeEmail('');
+      setInviteeEmail("");
     }
   };
-  
+
   const handleRemoveInvitee = (email: string) => {
-    setInvitees(invitees.filter(invitee => invitee !== email));
+    setInvitees(invitees.filter((invitee) => invitee !== email));
   };
 
-  
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     console.log("Lien copié dans le presse-papiers");
@@ -330,10 +330,9 @@ export default function PageEvent({ params }: EventPageProps) {
     }, 3000);
   };
 
-
   const handleSendInvitations = async (e: React.FormEvent) => {
-    console.log(invitees , inviteeEmail)
-    let invitation = await ShareInvitation(id , invitees);
+    console.log(invitees, inviteeEmail);
+    let invitation = await ShareInvitation(id, invitees);
     if (invitation.message === "Invitations sent successfully") {
       console.log("Invitations envoyées avec succès");
     } else {
@@ -422,75 +421,88 @@ export default function PageEvent({ params }: EventPageProps) {
               >
                 <Users className="w-4 h-4 mr-2" /> {event.userCount}
               </Button>
-                <Popover>
+              <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="default">
-                  <Share2 className="w-4 h-4 mr-2" /> Partager
+                    <Share2 className="w-4 h-4 mr-2" /> Partager
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="flex w-fit gap-4">
                   {event.visibility ? (
-                  <>
-                  <div className="flex flex-col gap-2 w-fit h-fit items-center justify-center">
-                    <Image src={LinkIcon} className="flex items-center justify-center cursor-pointer" onClick={handleCopyLink} alt="Link" width={32} height={32} />
-                    {isCopied ? (
-                      <p className="flex items-center text-green-500">
-                        <Clipboard className="w-4 h-4 mr-2" /> Copié !
-                      </p>
-                    ) : null}
-                    </div>
-                    <FacebookShareButton url={window.location.href}>
-                    <FacebookIcon size={32} round={true} />
-                    </FacebookShareButton>
-                    <TwitterShareButton url={window.location.href}>
-                    <XIcon size={32} round={true} />
-                    </TwitterShareButton>
-                  </>
+                    <>
+                      <div className="flex flex-col gap-2 w-fit h-fit items-center justify-center">
+                        <Image
+                          src={LinkIcon}
+                          className="flex items-center justify-center cursor-pointer"
+                          onClick={handleCopyLink}
+                          alt="Link"
+                          width={32}
+                          height={32}
+                        />
+                        {isCopied ? (
+                          <p className="flex items-center text-green-500">
+                            <Clipboard className="w-4 h-4 mr-2" /> Copié !
+                          </p>
+                        ) : null}
+                      </div>
+                      <FacebookShareButton url={window.location.href}>
+                        <FacebookIcon size={32} round={true} />
+                      </FacebookShareButton>
+                      <TwitterShareButton url={window.location.href}>
+                        <XIcon size={32} round={true} />
+                      </TwitterShareButton>
+                    </>
                   ) : (
-                      <div className="space-y-2">
-                        <Label htmlFor="invitee">Inviter des personnes</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="invitee"
-                            type="email"
-                            placeholder="Adresse mail de l'invité"
-                            value={inviteeEmail}
-                            onChange={(e) => setInviteeEmail(e.target.value)}
-                          />
-                          <Button
-                            type="button"
-                            onClick={handleAddInvitee}
-                            disabled={!inviteeEmail || invitees.includes(inviteeEmail)}
-                          >
-                            Ajouter
-                          </Button>
-                        </div>
-                        {invitees.length > 0 && (
-                          <ul className="mt-2 space-y-2">
-                            {invitees.map((email, index) => (
-                              <li
-                                key={index}
-                                className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full"
-                              >
-                                <span className="pr-3">{email}</span>
-                                <Button
-                                  className="rounded-full bg-inherit hover:text-white text-black"
-                                  size="icon"
-                                  onClick={() => handleRemoveInvitee(email)}
-                                >
-                                  <XIcon className="w-4 h-4 rounded-full font-bold" />
-                                </Button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <Button onClick={handleSendInvitations} className="w-full" type="submit">
-                          Envoyer les invitations
+                    <div className="space-y-2">
+                      <Label htmlFor="invitee">Inviter des personnes</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="invitee"
+                          type="email"
+                          placeholder="Adresse mail de l'invité"
+                          value={inviteeEmail}
+                          onChange={(e) => setInviteeEmail(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleAddInvitee}
+                          disabled={
+                            !inviteeEmail || invitees.includes(inviteeEmail)
+                          }
+                        >
+                          Ajouter
                         </Button>
                       </div>
+                      {invitees.length > 0 && (
+                        <ul className="mt-2 space-y-2">
+                          {invitees.map((email, index) => (
+                            <li
+                              key={index}
+                              className="flex items-center justify-between w-fit pl-3 pr-0 border-black border-2 rounded-full"
+                            >
+                              <span className="pr-3">{email}</span>
+                              <Button
+                                className="rounded-full bg-inherit hover:text-white text-black"
+                                size="icon"
+                                onClick={() => handleRemoveInvitee(email)}
+                              >
+                                <XIcon className="w-4 h-4 rounded-full font-bold" />
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <Button
+                        onClick={handleSendInvitations}
+                        className="w-full"
+                        type="submit"
+                      >
+                        Envoyer les invitations
+                      </Button>
+                    </div>
                   )}
                 </PopoverContent>
-                </Popover>
+              </Popover>
               {isSubscribed ? (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
@@ -655,7 +667,13 @@ export default function PageEvent({ params }: EventPageProps) {
                   <Users />
                   <h3 className="font-semibold">Places</h3>
                 </div>
-              <p> {event.userCount} / {Number(event.maxparticipant) === 0 ? "infini" : event.maxparticipant}</p>
+                <p>
+                  {" "}
+                  {event.userCount} /{" "}
+                  {Number(event.maxparticipant) === 0
+                    ? "infini"
+                    : event.maxparticipant}
+                </p>
               </div>
               <div>
                 <div className="flex gap-2 pb-2">

@@ -43,15 +43,15 @@ import { UpdateEvent } from "@/lib/request";
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Le titre doit contenir au moins 2 caractères.",
-  }).optional(),
-  description: z.string().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
+  }),
+  description: z.string(),
+  startDate: z.date(),
+  endDate: z.date(),
   location: z.string().min(2, {
     message: "Le lieu est requis.",
-  }).optional(),
-  maxAttendees: z.string().optional(),
-  visibility: z.string().optional(),
+  }),
+  maxAttendees: z.string(),
+  visibility: z.enum(["public", "private"]),
   inviteeEmail: z.string().email().optional().or(z.literal("")),
   image: z.any().optional(),
 });
@@ -70,6 +70,18 @@ interface EventFormProps {
   onUpdate: () => void;
 }
 
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  datestart: string;
+  dateend: string;
+  location: string;
+  maxparticipant: number;
+  visibility: boolean;
+  img: string;
+}
+
 export default function EventForm({ event, onClose, onUpdate }: EventFormProps) {
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,7 +91,7 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: event.title,
-      description: event.description || "",
+      description: event.description,
       startDate: new Date(event.datestart),
       endDate: new Date(event.dateend),
       location: event.location,
@@ -90,24 +102,26 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    setError(null);
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Créer l'objet de données à envoyer
       const formData: any = {};
 
+      // Ne mettre à jour que les champs modifiés
       if (values.title !== event.title) {
         formData.title = values.title;
       }
       if (values.description !== event.description) {
         formData.description = values.description;
       }
-      if (values.startDate && new Date(event.datestart).getTime() !== values.startDate.getTime()) {
-        formData.datestart = values.startDate.toISOString();
+      if (values.startDate) {
+        formData.datestart = values.startDate.toISOString().split('.')[0];
       }
-      if (values.endDate && new Date(event.dateend).getTime() !== values.endDate.getTime()) {
-        formData.dateend = values.endDate.toISOString();
+      if (values.endDate) {
+        formData.dateend = values.endDate.toISOString().split('.')[0];
       }
       if (values.location !== event.location) {
         formData.location = values.location;
@@ -116,23 +130,27 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
         formData.maxparticipant = parseInt(values.maxAttendees);
       }
       if ((values.visibility === "public") !== event.visibility) {
-        formData.visibility = values.visibility === "public" ? 1 : 0;
+        formData.visibility = values.visibility;
       }
 
+      // N'envoyer la requête que si des modifications ont été faites
       if (Object.keys(formData).length > 0) {
-        await UpdateEvent(event.id, formData);
-        onUpdate();
-        onClose();
+        const response = await UpdateEvent(event.id, formData);
+        if (response.event) {
+          onUpdate?.();
+          onClose?.();
+        }
       } else {
-        onClose();
+        onClose?.();
       }
     } catch (err) {
-      setError("Une erreur est survenue lors de la mise à jour de l'événement.");
+      const error = err as Error;
+      setError(error.message || "Une erreur est survenue lors de la mise à jour");
       console.error("Erreur lors de la mise à jour:", err);
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">

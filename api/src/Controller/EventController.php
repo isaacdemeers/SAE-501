@@ -952,4 +952,111 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
         return new JsonResponse(['message' => 'Invitations sent successfully'], Response::HTTP_OK);
     }
+
+    #[Route('/events/{id}/admin', name: 'get_event_admin', methods: ['GET'])]
+    public function getEventAdmin(int $id, EntityManagerInterface $entityManager, UserEventRepository $userEventRepository): JsonResponse
+    {
+        try {
+            // Récupérer l'administrateur de l'événement
+            $adminUserEvent = $userEventRepository->findEventAdmin($id);
+            
+            if (!$adminUserEvent) {
+                return new JsonResponse(['error' => 'Admin not found for this event'], Response::HTTP_NOT_FOUND);
+            }
+
+            $adminUser = $adminUserEvent->getUser();
+            
+            return new JsonResponse([
+                'admin' => [
+                    'id' => $adminUser->getId(),
+                    'email' => $adminUser->getEmail(),
+                    'username' => $adminUser->getUsername()
+                ]
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'An error occurred while fetching the event admin: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    #[Route('/events/{id}', name: 'edit_event', methods: ['PATCH'])]
+    public function editEvent(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserEventRepository $userEventRepository,
+        AmazonS3Service $s3Service
+    ): JsonResponse {
+        try {
+            // Récupérer l'événement
+            $event = $entityManager->getRepository(Event::class)->find($id);
+            if (!$event) {
+                return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier si l'utilisateur est admin de l'événement
+            $token = $request->cookies->get('jwt_token');
+            if (!$token) {
+                return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $adminUserEvent = $userEventRepository->findEventAdmin($id);
+            if (!$adminUserEvent) {
+                return new JsonResponse(['error' => 'Admin not found for this event'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Récupérer les données de la requête
+            $data = json_decode($request->getContent(), true);
+
+            // Mettre à jour les champs de l'événement
+            if (isset($data['title'])) {
+                $event->setTitle($data['title']);
+            }
+            if (isset($data['description'])) {
+                $event->setDescription($data['description']);
+            }
+            if (isset($data['datestart'])) {
+                $event->setDatestart(new \DateTime($data['datestart']));
+            }
+            if (isset($data['dateend'])) {
+                $event->setDateend(new \DateTime($data['dateend']));
+            }
+            if (isset($data['location'])) {
+                $event->setLocation($data['location']);
+            }
+            if (isset($data['maxparticipant'])) {
+                $event->setMaxparticipant($data['maxparticipant']);
+            }
+            if (isset($data['visibility'])) {
+                $event->setVisibility($data['visibility'] === 'public' ? 1 : 0);
+            }
+
+            // Sauvegarder les modifications
+            $entityManager->flush();
+
+            // Retourner l'événement mis à jour
+            return new JsonResponse([
+                'message' => 'Event updated successfully',
+                'event' => [
+                    'id' => $event->getId(),
+                    'title' => $event->getTitle(),
+                    'description' => $event->getDescription(),
+                    'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                    'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                    'location' => $event->getLocation(),
+                    'maxparticipant' => $event->getMaxparticipant(),
+                    'visibility' => $event->getVisibility(),
+                    'img' => $s3Service->getObjectUrl($event->getImg())
+                ]
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'An error occurred while updating the event: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }
