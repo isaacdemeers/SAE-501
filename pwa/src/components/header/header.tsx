@@ -1,21 +1,13 @@
+'use client'
+
 import Link from "next/link"
 import { PlusCircle, Calendar, User, AlignRight } from "lucide-react"
-import { abhayalibre, inter } from '@/lib/fonts'
+import { abhayalibre } from '@/lib/fonts'
 import SearchResult from "@/components/search/searchResult"
 import Nav from "@/components/header/headerNav"
-
-
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import SearchBar from "@/components/search/search"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, Settings, UserIcon } from "lucide-react"
 import {
     Tooltip,
     TooltipContent,
@@ -23,17 +15,47 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
+interface AuthResponse {
+    isValid: boolean;
+    user: {
+        email: string;
+        id: number;
+        username: string;
+    };
+}
+
 export default function Header() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const authenticateUser = async () => {
+            try {
+                const response = await fetch('/api/auth/validate-token', {
+                    method: 'POST',
+                    credentials: 'include',
+                });
+
+                const data: AuthResponse = await response.json();
+                setIsAuthenticated(data.isValid);
+            } catch (error) {
+                console.error('Authentication error:', error);
+                setIsAuthenticated(false);
+            }
+        };
+
+        authenticateUser();
+    }, []);
+
     return (
-        <>
-            <header className="fixed  left-0 bg-slate-50 bg-opacity-80 backdrop-blur-lg h-20  z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
-                <Link href="/" className={`  drop-shadow-lg   text-3xl font-bold text-slate-600 w-full flex   items-center justify-start ${abhayalibre.className}`}>
-                    <p className="transition-all transition-300ms w-fit hover:scale-105 x hover:drop-shadow-md ">PlanIt</p>
-                </Link>
+        <header className="fixed left-0 bg-slate-50 bg-opacity-80 backdrop-blur-lg h-20 z-50 top-0 w-screen flex items-center justify-between px-6 py-4 border-b shadow-sm">
+            <Link href="/" className={`drop-shadow-lg text-3xl font-bold text-slate-600 w-full flex items-center justify-start ${abhayalibre.className}`}>
+                <p className="transition-all transition-300ms w-fit hover:scale-105 x hover:drop-shadow-md">PlanIt</p>
+            </Link>
 
-                <SearchBar />
+            <SearchBar />
 
-                <div className="flex items-center w-full gap-2 justify-end">
+            <div className="flex items-center w-full gap-2 justify-end">
+                {isAuthenticated ? (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -62,58 +84,20 @@ export default function Header() {
                         </Tooltip>
 
                         <div className="h-6 w-px bg-gray-200 hidden sm:flex" />
-
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <DropdownMenu >
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="hidden sm:flex">
-                                            <User className="h-5 w-5 stroke-slate-600" />
-                                            <span className="sr-only">User profile</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className=" translate-x-2 rounded-lg w-56 bg-slate-50 bg-opacity-90 backdrop-blur-lg" align="end">
-                                        <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem>
-                                            <Link href="/account" className="flex items-center justify-start gap-2">
-                                                <UserIcon className="mr-2 h-4 w-4" />
-                                                <span>Profil</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            <Link href="/settings" className="flex items-center justify-start gap-2">
-                                                <Settings className="mr-2 h-4 w-4" />
-                                                <span>Paramètres</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-red-600">
-                                            <Link href="/logout" className="flex items-center justify-start gap-2">
-                                                <LogOut className="mr-2 h-4 w-4" />
-                                                <span>Déconnexion</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TooltipTrigger>
-                            <TooltipContent >
-                                <p>Profil utilisateur</p>
-                            </TooltipContent>
-                        </Tooltip>
                     </TooltipProvider>
-                    <Button variant="ghost" size="icon" className="flex sm:hidden">
-                        {/* <AlignRight className="h-5 w-5 stroke-slate-600" /> */}
-                        <Nav />
+                ) : (
+                    <div className="hidden sm:flex gap-2">
+                        <Link href="/login">
+                            <Button variant="outline">Connexion</Button>
+                        </Link>
+                        <Link href="/signin">
+                            <Button>Commencer</Button>
+                        </Link>
+                    </div>
+                )}
 
-                        <span className="sr-only">mobile menu</span>
-
-                    </Button>
-
-                </div>
-
-
-            </header>
-        </>
+                <Nav isAuthenticated={isAuthenticated} />
+            </div>
+        </header>
     )
 }

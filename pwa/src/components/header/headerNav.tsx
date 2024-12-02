@@ -1,66 +1,112 @@
 'use client'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 import { AlignRight, Calendar, CirclePlus, Search, Settings, User, X } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-export default function Nav() {
-    const [isOpen, setIsOpen] = useState(false)
+interface AuthResponse {
+    isValid: boolean;
+    user: {
+        email: string;
+        id: number;
+        username: string;
+    };
+}
 
-    let elementStyle = `flex items-center gap-4 delay-300 duration-300 p-4 origin-center  ${isOpen ? "opacity-100 blur-0  scale-100" : "opacity-0 blur-md "}`
+interface NavProps {
+    isAuthenticated: boolean;
+}
 
+export default function Nav({ isAuthenticated }: NavProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [username, setUsername] = useState<string>('');
 
-    // if (isOpen) {
-    //     document.body.style.overflow = 'hidden'
-    // } else {
-    //     document.body.style.overflow = 'auto'
-    // }
+    useEffect(() => {
+        if (isAuthenticated) {
+            const fetchUsername = async () => {
+                try {
+                    const response = await fetch('/api/auth/validate-token', {
+                        method: 'POST',
+                        credentials: 'include',
+                    });
+                    const data: AuthResponse = await response.json();
+                    if (data.user?.username) {
+                        setUsername(data.user.username);
+                    }
+                } catch (error) {
+                    console.error('Error fetching username:', error);
+                }
+            };
+            fetchUsername();
+        }
+    }, [isAuthenticated]);
+
     return (
-        <>
-            {isOpen ? <X onClick={() => setIsOpen(false)} className="h-5 w-5 stroke-slate-600" /> : <AlignRight onClick={() => setIsOpen(!isOpen)} className="h-5 w-5 stroke-slate-600" />}
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="flex sm:hidden">
+                    <AlignRight className="h-5 w-5 stroke-slate-600" />
+                </Button>
+            </SheetTrigger>
+            <SheetContent>
+                <SheetHeader>
+                    <SheetTitle>{isAuthenticated ? `Bonjour, ${username}` : 'Menu'}</SheetTitle>
+                </SheetHeader>
 
-            <nav className={`bg-white transition-all ${isOpen ? 'translate-y-0' : 'translate-y-full'} absolute left-0 top-0 z-30 h-screen mt-20 w-screen flex flex-col `}>
-                <ul className="flex flex-col items-start justify-center opacity-100  p-4">
-                    <li className={elementStyle}>
-                        <h3 className="text-3xl font-bold text-slate-600 mb-4">Compte</h3>
-                    </li>
-                    <li className={elementStyle}>
-                        <User className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/">Mon Profil</Link>
-                    </li>
-                    <li className={elementStyle}>
-                        <Settings className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/">Paramètres</Link>
-                    </li>
+                {isAuthenticated ? (
+                    // Menu pour utilisateurs connectés
+                    <div className="flex flex-col gap-4 mt-8">
+                        <div className="flex flex-col gap-2">
+                            <h3 className="text-lg font-semibold text-slate-600">Compte</h3>
+                            <Link href="/profile" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <User className="h-5 w-5" />
+                                Mon Profil
+                            </Link>
+                            <Link href="/settings" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <Settings className="h-5 w-5" />
+                                Paramètres
+                            </Link>
+                        </div>
 
-                </ul>
-                <ul className="flex flex-col items-start justify-center  p-4">
-                    <li className={elementStyle}>
-                        <h3 className="text-3xl font-bold text-slate-600 mb-4">Agenda</h3>
-                    </li>
-                    <li className={elementStyle}>
-                        <Calendar className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/calendar">Mon Agenda</Link>
-                    </li>
-                    <li className={elementStyle}>
-                        <CirclePlus className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/">Ajouter un Evenement</Link>
-                    </li>
-                    <li className={elementStyle}>
-                        <Search className="h-8 w-8 stroke-slate-600" />
-                        <Link className={`text-xl font-bold text-slate-600 `} href="/">Rechercher</Link>
-                    </li>
-
-                </ul>
-            </nav>
-
-        </>
+                        <div className="flex flex-col gap-2">
+                            <h3 className="text-lg font-semibold text-slate-600">Agenda</h3>
+                            <Link href="/calendar" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <Calendar className="h-5 w-5" />
+                                Mon Agenda
+                            </Link>
+                            <Link href="/events/new" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <CirclePlus className="h-5 w-5" />
+                                Nouvel Événement
+                            </Link>
+                            <Link href="/search" className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                                <Search className="h-5 w-5" />
+                                Rechercher
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    // Menu pour visiteurs
+                    <div className="flex flex-col gap-4 mt-8">
+                        <Link href="/login">
+                            <Button className="w-full" variant="outline">
+                                Connexion
+                            </Button>
+                        </Link>
+                        <Link href="/signin">
+                            <Button className="w-full">
+                                Commencer
+                            </Button>
+                        </Link>
+                    </div>
+                )}
+            </SheetContent>
+        </Sheet>
     )
 }

@@ -119,8 +119,8 @@ export default function DashboardClient() {
     return (
         <div className="container mt-16 mx-auto p-4 md:p-8 lg:p-12">
 
-            <h1 className="text-4xl font-bold mb-8">
-                {isAuthenticated ? `Bienvenue, ${username} 👋` : "Bienvenue sur Plan-It 👋"}
+            <h1 className="text-4xl font-bold mb-8 mt-4">
+                {isAuthenticated ? `Bienvenue, ${username} 👋` : "Bienvenue sur PlanIt 👋"}
             </h1>
             <div className="grid grid-cols-1 lg:grid-cols-[3fr_4fr] gap-8">
                 {isAuthenticated ? (
