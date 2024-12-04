@@ -430,7 +430,7 @@ class EventController extends AbstractController
     }
 }
 
-#[Route('/event/{id}', name: 'app_event_get', methods: ['POST'])]
+#[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
 public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
 {
     $event = $eventRepository->find($request->get('id'));
@@ -464,17 +464,18 @@ public function getevent (Request $request , EventRepository $eventRepository , 
         'userCount' => $userCount
     ];
 
-        // Get the image URL from AWS S3
-        $imageName = $event->getImg();
-        if ($imageName) {
-            $imageUrl = $this->s3Service->getObjectUrl($imageName);
-            $eventData['img'] = $imageUrl;
-        } else {
-            $eventData['img'] = null;
-        }
-
-        return $this->json($eventData, JsonResponse::HTTP_OK);
+    // Get the image URL from AWS S3
+    $imageName = $event->getImg();
+    if ($imageName) {
+        $imageUrl = $this->s3Service->getObjectUrl($imageName);
+        $eventData['img'] = $imageUrl;
+    } else {
+        $eventData['img'] = null;
     }
+
+    return $this->json($eventData, JsonResponse::HTTP_OK);
+}
+
 
     #[Route('/api/events/upcoming', name: 'get_upcoming_events', methods: ['GET'])]
     public function getUpcomingEvents(Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -582,7 +583,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
 
 
-    #[Route('/userevents/{eventid}', name: 'get_event_users', methods: ['GET'])]
+    #[Route('/userevents/{eventid}', name: 'get_event_users_1', methods: ['GET'])]
     public function getEventUsers($eventid, Request $request, EntityManagerInterface $entityManager, JWTEncoderInterface $jwtEncoder, UserProviderInterface $userProvider): JsonResponse
     {
         // Récupérer le token JWT depuis le cookie
@@ -663,12 +664,12 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
             // Check if the user is in the UserEvent table
             $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
-                'event' => $event,
-                'user' => $userId
+            'event' => $event,
+            'user' => $userId
             ]);
 
             if ($userEvent) {
-                return new JsonResponse(['isValid' => true], Response::HTTP_OK);
+            return new JsonResponse(['isValid' => true], Response::HTTP_OK);
             } else {
 
 
@@ -719,7 +720,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             $entityManager->persist($userEvent);
             $entityManager->flush();
 
-                return new JsonResponse(['isValid' => true, 'message' => 'User successfully added to the event'], Response::HTTP_OK);
+            return new JsonResponse(['isValid' => true, 'message' => 'User successfully added to the event'], Response::HTTP_OK);
             }
         } else {
             return new JsonResponse(['isValid' => false, 'error' => 'Invalid UUID'], Response::HTTP_BAD_REQUEST);
@@ -759,8 +760,8 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     }
 
 
-    #[Route('/userevents/{event}/leave', name: 'app_event_leave', methods: ['POST'])]
-    public function LeaveEventConnecteduser($event, EntityManagerInterface $entityManager, Request $request, JWTEncoderInterface $jwtEncoder, UserProviderInterface $userProvider): JsonResponse
+     #[Route('/userevents/{event}/leave', name: 'app_event_leave', methods: ['POST'])]
+     public function LeaveEventConnecteduser($event, EntityManagerInterface $entityManager ,Request $request , JWTEncoderInterface $jwtEncoder , UserProviderInterface $userProvider): JsonResponse
     {
         // Retrieve the token from the request cookies
         $token = $request->cookies->get('jwt_token');
@@ -791,7 +792,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             if (!$User) {
                 return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
             }
-
+            
             // Check if the user has the role 'ROLE_ADMIN'
             $userEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
                 'event' => $event,
@@ -816,6 +817,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             $entityManager->flush();
 
             return new JsonResponse(['message' => 'User successfully left the event'], Response::HTTP_OK);
+
         }
 
         try {
@@ -862,7 +864,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             if ($userEvent) {
                 $entityManager->remove($userEvent);
             }
-
+        
 
             if ($userEvent) {
                 $entityManager->remove($userEvent);
@@ -986,8 +988,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
         int $id,
         Request $request,
         EntityManagerInterface $entityManager,
-        UserEventRepository $userEventRepository,
-        AmazonS3Service $s3Service
+        
     ): JsonResponse {
         try {
             // Récupérer l'événement
@@ -996,20 +997,10 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
             }
 
-            // Vérifier si l'utilisateur est admin de l'événement
-            $token = $request->cookies->get('jwt_token');
-            if (!$token) {
-                return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            $adminUserEvent = $userEventRepository->findEventAdmin($id);
-            if (!$adminUserEvent) {
-                return new JsonResponse(['error' => 'Admin not found for this event'], Response::HTTP_NOT_FOUND);
-            }
-
             // Récupérer les données de la requête
             $data = json_decode($request->getContent(), true);
-
+            $file = $request->files->get('file');
+    return new JsonResponse(['fileName' =>  uniqid() . '.' . $file->guessExtension()], Response::HTTP_OK);
             // Mettre à jour les champs de l'événement
             if (isset($data['title'])) {
                 $event->setTitle($data['title']);
@@ -1031,6 +1022,23 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             }
             if (isset($data['visibility'])) {
                 $event->setVisibility($data['visibility'] === 'public' ? 1 : 0);
+            }
+            if ($file) {
+                $imageName = uniqid() . '.' . $file->guessExtension();
+                
+                // Delete the old image from S3
+                $oldImageName = $event->getImg();
+                if ($oldImageName && $oldImageName !== 'event-background-desktop.png') {
+                    $this->s3Service->deleteObject($oldImageName);
+                }
+
+                // Upload the new image to S3
+                $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
+                if ($uploaded) {
+                    $event->setImg($imageName);
+                } else {
+                    return new JsonResponse(['error' => 'Failed to upload new image to S3'], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
             }
 
             // Sauvegarder les modifications

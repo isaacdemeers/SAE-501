@@ -41,4 +41,14 @@ class AmazonS3Service
 
         return $result['@metadata']['statusCode'] === 200;
     }
-}
+    public function deleteObject(string $key ): bool
+        {
+
+            $result = $this->s3Client->deleteObject([
+                'Bucket'=> $this->bucketName,
+                'Key'=> $key,
+                ]);
+                return $result['@metadata']['statusCode'] === 200;
+            }
+
+        }

@@ -30,18 +30,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  IsAuthentificated,
-  JoinEvent,
-  VerifyConnectionUUID,
-  unsubscribeConnectedUser,
-  unsubscribeUUID,
-  NewConnectionUUID,
-} from "@/lib/request";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConnectedUser , unsubscribeConnectedUser , unsubscribeUUID , NewConnectionUUID } from "@/lib/request";
+import { DialogClose, DialogTitle } from "@radix-ui/react-dialog";
 import EventForm from "./eventEdit"; // Ajoutez cet import
 import EventModerate from "./eventModerate";
 import { GetEventAdmin } from "@/lib/request"; // Ajoutez cet importimport { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -80,6 +74,7 @@ interface Event {
   userCount: number;
   adminEmail: string;
   adminUsername: string;
+  userevents: string ;
 }
 
 interface Admin {
@@ -96,9 +91,8 @@ export default function PageEvent({ params }: EventPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [Role, setRole] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [connectionuuid, setConnectionuuid] = useState("");
+  const [connectionuuid , setConnectionuuid] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [inviteeEmail, setInviteeEmail] = useState("");
@@ -116,33 +110,15 @@ export default function PageEvent({ params }: EventPageProps) {
       setError(null);
       const urlParams = new URLSearchParams(window.location.search);
       try {
-        const [eventData, authData, adminData] = await Promise.all([
-          GetEvent(id),
-          IsAuthentificated(),
-          GetEventAdmin(id).catch(err => {
-            console.warn("Could not fetch admin data:", err);
-            return { admin: null };
-          })
-        ]);
+        const [eventData, authData] = await Promise.all([GetEvent(id), IsAuthentificated()]);
         setEvent(eventData);
-        setEventAdmin(adminData.admin);
 
         if (eventData.visibility === 0 && !authData.isValid) {
           const newconnection = urlParams.get("newconnection");
-          router.push(
-            `/login?returnUrl=/events/${id}?newconnection=${newconnection}`
-          );
+          router.push(`/login?returnUrl=/events/${id}?newconnection=${newconnection}`);
           return;
         } else if (authData.isValid) {
           setIsAuthenticated(true);
-          if (
-            adminData.admin &&
-            authData.user &&
-            authData.user.email === adminData.admin.email
-          ) {
-            setIsAdmin(true);
-            setIsSubscribed(true);
-          }
 
           const connection = urlParams.get("connection");
           if (connection) {
@@ -152,8 +128,8 @@ export default function PageEvent({ params }: EventPageProps) {
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-            let connected = await NewConnectionUUID(newconnection, id);
-            if (connected.isValid) {
+           let connected = await NewConnectionUUID(newconnection, id);
+            if(connected.isValid) {
               setIsSubscribed(true);
               setEvent((prevEvent) => {
                 if (prevEvent) {
@@ -161,27 +137,34 @@ export default function PageEvent({ params }: EventPageProps) {
                 }
                 return prevEvent;
               });
-            }
           }
-          if (eventData.visibility === 0) {
-            router.push("/");
+        }
+          const subscriptionData = await VerifyConnectionConnectedUser(id);
+          console.log(subscriptionData);
+          if (eventData.visibility === 0 && subscriptionData.message === "User is not joined to the event") {
+             router.push('/');
             return;
+          } else if (subscriptionData.isLog === true) {
+            setIsSubscribed(true);
+            setIsAdmin(subscriptionData.Role);
+            console.log(subscriptionData);
           }
-        } else if (authData.isValid === false) {
+        }
+        else if(authData.isValid === false) {
           const urlParams = new URLSearchParams(window.location.search);
           const connection = urlParams.get("connection");
           if (connection) {
             setConnectionuuid(connection);
             let connected = await verifyConnectionUUID(connection, id);
-            if (connected.isValid) {
+            if(connected.isValid) {
               setIsSubscribed(true);
             }
           }
           const newconnection = urlParams.get("newconnection");
           if (newconnection) {
             setConnectionuuid(newconnection);
-            let connected = await NewConnectionUUID(newconnection, id);
-            if (connected.isValid) {
+           let connected = await NewConnectionUUID(newconnection, id);
+            if(connected.isValid) {
               setIsSubscribed(true);
               setEvent((prevEvent) => {
                 if (prevEvent) {
@@ -189,11 +172,14 @@ export default function PageEvent({ params }: EventPageProps) {
                 }
                 return prevEvent;
               });
-            }
           }
-        }
-      } catch (err) {
+      }
+    }
+    } catch (err) {
         setError("Une erreur est survenue lors du chargement de l'événement.");
+        setTimeout(() => {
+          setError(null);
+        }, 5000);
         console.error("Erreur lors du chargement de l'événement:", err);
       } finally {
         setLoading(false);
@@ -203,11 +189,12 @@ export default function PageEvent({ params }: EventPageProps) {
     fetchEventAndCheckAuthentication();
   }, [id]);
 
-  async function verifyConnectionUUID(connectionUUID: string, id: number) {
+
+  async function verifyConnectionUUID(connectionUUID: string , id : number) {
     try {
-      const response = await VerifyConnectionUUID(connectionUUID, id);
+      const response = await VerifyConnectionUUID(connectionUUID , id);
       if (response.isValid) {
-        console.log("Connection UUID is valid");
+        console.log("Connection UUID is valid" );
         setIsSubscribed(true);
       } else {
         console.log("Connection UUID is invalid");
@@ -220,24 +207,25 @@ export default function PageEvent({ params }: EventPageProps) {
   }
 
   async function handleSubscribe() {
-    let sub = await JoinEvent(id, email);
+    let sub = await JoinEvent(id , email);
     if (sub.message === "User successfully joined the event") {
       setIsDialogOpen(false);
       setIsSubscribed(true);
       console.log(sub);
-      if (sub.uuid !== "") {
-        setConnectionuuid(sub.uuid); // Replace alert with console log or any other notification method
-        console.log("Vous avez rejoint l'événement avec succès");
-      }
-    } else if (sub.error) {
+      if(sub.uuid !== "") {
+      setConnectionuuid(sub.uuid);      // Replace alert with console log or any other notification method
+      console.log("Vous avez rejoint l'événement avec succès");
+    }
+  }
+    else if (sub.error) { 
       console.log(sub);
       setDialogMessage(sub.error);
-    }
+  }
   }
 
   async function handleUnsubscribe() {
-    if (isAuthenticated) {
-      let unsub = await unsubscribeConnectedUser(id);
+    if(isAuthenticated) {
+      let unsub  = await unsubscribeConnectedUser(id);
       if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
@@ -249,30 +237,31 @@ export default function PageEvent({ params }: EventPageProps) {
         });
         console.log("Vous vous êtes désinscrit avec succès");
       }
-      if (unsub.error === "Admin users cannot unsubscribe from the event") {
-        setIsDialogOpen(false);
-        setError(" Le créateur ne peut pas se désinscrire de l'événement");
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
-    } else if (connectionuuid !== "" && isSubscribed) {
-      let unsub = await unsubscribeUUID(connectionuuid, id);
-      if (unsub.message === "User successfully left the event") {
-        setIsDialogOpen(false);
-        setIsSubscribed(false);
-        setEvent((prevEvent) => {
-          if (prevEvent) {
-            return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+        if(unsub.error === "Admin users cannot unsubscribe from the event"){
+          setIsDialogOpen(false);
+          setError(" Le créateur ne peut pas se désinscrire de l'événement");
+            setTimeout(() => {
+              setError("");
+            }, 5000);
           }
-          return prevEvent;
-        });
-        console.log("Vous vous êtes désinscrit avec succès");
-      } else {
-        console.log(unsub);
-      }
+        } 
+  else if (connectionuuid !== "" && isSubscribed) {
+    let unsub = await unsubscribeUUID(connectionuuid , id);
+    if (unsub.message === "User successfully left the event") {
+      setIsDialogOpen(false);
+      setIsSubscribed(false);
+      setEvent((prevEvent) => {
+        if (prevEvent) {
+          return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+        }
+        return prevEvent;
+      });
+      console.log("Vous vous êtes désinscrit avec succès");
+    } else {
+      console.log(unsub);
     }
   }
+}
 
   // Formatage des dates
   function formatDate(dateString: string): string {
@@ -303,26 +292,20 @@ export default function PageEvent({ params }: EventPageProps) {
     );
   }
 
-  const refreshEventData = async () => {
-    try {
-      const eventData = await GetEvent(id);
-      setEvent(eventData);
-    } catch (err) {
-      console.error("Erreur lors du rafraîchissement des données:", err);
-    }
-  };
+
 
   const handleAddInvitee = () => {
     if (inviteeEmail && !invitees.includes(inviteeEmail)) {
       setInvitees([...invitees, inviteeEmail]);
-      setInviteeEmail("");
+      setInviteeEmail('');
     }
   };
-
+  
   const handleRemoveInvitee = (email: string) => {
-    setInvitees(invitees.filter((invitee) => invitee !== email));
+    setInvitees(invitees.filter(invitee => invitee !== email));
   };
 
+  
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     console.log("Lien copié dans le presse-papiers");
@@ -332,9 +315,18 @@ export default function PageEvent({ params }: EventPageProps) {
     }, 3000);
   };
 
+  const refreshEventData = async () => {
+    try {
+      const eventData = await GetEvent(id);
+      setEvent(eventData);
+    } catch (err) {
+      console.error("Erreur lors du rafraîchissement des données:", err);
+    }
+  };
+
   const handleSendInvitations = async (e: React.FormEvent) => {
-    console.log(invitees, inviteeEmail);
-    let invitation = await ShareInvitation(id, invitees);
+    console.log(invitees , inviteeEmail)
+    let invitation = await ShareInvitation(id , invitees);
     if (invitation.message === "Invitations sent successfully") {
       console.log("Invitations envoyées avec succès");
     } else {
@@ -344,13 +336,14 @@ export default function PageEvent({ params }: EventPageProps) {
 
   // Gestion des cas de chargement ou d'erreur
   if (loading) {
-    return <p>Chargement de l&apos;événement...</p>;
+    return <p>Chargement de l'événement...</p>;
   }
 
   if (!event) {
     return <p>Aucun événement trouvé.</p>;
   }
 
+  console.log(event);
   // Rendu principal
   return (
     <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12 mt-20">
@@ -377,6 +370,10 @@ export default function PageEvent({ params }: EventPageProps) {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogTitle className=" hidden text-lg font-bold">Éditer l'événement</DialogTitle>
+              <DialogDescription className="hidden text-muted-foreground">
+                Modifiez les informations de l'événement
+              </DialogDescription>
                 <EventForm
                   event={event}
                   onClose={() => setShowEditDialog(false)}
@@ -396,6 +393,9 @@ export default function PageEvent({ params }: EventPageProps) {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogTitle className="hidden text-lg font-bold">Modérer l'événement</DialogTitle>
+                <DialogDescription className="hidden text-muted-foreground">
+                  Modérez les participants et les commentaires</DialogDescription>
                 <EventModerate eventId={Number(event.id)} />
               </DialogContent>
             </Dialog>
@@ -417,14 +417,8 @@ export default function PageEvent({ params }: EventPageProps) {
           </CardTitle>
           <div className="flex flex-col justify-between md:flex-row-reverse md:mt-8 lg:mt-12 mb-">
             <div className="flex flex-wrap gap-4 mt-2 mb-8 md:mt-0">
-              {/* <Button
-                variant="default"
-                className="bg-green-500 md:flex hover:bg-green-400"
-              >
-                <Users className="w-4 h-4 mr-2" /> {event.userCount}
-              </Button> */}
               <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
-                <CustomBadge icon={<Users className="w-6 h-6" />} content={event.userCount.toString()} color={1} />
+                <CustomBadge icon={<Users className="w-6 h-6" />} content={event.userCount} color={1} />
                 <CustomBadge icon={<Eye className="w-6 h-6" />} content={event.visibility ? "Public" : "Privé"} color={event.visibility ? 1 : 0} />
               </div>
 
@@ -451,7 +445,7 @@ export default function PageEvent({ params }: EventPageProps) {
                             <Clipboard className="w-4 h-4 mr-2" /> Copié !
                           </p>
                         ) : null}
-                      </div>
+                    </div>
                       <FacebookShareButton url={window.location.href}>
                         <FacebookIcon size={32} round={true} />
                       </FacebookShareButton>
