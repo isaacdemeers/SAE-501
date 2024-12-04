@@ -12,7 +12,7 @@ import CalendarCustomBtn from './customButtons';
 import FullCalendar from '@fullcalendar/react'
 import { Separator } from "@/components/ui/separator"
 import { abhayalibre } from "@/lib/fonts"
-import { GetAllEvents } from "@/lib/request"
+import { fetchUserEvents, IsAuthentificated } from "@/lib/request"
 
 
 
@@ -63,10 +63,13 @@ export function Calendar() {
 
 
     useEffect(() => {
-        GetAllEvents().then((data) => {
-            const eventsArray = data['hydra:member'] || [];
-            const transformedEvents = transformEvents(eventsArray);
-            setEvents(transformedEvents);
+        IsAuthentificated().then((data) => {
+            console.log("ddfs", data)
+            fetchUserEvents(data.user.id).then((data) => {
+                // const eventsArray = data['hydra:member'] || [];
+                const transformedEvents = transformEvents(data);
+                setEvents(transformedEvents);
+            });
         });
     }, []);
 
