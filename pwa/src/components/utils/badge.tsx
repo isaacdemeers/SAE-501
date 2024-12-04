@@ -1,9 +1,14 @@
-
 import { Badge } from "@/components/ui/badge"
 import { Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export default function CustomBadge({ icon, content, color }: { icon: React.ReactNode, content: string, color: number }) {
+interface CustomBadgeProps {
+    icon: React.ReactNode;
+    content: string | number;
+    color: number;
+}
+
+export default function CustomBadge({ icon, content, color }: CustomBadgeProps) {
     let colorStyle = "bg-slate-700"
     if (color == 1) {
         colorStyle = "bg-blue-100 hover:bg-blue-100"
