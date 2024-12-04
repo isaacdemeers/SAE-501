@@ -16,12 +16,12 @@ export default function AuthPrompt() {
                 </p>
                 <div className="flex flex-col lg:flex-row gap-4">
                     <Link href="/login">
-                        <Button className="w-full">
+                        <Button className="w-full" variant="outline">
                             Se connecter
                         </Button>
                     </Link>
                     <Link href="/signin">
-                        <Button variant="outline" className="w-full">
+                        <Button className="w-full">
                             Créer un compte
                         </Button>
                     </Link>

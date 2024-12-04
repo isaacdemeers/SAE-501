@@ -203,22 +203,22 @@ export async function GetAllEvents() {
   }
 }
 
-export async function GetUserEvents() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/users/events`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    console.error("Error getting event:", error);
-    throw error;
-  }
-}
+// export async function GetUserEvents() {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/users/events`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       credentials: "include",
+//     });
+//     return await response.json();
+//   } catch (error) {
+//     console.error("Error fetching events:", error);
+//     console.error("Error getting event:", error);
+//     throw error;
+//   }
+// }
 
 export async function AddEvent(formData: any) {
   try {
@@ -453,5 +453,17 @@ export async function RemoveEventUser(eventId: number, userId: number) {
   } catch (error) {
     console.error("Error removing user from event:", error);
     throw error;
+  }
+}
+
+
+export async function fetchUserEvents(userId: number) {
+  try {
+    const response = await fetch(`/user/${userId}/events`);
+    if (!response.ok) throw new Error('Failed to fetch events');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching user events:', error);
   }
 }

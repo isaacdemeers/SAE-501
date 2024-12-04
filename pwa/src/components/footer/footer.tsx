@@ -3,7 +3,7 @@ import { abhayalibre } from '@/lib/fonts'
 
 export default function Footer() {
     return (
-        <footer className="bg-navy-900 text-white py-12 px-6 bg-slate-950 ">
+        <footer className="bg-navy-900 text-white py-12 px-6 bg-slate-800 ">
             <div className="max-w-6xl mx-auto">
                 <h2 className={`mb-8 drop-shadow-lg  text-4xl font-bold text-slate-50 ${abhayalibre.className}`}>PlanIt</h2>
 
@@ -30,7 +30,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-slate-50">Legal</h3>
                         <ul className="space-y-2">
-                            <li><Link href="/politique-de-confidentialite" className="hover:underline text-slate-50">Politique de Confidentialité</Link></li>
+                            <li><Link href="/confidentiality" className="hover:underline text-slate-50">Politique de Confidentialité</Link></li>
                             <li><Link href="/cgu" className="hover:underline text-slate-50">Conditions Générales d'Utilisation</Link></li>
                             {/* <li><Link href="/help-support" className="hover:underline text-slate-50">Help & Support</Link></li>
                             <li><Link href="/about-licenses" className="hover:underline text-slate-50">About Licenses</Link></li> */}
