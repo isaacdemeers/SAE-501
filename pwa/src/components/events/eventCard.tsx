@@ -52,14 +52,14 @@ export default function EventCard({ event, type }: EventCardProps) {
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <li>
                                     {event.isPublic && (
-                                        <CustomBadge color="blue" content="PUBLIC" icon={<LockOpen />} />
+                                        <CustomBadge color={1} content="PUBLIC" icon={<LockOpen />} />
                                     )}
                                     {!event.isPublic && (
-                                        <CustomBadge color="red" content="PRIVATE" icon={<Lock />} />
+                                        <CustomBadge color={0} content="PRIVATE" icon={<Lock />} />
                                     )}
                                 </li>
                                 <li>
-                                    <CustomBadge color="green" content={event.attendees} icon={<Users />} />
+                                    <CustomBadge color={2} content={event.attendees.toString()} icon={<Users />} />
                                 </li>
                             </ul>
                         </div>
