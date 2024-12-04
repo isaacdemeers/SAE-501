@@ -68,10 +68,7 @@ export default function EventCard({ event, type }: EventCardProps) {
                                 <Eye className="w-4 h-4 mr-2 " />
                                 Voir l&apos;événement
                             </Button>
-                            <Button className="flex gap-2">
-                                <CirclePlus size={16} className=" stroke-white" />
-                                S'inscrire
-                            </Button>
+
                         </div>
 
                     </div>
