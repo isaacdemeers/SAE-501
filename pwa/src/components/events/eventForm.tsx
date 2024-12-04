@@ -126,11 +126,10 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
       <form onSubmit={handleSubmit}>
         {errorMessage && (
           <div
-            className={`mb-4 p-4 rounded-md ${
-              errorMessage === "Event created successfully"
-                ? "text-green-600 bg-green-100"
-                : "text-red-600 bg-red-100"
-            }`}
+            className={`mb-4 p-4 rounded-md ${errorMessage === "Event created successfully"
+              ? "text-green-600 bg-green-100"
+              : "text-red-600 bg-red-100"
+              }`}
           >
             {errorMessage}
           </div>
@@ -252,8 +251,8 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                               const timeString = `${hour
                                 .toString()
                                 .padStart(2, "0")}:${minutes
-                                .toString()
-                                .padStart(2, "0")}`;
+                                  .toString()
+                                  .padStart(2, "0")}`;
                               return (
                                 <SelectItem key={timeString} value={timeString}>
                                   {timeString}
@@ -312,8 +311,8 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                               const timeString = `${hour
                                 .toString()
                                 .padStart(2, "0")}:${minutes
-                                .toString()
-                                .padStart(2, "0")}`;
+                                  .toString()
+                                  .padStart(2, "0")}`;
                               return (
                                 <SelectItem key={timeString} value={timeString}>
                                   {timeString}
