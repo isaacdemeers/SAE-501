@@ -25,6 +25,29 @@ class UserController extends AbstractController
         $this->s3Service = $s3Service;
     }
 
+
+    #[Route('/users/username' , name:'app_users_username', methods: ['POST'])]
+    public function index(Request $request,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['email'], $data['password'])) {
+            return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+
+        if (null === $user) {
+            return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$passwordHasher->isPasswordValid($user, $data['password'])) {
+            return $this->json(['message' => 'Invalid credentials.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $this->json(['username' => $user->getUsername()], Response::HTTP_OK);
+    }
+    
     #[Route('/users/{id}', name: 'app_users_update', methods: ['POST'])]
     public function updateUser(
         int $id,

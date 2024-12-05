@@ -88,15 +88,30 @@ export async function VerifyEmailToken(data: string) {
 export async function LoginUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch(`${API_BASE_URL}/auth`, {
+    const response = await fetch(`${API_BASE_URL}/users/username`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    return await response.json();
-  } catch (error) {
+   let username = await response.json();
+   if(username.message === "Invalid credentials."){
+     return username;
+    }
+    else{
+      data.username = username.username;
+      const response = await fetch(`${API_BASE_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    }
+  }
+  catch (error) {
     console.error("Error logging in user:", error);
     throw error;
   }

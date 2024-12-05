@@ -19,18 +19,16 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
         $this->jwtManager = $jwtManager;
     }
 
+
+
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
         // Récupérer l'utilisateur connecté
         $user = $token->getUser();
 
-        // Vérifier si l'utilisateur est valide et récupérer l'email et l'username
-        $email = $user->getEmail();
 
         // Générer le token JWT avec l'email et l'username dans le payload
-        $jwt = $this->jwtManager->createFromPayload($user, [
-            'email' => $email,
-        ]);
+        $jwt = $this->jwtManager->createFromPayload($user);
 
         // Créer un cookie pour le token JWT
         $cookie = new Cookie(
@@ -48,7 +46,6 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
         // Créer une réponse avec le cookie
         $response = new JsonResponse([
             'message' => 'Authentication successful',
-            'email' => $email, // Vous pouvez également renvoyer l'email ici pour confirmation
         ]);
 
         // Ajouter le cookie à la réponse

@@ -22,16 +22,6 @@ class AuthController extends AbstractController
     }
 
 
-
-
-
-
-
-
-
-
-
-    
     #[Route('/api/auth/validate-token', name: 'validate_token', methods: ['POST'])]
     public function validateToken(
         Request $request,
@@ -66,7 +56,7 @@ class AuthController extends AbstractController
                 ]);
             }
 
-            $identifier = $payload['email'] ?? null;
+            $identifier = $payload['username'] ?? null;
 
             if (!$identifier) {
                 return $this->json([
@@ -80,10 +70,6 @@ class AuthController extends AbstractController
             if (!$user || !$user instanceof User) {
                 return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
             }
-
-            // Obtenir l'URL de l'image via AmazonS3Service
-            $imageName = $user->getPhoto();
-            $imageUrl = $imageName ? $this->s3Service->getObjectUrl($imageName) : null;
 
             // Préparer les données utilisateur
             $userData = [

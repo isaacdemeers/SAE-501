@@ -5,7 +5,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: username
     firewalls:
       dev:
         pattern: ^/_(profiler|wdt)
@@ -15,7 +15,7 @@ security:
         provider: app_user_provider
         json_login:
             check_path: /auth
-            username_path: email
+            username_path: username
             password_path: password
             success_handler: App\Controller\ApiLoginController
             failure_handler: lexik_jwt_authentication.handler.authentication_failure
@@ -26,7 +26,9 @@ security:
     - { path: ^/docs, roles: ROLE_USER }
     - { path: ^/auth, roles: PUBLIC_ACCESS }
     - { path: ^/users/verify-email, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: PUBLIC_ACCESS }
     - {path: ^/events, roles: ROLE_USER}
+    - {path: ^/users, roles: PUBLIC_ACCESS}
     
 when@test:
     security:
