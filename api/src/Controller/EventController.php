@@ -61,8 +61,8 @@ class EventController extends AbstractController
         $event = new Event();
         $event->setTitle($data['title']);
         $event->setDescription($data['description']);
-        $event->setDatestart(new \DateTime($data['datestart']));
-        $event->setDateend(new \DateTime($data['dateend']));
+        $event->setDatestart((new \DateTime($data['datestart']))->modify('+1 hour'));
+        $event->setDateend((new \DateTime($data['dateend']))->modify('+1 hour'));
         $event->setLocation($data['location']);
         if ($data['maxparticipant'] == null) {
             $data['maxparticipant'] = 0;

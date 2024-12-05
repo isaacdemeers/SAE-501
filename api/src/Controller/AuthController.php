@@ -21,6 +21,17 @@ class AuthController extends AbstractController
         $this->s3Service = $s3Service;
     }
 
+
+
+
+
+
+
+
+
+
+
+    
     #[Route('/api/auth/validate-token', name: 'validate_token', methods: ['POST'])]
     public function validateToken(
         Request $request,
