@@ -43,6 +43,28 @@ export async function editUser(id: number, data: any) {
   }
 }
 
+export async function editUserPhoto(id: number, file: File) {
+  console.log(file);
+  const data = new FormData();
+  data.append("file", file);
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/photo/${id}`, {
+      method: "POST",
+      credentials: "include",
+      body: data,
+    });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new Error(errorResponse.message || "Failed to edit user");
+    }
+
+    return await response.json(); // Retourne les données mises à jour de l'utilisateur
+  } catch (error) {
+    console.error("Error editing user:", error);
+    throw error;
+  }
+}
 export async function VerifyEmailToken(data: string) {
   let formData = {
     emailtoken: data,
@@ -418,12 +440,13 @@ export async function UpdateEvent(id: number, data: any): Promise<any> {
       body.append("data", JSON.stringify(data));
       body.append("file", data.image, data.image.name);
       headers = {}; // FormData sets its own headers
+      
     } else {
       body = JSON.stringify(data);
     }
 
     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
-      method: "PATCH",
+      method: "POST",
       headers,
       credentials: "include",
       body,

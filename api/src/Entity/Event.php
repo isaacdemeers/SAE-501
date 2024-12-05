@@ -94,7 +94,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
                 ]
             ]
         ),
-        new Patch(
+        new Post(
             uriTemplate: '/events/{id}',
             controller: EventController::class . '::editEvent',
             normalizationContext: ['groups' => ['event:edit']],

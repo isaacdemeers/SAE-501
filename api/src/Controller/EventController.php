@@ -983,7 +983,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
         }
     }
 
-    #[Route('/events/{id}', name: 'edit_event', methods: ['PATCH'])]
+    #[Route('/events/{id}', name: 'edit_event', methods: ['POST'])]
     public function editEvent(
         int $id,
         Request $request,
@@ -999,8 +999,8 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
             // Récupérer les données de la requête
             $data = json_decode($request->getContent(), true);
-            $file = $request->files->get('file');
-    return new JsonResponse(['fileName' =>  uniqid() . '.' . $file->guessExtension()], Response::HTTP_OK);
+    $file = $request->files->get('file');
+   
             // Mettre à jour les champs de l'événement
             if (isset($data['title'])) {
                 $event->setTitle($data['title']);
@@ -1056,7 +1056,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                     'location' => $event->getLocation(),
                     'maxparticipant' => $event->getMaxparticipant(),
                     'visibility' => $event->getVisibility(),
-                    'img' => $s3Service->getObjectUrl($event->getImg())
+                    'img' => $this->s3Service->getObjectUrl($event->getImg())
                 ]
             ], Response::HTTP_OK);
 

@@ -8,15 +8,113 @@ use App\Service\AmazonS3Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Entity\User;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use DateTime;
 
 class UserController extends AbstractController
 {
-    private $amazonS3Service;
+    private $s3Service;
 
-    public function __construct(AmazonS3Service $amazonS3Service)
+
+    public function __construct(AmazonS3Service $s3Service)
     {
-        $this->amazonS3Service = $amazonS3Service;
+        $this->s3Service = $s3Service;
+    }
+
+    #[Route('/users/{id}', name: 'app_users_update', methods: ['POST'])]
+    public function updateUser(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
+        $data = json_decode($request->getContent(), true);
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (null === $user) {
+            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Mise à jour du username
+        if (isset($data['username'])) {
+            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
+            if (null !== $existingUser && $existingUser->getId() !== $user->getId()) {
+                return $this->json(['message' => 'Username already exists'], Response::HTTP_CONFLICT);
+            }
+            $user->setUsername($data['username']);
+        }
+
+        // Mise à jour du firstname
+        if (isset($data['firstname'])) {
+            $user->setFirstname($data['firstname']);
+        }
+
+        // Mise à jour du lastname
+        if (isset($data['lastname'])) {
+            $user->setLastname($data['lastname']);
+        }
+
+        // Mise à jour de l'email
+        if (isset($data['email'])) {
+            $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+            if (null !== $existingEmail && $existingEmail->getId() !== $user->getId()) {
+                return $this->json(['message' => 'Email already exists'], Response::HTTP_CONFLICT);
+            }
+            $user->setEmail($data['email']);
+        }
+
+        // Mise à jour du mot de passe
+        if (isset($data['oldPassword'], $data['newPassword'])) {
+            if (!$passwordHasher->isPasswordValid($user, $data['oldPassword'])) {
+                return $this->json(['message' => 'Old password is incorrect'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $newHashedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
+            $user->setPassword($newHashedPassword);
+        }
+
+        // Persistance des modifications
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
+    }
+
+    #[Route('/users/photo/{id}', name: 'app_users_update_photo', methods: ['POST'])]
+    public function updateUserPhoto(int $id, EntityManagerInterface $entityManager , Request $request): Response
+    {
+    $user = $entityManager->getRepository(User::class)->find($id);
+    $file = $request->files->get('file');
+
+    if (!$file) {
+        return $this->json(['message' => 'No file provided'], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Delete the old photo from S3
+    $oldPhoto = $user->getPhoto();
+    if ($oldPhoto && $oldPhoto !== 'logimg.png') {
+        $this->s3Service->deleteObject($oldPhoto);
+    }
+
+    // Generate a new filename with UUID
+    $extension = $file->guessExtension();
+    $newFilename = uniqid() . '.' . $extension;
+
+    // Upload the new photo to S3
+    $this->s3Service->uploadObject($newFilename, $file->getPathname());
+
+    // Update the user's photo
+    $user->setPhoto($newFilename);
+
+    // Persist the changes
+    $entityManager->persist($user);
+    $entityManager->flush();
+
+    return $this->json(['message' => 'User photo updated successfully'], Response::HTTP_OK);
     }
 
     #[Route('/user/{id}/events', name: 'get_user_events', methods: ['GET'])]
@@ -36,7 +134,7 @@ class UserController extends AbstractController
         $events = [];
         foreach ($userEvents as $userEvent) {
             $imgName = $userEvent->getEvent()->getImg();
-            $fullImgUrl = $imgName ? $this->amazonS3Service->getObjectUrl($imgName) : null;
+            $fullImgUrl = $imgName ? $this->s3Service->getObjectUrl($imgName) : null;
 
             $eventData = [
                 'eventId' => $userEvent->getEvent()->getId(),

@@ -43,7 +43,7 @@ export default function ProfileSettings() {
   });
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [message , setMessage] = useState("")
   const fetchUserData = useCallback(async () => {
     try {
       setIsLoading(true);

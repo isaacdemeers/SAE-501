@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\RegisterController;
+use App\Controller\UserController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,7 +30,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Patch(
             uriTemplate: '/users/{id}',
-            controller: RegisterController::class . '::updateUser',
+            controller: UserController::class . '::updateUser',
             openapiContext: [
                 'summary' => 'Partially update a user',
                 'description' => 'This endpoint allows partial updates to user properties such as username, email, firstname, lastname, and password.',

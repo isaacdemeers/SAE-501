@@ -102,7 +102,6 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
         location: event.location,
         maxAttendees: event.maxparticipant.toString(),
         visibility: event.visibility ? "public" : "private",
-        inviteeEmail: "",
         image: null,
       },
     });
@@ -381,24 +380,6 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
                           <SelectItem value="private">Privé</SelectItem>
                         </SelectContent>
                       </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-  
-              <FormField
-                control={form.control}
-                name="inviteeEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Invité des personnes</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Adresse mail de l'inviter"
-                        {...field}
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
