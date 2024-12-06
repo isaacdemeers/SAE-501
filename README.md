@@ -102,6 +102,27 @@ Travaille sur la structure des fichiers, correction de bugs et lancement des nou
 - affichage d'un event fini
 - ajout partager l'event et visualisation des élément de la base avec le /admin seulement en localhost pas sur codespace
 - Ajout de la page de profil
-- Possibilité de modifier les informations d’un utilisateur (sauf photo de profil "s3 issue") 
+- Possibilité de modifier les informations d’un utilisateur (sauf photo de profil "s3 issue")
+
+
+## [Rendu 4 - Semaine du 2 Décembre]
+
+### - Links
   
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU4)
+ 
+ ### - Changelog
+
+#### Updated
+- event : modification de l'ui de création d'évènement
+- event : modification de certain élément de la page d'évènemeent
+- login : modification du login avec 2 cookie pour le jwttoken séparer entre le payload et la signature + sécurisation d'accès a certaines route
+
+
+#### Added
+- Superadmin
+- Logout
+- Modération d'évènement
+- Modification des informations d'un utilisateur
+
 
