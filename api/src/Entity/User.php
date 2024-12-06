@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\RegisterController;
+use App\Controller\UserController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,7 +30,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Patch(
             uriTemplate: '/users/{id}',
-            controller: RegisterController::class . '::updateUser',
+            controller: UserController::class . '::updateUser',
             openapiContext: [
                 'summary' => 'Partially update a user',
                 'description' => 'This endpoint allows partial updates to user properties such as username, email, firstname, lastname, and password.',
@@ -213,7 +214,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private array $roles = [];
 
     #[ORM\Column]
@@ -233,11 +234,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?string $photo = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255, nullable: true)]

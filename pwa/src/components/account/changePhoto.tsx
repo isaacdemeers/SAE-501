@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { UploadCloud, X } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Removed unused imports
 import Image from "next/image";
-import { editUser } from "@/lib/request";
+import { editUserPhoto } from "@/lib/request";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ export function ProfilePhotoUpload({
   const [dragActive, setDragActive] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -61,7 +62,8 @@ export function ProfilePhotoUpload({
   const handleFile = (file: File) => {
     // Validate file type
     if (!["image/svg+xml", "image/png", "image/jpeg"].includes(file.type)) {
-      alert("Veuillez télécharger uniquement des fichiers SVG, PNG ou JPEG");
+      setErrorMessage("Veuillez télécharger uniquement des fichiers SVG, PNG ou JPEG");
+      setTimeout(() => setErrorMessage(null), 3000);
       return;
     }
 
@@ -78,10 +80,9 @@ export function ProfilePhotoUpload({
     img.src = tempUrl;
     img.onload = () => {
       if (img.width > 800 || img.height > 800) {
-        alert(
-          "Les dimensions de l'image ne doivent pas dépasser 800x800 pixels"
-        );
+        setErrorMessage("Les dimensions de l'image ne doivent pas dépasser 800x800 pixels");
         URL.revokeObjectURL(tempUrl); // Revoke the invalid URL
+        setTimeout(() => setErrorMessage(null), 3000);
         return;
       }
       setSelectedFile(file);
@@ -92,8 +93,6 @@ export function ProfilePhotoUpload({
   const handleUpload = async () => {
     if (!selectedFile || !userId) return;
 
-    const formData = new FormData();
-    formData.append('photo', selectedFile);
 
     try {
       console.log('Starting upload with formData:', {
@@ -102,11 +101,11 @@ export function ProfilePhotoUpload({
         fileSize: selectedFile.size
       });
 
-      const response = await editUser(userId, formData);
+      const response = await editUserPhoto(userId, selectedFile);
       console.log('Upload response:', response);
 
-      if (response && (response.photo || response.success)) {
-        console.log('Upload successful, photo URL:', response.photo);
+      if (response.message === 'User photo updated successfully') {
+        console.log('Upload successful');
         onUpload(selectedFile);
       } else {
         console.error('Invalid response format:', response);
@@ -114,7 +113,7 @@ export function ProfilePhotoUpload({
       }
     } catch (error) {
       console.error('Error uploading photo:', error);
-      alert(`Erreur lors de l'upload de la photo: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      setErrorMessage(`Erreur lors de l'upload de la photo: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
@@ -125,6 +124,9 @@ export function ProfilePhotoUpload({
           <DialogTitle>Changer photo de profil</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {errorMessage && (
+            <p className="text-red-500 text-center">{errorMessage}</p>
+          )}
           {previewUrl ? (
             <div className="relative w-full h-64">
               <Image
@@ -132,6 +134,13 @@ export function ProfilePhotoUpload({
                 alt="Preview"
                 fill
                 style={{ objectFit: "contain" }}
+              />
+              <input
+                ref={inputRef}
+                type="file"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept=".svg,.png,.jpg,.jpeg"
+                onChange={handleChange}
               />
             </div>
           ) : (

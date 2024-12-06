@@ -16,7 +16,7 @@ class LogoutController extends AbstractController
         $response = new JsonResponse(['message' => 'Logged out successfully']);
         
         // Supprime le cookie JWT avec tous les paramètres nécessaires
-        $response->headers->clearCookie('jwt_token', 
+        $response->headers->clearCookie('2af7273686d970a5404661e918a0439b316a0332fff65ce830dd52b9b46d333e', 
             path: '/', 
             domain: null,
             secure: true,
@@ -24,21 +24,13 @@ class LogoutController extends AbstractController
             sameSite: Cookie::SAMESITE_STRICT
         );
         
-        // Force l'expiration immédiate du cookie
-        $response->headers->setCookie(
-            new Cookie(
-                'jwt',
-                '',
-                time() - 3600,  // Expire dans le passé
-                '/',
-                null,
-                true,
-                true,
-                false,
-                Cookie::SAMESITE_STRICT
-            )
-        );
-        
+        $response->headers->clearCookie('5756e9a6f92de5329d245b9d278f89c802d8db852de09ecdf26d66aefae4d7c0', 
+        path: '/', 
+        domain: null,
+        secure: true,
+        httpOnly: true,
+        sameSite: Cookie::SAMESITE_STRICT
+    );
         return $response;
     }
 } 

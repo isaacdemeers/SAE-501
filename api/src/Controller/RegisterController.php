@@ -20,64 +20,7 @@ class RegisterController extends AbstractController
 {
     private $s3Service;
     private $params;
-    #[Route('/users/{id}', name: 'app_users_update', methods: ['PATCH'])]
-    public function updateUser(
-        int $id,
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
-    ): Response {
-        $data = json_decode($request->getContent(), true);
-        $user = $entityManager->getRepository(User::class)->find($id);
 
-        if (null === $user) {
-            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        // Mise à jour du username
-        if (isset($data['username'])) {
-            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
-            if (null !== $existingUser && $existingUser->getId() !== $user->getId()) {
-                return $this->json(['message' => 'Username already exists'], Response::HTTP_CONFLICT);
-            }
-            $user->setUsername($data['username']);
-        }
-
-        // Mise à jour du firstname
-        if (isset($data['firstname'])) {
-            $user->setFirstname($data['firstname']);
-        }
-
-        // Mise à jour du lastname
-        if (isset($data['lastname'])) {
-            $user->setLastname($data['lastname']);
-        }
-
-        // Mise à jour de l'email
-        if (isset($data['email'])) {
-            $existingEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
-            if (null !== $existingEmail && $existingEmail->getId() !== $user->getId()) {
-                return $this->json(['message' => 'Email already exists'], Response::HTTP_CONFLICT);
-            }
-            $user->setEmail($data['email']);
-        }
-
-        // Mise à jour du mot de passe
-        if (isset($data['oldPassword'], $data['newPassword'])) {
-            if (!$passwordHasher->isPasswordValid($user, $data['oldPassword'])) {
-                return $this->json(['message' => 'Old password is incorrect'], Response::HTTP_BAD_REQUEST);
-            }
-
-            $newHashedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
-            $user->setPassword($newHashedPassword);
-        }
-
-        // Persistance des modifications
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
-    }
 
     public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
     {

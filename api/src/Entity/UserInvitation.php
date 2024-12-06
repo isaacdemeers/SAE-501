@@ -11,8 +11,11 @@ use ApiPlatform\Metadata\Delete;
 use App\Repository\UserInvitationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
+    normalizationContext: ['groups' => ['event_invitation:read']],
+    denormalizationContext: ['groups' => ['event_invitation:write']],
     operations: [
         new Get(),
         new Delete(),
@@ -26,29 +29,38 @@ class UserInvitation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
+
     private ?int $id = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?Event $event = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?string $link = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?\DateTimeInterface $expiration = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?\DateTimeInterface $date_invitation = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?\DateTimeInterface $date_acceptinvitation = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?User $user_id = null;
 
     #[ORM\ManyToOne]
+    #[Groups(['event_invitation:read', 'event_invitation:write'])]
     private ?User $user_invite = null;
 
     public function getId(): ?int
