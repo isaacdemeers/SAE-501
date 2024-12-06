@@ -214,7 +214,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private array $roles = [];
 
     #[ORM\Column]
@@ -234,11 +234,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?string $photo = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'user:create'])]
     private ?bool $emailverify = null;
 
     #[ORM\Column(length: 255, nullable: true)]

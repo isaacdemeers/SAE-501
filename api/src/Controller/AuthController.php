@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
+
 class AuthController extends AbstractController
 {
 
@@ -23,55 +24,17 @@ class AuthController extends AbstractController
 
 
     #[Route('/api/auth/validate-token', name: 'validate_token', methods: ['POST'])]
-    public function validateToken(
-        Request $request,
-        JWTEncoderInterface $jwtEncoder,
-        UserProviderInterface $userProvider,
-        AmazonS3Service $s3Service
-    ): JsonResponse {
+    public function validateToken(): JsonResponse {
         // Récupérer le token JWT depuis le cookie
-        $token = $request->cookies->get('jwt_token');
+       
+        $user = $this->getUser();
 
-        if (!$token) {
-            return $this->json([
+        if (!$user) {
+         return $this->json([
                 'isValid' => false,
-            ]);
+                ]);
         }
 
-        try {
-            // Décoder le token
-            $payload = $jwtEncoder->decode($token);
-
-            if (!$payload) {
-                return $this->json([
-                    'isValid' => false,
-                ]);
-            }
-
-            // Vérifier que le token n'est pas expiré
-            $currentTime = time();
-            if ($payload['exp'] < $currentTime) {
-                return $this->json([
-                    'isValid' => false,
-                ]);
-            }
-
-            $identifier = $payload['username'] ?? null;
-
-            if (!$identifier) {
-                return $this->json([
-                    'isValid' => false,
-                ]);
-            }
-
-            // Charger l'utilisateur à partir du UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
-
-            if (!$user || !$user instanceof User) {
-                return $this->json(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
-            }
-
-            // Préparer les données utilisateur
             $userData = [
                 'id' => $user->getId(),
                 'username' => $user->getUsername(),
@@ -91,10 +54,6 @@ class AuthController extends AbstractController
 
             // Répondre avec les informations utilisateur
             return $this->json(['isValid' => true, 'user' => $userData], JsonResponse::HTTP_OK);
-        } catch (\Exception $e) {
-            return $this->json([
-                'isValid' => false,
-            ]);
-        }
+        } 
     }
-}
+

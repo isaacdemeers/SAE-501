@@ -3,10 +3,13 @@ lexik_jwt_authentication:
     public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     token_extractors:
-        cookie:
+        split_cookie:
             enabled: true
-            name: jwt_token
+            cookies:
+                - 2af7273686d970a5404661e918a0439b316a0332fff65ce830dd52b9b46d333e
+                - 5756e9a6f92de5329d245b9d278f89c802d8db852de09ecdf26d66aefae4d7c0
     api_platform:
         check_path: /auth
         username_path: email
         password_path: password
+

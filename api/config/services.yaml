@@ -37,5 +37,9 @@ services:
         arguments:
             $s3Client: '@Aws\S3\S3Client'
             $bucketName: '%env(AWS_S3_BUCKET_NAME)%' # Remplacez par votre nom de bucket
+    
+    App\Security\JWTExtractor:
+        tags:
+            - { name: 'lexik_jwt_authentication.token_extractor', alias: 'custom' }
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

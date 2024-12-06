@@ -19,38 +19,56 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
         $this->jwtManager = $jwtManager;
     }
 
-
-
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
         // Récupérer l'utilisateur connecté
         $user = $token->getUser();
-
-
-        // Générer le token JWT avec l'email et l'username dans le payload
-        $jwt = $this->jwtManager->createFromPayload($user);
-
-        // Créer un cookie pour le token JWT
-        $cookie = new Cookie(
-            'jwt_token', // Nom du cookie
-            $jwt,        // Valeur du cookie (le token JWT)
-            time() + 3600, // Expire dans 1 heure
-            '/',         // Path : le cookie est accessible pour toute l'application
-            null,         // Domaine : laisse par défaut pour le domaine actuel
-            false,        // HTTPS (false pour dev)
-            true,         // HttpOnly : rend le cookie inaccessible via JS
-            false,        // SameSite : on peut ajuster selon les besoins (Strict/Lax)
-            'lax'         // SameSite (lax est généralement plus permissif)
+    
+        // Générer le token JWT
+        $jwt = $this->jwtManager->create($user);
+    
+        // Vérifier que le JWT contient bien deux points
+        if (substr_count($jwt, '.') !== 2) {
+            throw new \Exception('Invalid JWT format');
+        }
+    
+        // Split the JWT into header, payload, and signature
+        [$header, $payload, $signature] = explode('.', $jwt);
+    
+        // Créer les cookies
+        $headerPayloadCookie = new Cookie(
+            '2af7273686d970a5404661e918a0439b316a0332fff65ce830dd52b9b46d333e',
+            $header . '.' . $payload,
+            time() + 7200,
+            '/',
+            null,
+            true, // HttpOnly
+            true,
+            false,
+            'lax'
         );
-
-        // Créer une réponse avec le cookie
+    
+        $signatureCookie = new Cookie(
+            '5756e9a6f92de5329d245b9d278f89c802d8db852de09ecdf26d66aefae4d7c0',
+            $signature,
+            time() + 7200,
+            '/',
+            null,
+            true, // HttpOnly
+            true,
+            false,
+            'lax'
+        );
+    
+        // Créer une réponse avec les cookies
         $response = new JsonResponse([
             'message' => 'Authentication successful',
         ]);
-
-        // Ajouter le cookie à la réponse
-        $response->headers->setCookie($cookie);
-
+    
+        // Ajouter les cookies à la réponse
+        $response->headers->setCookie($headerPayloadCookie);
+        $response->headers->setCookie($signatureCookie);
+    
         return $response;
     }
 }

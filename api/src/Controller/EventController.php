@@ -135,42 +135,14 @@ class EventController extends AbstractController
             }
         }
 
+        $user = $this->getUser();
 
-        // Retrieve the token from the request cookies
-        $token = $request->cookies->get('jwt_token');
-
-        if (!$token) {
-            return new JsonResponse(['error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+        if (!$user) {
+            return new JsonResponse([
+                'message' => 'User not found',
+            ], Response::HTTP_NOT_FOUND);
         }
-
-        try {
-            // Decode the token
-            $payload = $jwtEncoder->decode($token);
-
-            if (!$payload) {
-                return new JsonResponse(['error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Check if the token is expired
-            $currentTime = time();
-            if ($payload['exp'] < $currentTime) {
-                return new JsonResponse(['error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Get the identifier from the token payload
-            $identifier = $payload['email'] ?? null;
-
-            if (!$identifier) {
-                return new JsonResponse(['error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Load the user from the UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
-
-            if (!$user) {
-                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
-            }
-
+      
             // Create a new UserEvent with the role ROLE_ADMIN
             $userEvent = new UserEvent();
             $userEvent->setEvent($event);
@@ -178,16 +150,12 @@ class EventController extends AbstractController
             $userEvent->setRole('ROLE_ADMIN');
             $entityManager->persist($userEvent);
             $entityManager->flush();
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
 
 
-
-        return new JsonResponse([
-            'message' => 'Event created successfully',
-        ], Response::HTTP_CREATED);
-    }
+            return new JsonResponse([
+                'message' => 'Event created successfully',
+            ], Response::HTTP_CREATED);
+        } 
 
 
 
@@ -201,10 +169,10 @@ class EventController extends AbstractController
         EntityManagerInterface $entityManager,
         MailerInterface $mailer
     ): JsonResponse {
-        // Récupérer le token JWT depuis le cookie
-        $token = $request->cookies->get('jwt_token');
-
-    if (empty($token)) {
+  
+        $user = $this->getUser();
+        $appUrl = $this->params->get('APP_URL');
+    if (!$user) {
         $email = $request->get('email');
         if (!$email) {
             return $this->json(['error' => 'Email is missing'], Response::HTTP_BAD_REQUEST);
@@ -224,9 +192,9 @@ class EventController extends AbstractController
 
                 // Vérifier le nombre de participants
                 $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
-                if ($userCount >= $event->getMaxparticipant()) {
-                    return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
-                }
+        if ($event->getMaxparticipant() != 0 && $userCount >= $event->getMaxparticipant()) {
+            return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+        }
 
                 // Vérifier si l'utilisateur est déjà inscrit à l'événement
                 $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
@@ -314,9 +282,9 @@ class EventController extends AbstractController
 
             // Vérifier le nombre de participants
             $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
-            if ($userCount >= $event->getMaxparticipant()) {
-                return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
-            }
+        if ($event->getMaxparticipant() != 0 && $userCount >= $event->getMaxparticipant()) {
+            return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
+        }
 
             // Vérifier si l'utilisateur est déjà inscrit à l'événement
             $existingUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
@@ -363,34 +331,6 @@ class EventController extends AbstractController
             ], Response::HTTP_OK);
         }
     }
-    try {
-        // Décoder le token
-        $payload = $jwtEncoder->decode($token);
-
-            if (!$payload) {
-                return $this->json(['error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Vérifier que le token n'est pas expiré
-            $currentTime = time();
-            if ($payload['exp'] < $currentTime) {
-                return $this->json(['error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Récupérer le username ou identifiant depuis le payload
-            $identifier = $payload['email'] ?? null;
-
-            if (!$identifier) {
-                return $this->json(['error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Charger l'utilisateur à partir du UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
-
-            if (!$user) {
-                return $this->json(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
-            }
-
             // Récupérer l'événement
             $event = $eventRepository->find($request->get('event'));
 
@@ -400,7 +340,7 @@ class EventController extends AbstractController
 
         // Vérifier le nombre de participants
         $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
-        if ($userCount >= $event->getMaxparticipant()) {
+        if ($event->getMaxparticipant() != 0 && $userCount >= $event->getMaxparticipant()) {
             return $this->json(['error' => 'Event has reached the maximum number of participants'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -425,10 +365,7 @@ class EventController extends AbstractController
         return $this->json([
             'message' => 'User successfully joined the event',
         ], Response::HTTP_OK);
-    } catch (\Exception $e) {
-        return $this->json(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-}
+    } 
 
 #[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
 public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
@@ -587,39 +524,11 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     public function getEventUsers($eventid, Request $request, EntityManagerInterface $entityManager, JWTEncoderInterface $jwtEncoder, UserProviderInterface $userProvider): JsonResponse
     {
         // Récupérer le token JWT depuis le cookie
-        $token = $request->cookies->get('jwt_token');
+        $user = $this->getUser();
 
-        if (!$token) {
-            return new JsonResponse(['isLog' => false, 'error' => 'Token is missing'], Response::HTTP_UNAUTHORIZED);
+        if (!$user) {
+            return new JsonResponse(['isLog' => false, 'error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
         }
-
-        try {
-            // Décoder le token
-            $payload = $jwtEncoder->decode($token);
-
-            if (!$payload) {
-                return new JsonResponse(['isLog' => false, 'error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Vérifier que le token n'est pas expiré
-            $currentTime = time();
-            if ($payload['exp'] < $currentTime) {
-                return new JsonResponse(['isLog' => false, 'error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Récupérer le username ou identifiant depuis le payload
-            $identifier = $payload['email'] ?? null;
-
-            if (!$identifier) {
-                return new JsonResponse(['isLog' => false, 'error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Charger l'utilisateur à partir du UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
-
-            if (!$user) {
-                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
-            }
 
             // Récupérer l'événement
             $event = $entityManager->getRepository(Event::class)->find($eventid);
@@ -640,10 +549,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
             $role =  $userEvent->getRole();
             return new JsonResponse(['isLog' => true, 'Role' => $role], JsonResponse::HTTP_OK);
-        } catch (\Exception $e) {
-            return new JsonResponse(['isLog' => false, 'error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+        } 
 
 
 
@@ -763,10 +669,10 @@ public function getevent (Request $request , EventRepository $eventRepository , 
      #[Route('/userevents/{event}/leave', name: 'app_event_leave', methods: ['POST'])]
      public function LeaveEventConnecteduser($event, EntityManagerInterface $entityManager ,Request $request , JWTEncoderInterface $jwtEncoder , UserProviderInterface $userProvider): JsonResponse
     {
-        // Retrieve the token from the request cookies
-        $token = $request->cookies->get('jwt_token');
+        $user = $this->getUser();
 
-        if (!$token) {
+       
+        if (!$user) {
 
             $data = json_decode($request->getContent(), true);
             $uuid = $data['uuid'] ?? null;
@@ -781,7 +687,12 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 'event' => $event,
                 'link' => $appUrl . '/events/' . $event->getId() . '?connection=' . $uuid
             ]);
-
+            if($event->getVisibility() === 1 && !$userInvitation){
+                $userInvitation = $entityManager->getRepository(UserInvitation::class)->findOneBy([
+                    'event' => $event,
+                    'link' => $appUrl . '/events/' . $event->getId() . '?newconnection=' . $uuid
+                ]);
+            }
             if (!$userInvitation) {
                 return new JsonResponse(['error' => 'Invalid UUID or invitation not found'], Response::HTTP_BAD_REQUEST);
             }
@@ -820,29 +731,6 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
         }
 
-        try {
-            // Decode the token
-            $payload = $jwtEncoder->decode($token);
-
-            if (!$payload) {
-                return new JsonResponse(['error' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Check if the token is expired
-            $currentTime = time();
-            if ($payload['exp'] < $currentTime) {
-                return new JsonResponse(['error' => 'Token has expired'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Get the identifier from the token payload
-            $identifier = $payload['email'] ?? null;
-
-            if (!$identifier) {
-                return new JsonResponse(['error' => 'Identifier not found in token'], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Load the user from the UserProvider
-            $user = $userProvider->loadUserByIdentifier($identifier);
 
             if (!$user) {
                 return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -883,10 +771,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
             $entityManager->flush();
 
             return new JsonResponse(['message' => 'User successfully left the event'], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
+        } 
 
 
     #[Route('/userevents/{id}/share', name: 'share_event', methods: ['POST'])]
