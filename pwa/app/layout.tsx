@@ -7,8 +7,14 @@ import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from "react";
 import Footer from "@/components/footer/footer";
+import { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const metadata: Metadata = {
+  title: "PlanIt - Planifier votre prochaine sortie",
+  description: "PlanIt est un calendrier partagé pour planifier vos événements.",
+};
 
 export default function RootLayout({
   children,
