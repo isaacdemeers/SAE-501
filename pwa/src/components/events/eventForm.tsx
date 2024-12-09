@@ -138,33 +138,36 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
           {/* Left Column */}
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Titre</Label>
+              <Label htmlFor="title">Titre <span className="text-red-500">*</span></Label>
               <Input
                 id="title"
-                placeholder="Titre de l'évènement"
+                placeholder="Titre de l'évènement..."
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
               <Textarea
                 id="description"
                 placeholder="Votre description..."
                 className="h-32"
                 value={eventDescription}
                 onChange={(e) => setEventDescription(e.target.value)}
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Lieu</Label>
+              <Label htmlFor="location">Lieu <span className="text-red-500">*</span></Label>
               <Input
                 id="location"
-                placeholder="Limoges, vejvre rve33v 3wevfg"
+                placeholder="Lieu de l'évènement..."
                 value={eventLocation}
                 onChange={(e) => setEventLocation(e.target.value)}
+                required
               />
             </div>
 
@@ -209,7 +212,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
               {/* Date inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Date et heure de début</Label>
+                  <Label>Date et heure de début <span className="text-red-500">*</span></Label>
                   <div className="flex flex-col gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -224,7 +227,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                           {startDate ? (
                             format(startDate, "PPP", { locale: fr })
                           ) : (
-                            <span>Sélectionner une date</span>
+                            <span>Sélectionner une date </span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -266,7 +269,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Date et heure de fin</Label>
+                  <Label>Date et heure de fin <span className="text-red-500">*</span></Label>
                   <div className="flex flex-col gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -334,8 +337,9 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                   <Input
                     id="max-attendees"
                     type="number"
-                    placeholder="12"
+                    placeholder="-"
                     value={maxParticipants}
+                    min={0}
                     onChange={(e) =>
                       setMaxParticipants(
                         e.target.value === "" ? "" : parseInt(e.target.value)
@@ -367,7 +371,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                   <Input
                     id="invitee"
                     type="email"
-                    placeholder="Adresse mail de l'invité"
+                    placeholder="Adresse mail de l'invité..."
                     value={inviteeEmail}
                     onChange={(e) => setInviteeEmail(e.target.value)}
                   />

@@ -278,7 +278,7 @@ export function RenderedEventSideShow({ selectedEvent }: RenderedEventSideShowPr
                     <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">
                         Rien à afficher
                     </p>
-                    <section id="sideShow" className="w-full z-10 h-full opacity-100 overflow-y-scroll bg-white rounded-sm overflow-hidden">
+                    <section id="sideShow" className="w-full z-10 h-full opacity-100 overflow-y-scroll bg-red-500 rounded-sm overflow-hidden">
                         <EventSideShow event={selectedEvent} />
 
                     </section>
