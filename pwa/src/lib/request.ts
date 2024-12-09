@@ -552,3 +552,14 @@ export async function fetchUserEvents(userId: number) {
     console.error('Error fetching user events:', error);
   }
 }
+
+export async function fetchUserAdmin(userId: number) {
+  try {
+    const response = await fetch(`/admin/users/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user');
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching user admin:', error);
+  }
+}

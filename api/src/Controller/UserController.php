@@ -175,4 +175,44 @@ class UserController extends AbstractController
 
         return $this->json($events, JsonResponse::HTTP_OK);
     }
+
+
+    #[Route('/admin/users/{id}', name: 'app_users_get', methods: ['GET'])]
+    public function getAdminUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (null === $user) {
+            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+        $imgName = $user->getPhoto();
+        if($imgName =! 'logimg.png'){
+            $fullImgUrl = $this->s3Service->getObjectUrl($imgName);
+            $userData = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'firstname' => $user->getFirstname(),
+                'lastname' => $user->getLastname(),
+                'email' => $user->getEmail(),
+                'photo' => $fullImgUrl,
+            ];
+        }
+      else{
+        $userData = [
+            'id' => $user->getId(),
+            'password' => $user->getPassword(),
+            'emailverify' => $user->isEmailverify(),
+            'role' => $user->getRoles(),
+            'emaillink' => $user->getEmaillink(),
+            'deleted_at' => $user->getDeletedat(),
+            'created_at' => $user->getCreatedat(),
+            'username' => $user->getUsername(),
+            'firstname' => $user->getFirstname(),
+            'lastname' => $user->getLastname(),
+            'email' => $user->getEmail(),
+            'photo' => $user->getPhoto(),
+        ];
+    }
+        return $this->json($userData, Response::HTTP_OK);
+    }
 }
