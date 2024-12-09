@@ -30,6 +30,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, Settings, UserIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface AuthResponse {
     isValid: boolean;
@@ -41,6 +42,7 @@ interface AuthResponse {
 }
 
 export default function Header() {
+    const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showEventForm, setShowEventForm] = useState(false);
 
@@ -65,7 +67,7 @@ export default function Header() {
 
     const handleEventCreated = () => {
         setShowEventForm(false);
-        // You might want to add a callback here to refresh the events list
+        router.push('/?refresh=' + Date.now());
     };
 
     return (
