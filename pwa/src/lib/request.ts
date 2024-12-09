@@ -95,11 +95,11 @@ export async function LoginUser(data: any) {
       },
       body: JSON.stringify(data),
     });
-   let username = await response.json();
-   if(username.message === "Invalid credentials."){
-     return username;
+    let username = await response.json();
+    if (username.message === "Invalid credentials.") {
+      return username;
     }
-    else{
+    else {
       data.username = username.username;
       const response = await fetch(`${API_BASE_URL}/auth`, {
         method: "POST",
@@ -275,36 +275,36 @@ export async function AddEvent(formData: any) {
   }
 }
 
-export async function JoinEvent(event: number , email: string) {
-  if(email === "") {
-  try {
-    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error joining event:', error);
+export async function JoinEvent(event: number, email: string) {
+  if (email === "") {
+    try {
+      const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error joining event:', error);
+    }
   }
-}
-else {
-  
-  const formData = new FormData();
-  formData.append("email", email);
-  try {
-    const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error joining event:', error);
+  else {
+
+    const formData = new FormData();
+    formData.append("email", email);
+    try {
+      const response = await fetch(`${API_BASE_URL}/event/${event}/join`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error joining event:', error);
+    }
   }
-}
 }
 
 export async function IsAuthentificated() {
@@ -323,14 +323,14 @@ export async function IsAuthentificated() {
   }
 }
 
-export async function NewConnectionUUID(uuid: string , id: number) {
+export async function NewConnectionUUID(uuid: string, id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}/new-connection-uuid`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({"uuid": uuid}),
+      body: JSON.stringify({ "uuid": uuid }),
     });
     return await response.json();
   } catch (error) {
@@ -339,7 +339,7 @@ export async function NewConnectionUUID(uuid: string , id: number) {
 }
 
 
-export async function VerifyConnectionConnectedUser(id:number){
+export async function VerifyConnectionConnectedUser(id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
     const data = await response.json();
@@ -351,14 +351,14 @@ export async function VerifyConnectionConnectedUser(id:number){
 }
 
 
-export async function VerifyConnectionUUID(uuid: string , id: number) {
+export async function VerifyConnectionUUID(uuid: string, id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}/verify-connection-uuid`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({"uuid": uuid}),
+      body: JSON.stringify({ "uuid": uuid }),
       credentials: 'include'
     });
     return await response.json();
@@ -368,7 +368,7 @@ export async function VerifyConnectionUUID(uuid: string , id: number) {
 }
 
 
-export async function unsubscribeConnectedUser(id:number){
+export async function unsubscribeConnectedUser(id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
       method: 'POST',
@@ -384,7 +384,7 @@ export async function unsubscribeConnectedUser(id:number){
 }
 
 
-export async function unsubscribeUUID(uuid: string , id: number) {
+export async function unsubscribeUUID(uuid: string, id: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}/leave`, {
       method: 'POST',
@@ -400,7 +400,7 @@ export async function unsubscribeUUID(uuid: string , id: number) {
 }
 
 
-export async function ShareInvitation(id: number ,emails: string[]) {
+export async function ShareInvitation(id: number, emails: string[]) {
   let formData = new FormData();
   formData.append('emails', JSON.stringify(emails));
   try {
@@ -409,7 +409,7 @@ export async function ShareInvitation(id: number ,emails: string[]) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({"emails": emails}),
+      body: JSON.stringify({ "emails": emails }),
     });
     return await response.json();
   } catch (error) {
@@ -455,7 +455,7 @@ export async function UpdateEvent(id: number, data: any): Promise<any> {
       body.append("data", JSON.stringify(data));
       body.append("file", data.image, data.image.name);
       headers = {}; // FormData sets its own headers
-      
+
     } else {
       body = JSON.stringify(data);
     }
