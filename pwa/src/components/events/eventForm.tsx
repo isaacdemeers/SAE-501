@@ -141,7 +141,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
               <Label htmlFor="title">Titre</Label>
               <Input
                 id="title"
-                placeholder="Titre de l'évènement"
+                placeholder="Titre de l'évènement..."
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
               />
@@ -162,7 +162,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
               <Label htmlFor="location">Lieu</Label>
               <Input
                 id="location"
-                placeholder="Limoges, vejvre rve33v 3wevfg"
+                placeholder="Lieu de l'évènement..."
                 value={eventLocation}
                 onChange={(e) => setEventLocation(e.target.value)}
               />
@@ -334,8 +334,9 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                   <Input
                     id="max-attendees"
                     type="number"
-                    placeholder="12"
+                    placeholder="-"
                     value={maxParticipants}
+                    min={0}
                     onChange={(e) =>
                       setMaxParticipants(
                         e.target.value === "" ? "" : parseInt(e.target.value)
@@ -367,7 +368,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                   <Input
                     id="invitee"
                     type="email"
-                    placeholder="Adresse mail de l'invité"
+                    placeholder="Adresse mail de l'invité..."
                     value={inviteeEmail}
                     onChange={(e) => setInviteeEmail(e.target.value)}
                   />
