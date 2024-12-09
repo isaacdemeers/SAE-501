@@ -12,7 +12,7 @@ interface EventCardProps {
         id: string;
         title: string;
         date: string;
-        isPublic: boolean;
+        isPublic: number;
         attendees: number;
         imageUrl: string;
         description: string;
@@ -50,14 +50,14 @@ export default function EventCard({ event, type }: EventCardProps) {
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
-                                <li>
-                                    {event.isPublic && (
+                                {/* <li>
+                                    {event.isPublic == 1 && (
                                         <CustomBadge color={1} content="PUBLIC" icon={<LockOpen />} />
                                     )}
-                                    {!event.isPublic && (
+                                    {event.isPublic == 0 && (
                                         <CustomBadge color={0} content="PRIVATE" icon={<Lock />} />
                                     )}
-                                </li>
+                                </li> */}
                                 <li>
                                     <CustomBadge color={2} content={event.attendees.toString()} icon={<Users />} />
                                 </li>
