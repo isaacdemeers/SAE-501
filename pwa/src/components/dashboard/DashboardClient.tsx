@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import SuggestedEvents from '@/components/dashboard/SuggestedEvents';
 import MyEvents from '@/components/dashboard/MyEvents';
 import AuthPrompt from '@/components/dashboard/loginPrompt';
+import { useSearchParams } from 'next/navigation';
 
 interface AuthResponse {
     isValid: boolean;
@@ -32,6 +33,7 @@ export default function DashboardClient() {
     const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
     const [myEvents, setMyEvents] = useState<Event[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
+    const searchParams = useSearchParams();
 
     // Fetch upcoming events
     const fetchUpcomingEvents = async (page: number = 1) => {
@@ -115,6 +117,13 @@ export default function DashboardClient() {
     useEffect(() => {
         fetchUpcomingEvents(); // Fetch events when component mounts
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            const refresh = searchParams.get('refresh');
+            refreshEvents();
+        }
+    }, [searchParams, userId]);
 
     return (
         <div className="container mt-16 mx-auto p-4 md:p-8 lg:p-12">
