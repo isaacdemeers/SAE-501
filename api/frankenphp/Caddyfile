@@ -1,21 +1,21 @@
 {
-	{$CADDY_GLOBAL_OPTIONS}
-
-	frankenphp {
-		{$FRANKENPHP_CONFIG}
+	frankenphp
+	servers {
+		protocols h1 h2
 	}
 }
 
-{$CADDY_EXTRA_CONFIG}
-
-{$SERVER_NAME:localhost} {
+sae-501.leopoldcanou.fr {
 	log {
-		# Redact the authorization query parameter that can be set by Mercure
 		format filter {
 			request>uri query {
 				replace authorization REDACTED
 			}
 		}
+	}
+
+	tls {
+		protocols tls1.2 tls1.3
 	}
 
 	root * /app/public
@@ -55,9 +55,9 @@
 		|| path('/favicon.ico', '/manifest.json', '/robots.txt', '/sitemap*', '/_next*', '/__next*')
 		|| query({'_rsc': '*'})`
 
-	# Comment the following line if you don't want Next.js to catch requests for HTML documents.
-	# In this case, they will be handled by the PHP app.
+	# Redirect matching requests to Next.js
 	reverse_proxy @pwa http://{$PWA_UPSTREAM}
 
+	# Handle PHP fallback
 	php_server
 }

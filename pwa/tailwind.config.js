@@ -11,9 +11,9 @@ module.exports = {
     extend: {
       keyframes: {
         show: {
-          '0%': { transform: 'translateY(-20%)' },
-          '100%': { transform: 'translateY(0)' },
-        }
+          "0%": { transform: "translateY(-20%)" },
+          "100%": { transform: "translateY(0)" },
+        },
       },
       fontFamily: {
         sans: ["Poppins", "system-ui"],
