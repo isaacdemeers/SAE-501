@@ -23,9 +23,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Post(),
         new Put(),
-        new Delete(),
         new Get(),
         new GetCollection(),
+        new Delete(),
         new Get(
             uriTemplate: '/events/{id}',
             controller: EventController::class . '::getEvent',

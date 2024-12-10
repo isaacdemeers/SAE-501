@@ -563,3 +563,24 @@ export async function fetchUserAdmin(userId: number) {
     console.error('Error fetching user admin:', error);
   }
 }
+
+export async function UpdateUserAdmin(data: any , userId: number) {
+  console.log(data);
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+  if (data.photo && data.photo instanceof File) {
+    formData.append("file", data.photo, data.photo.name);
+  }
+  try {
+    const response = await fetch(`/admin/users/${userId}` , {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to fetch user');
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching user admin:', error);
+  }
+}

@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { CalendarIcon, UserIcon , Upload } from 'lucide-react';
+import { CalendarIcon, UserIcon, Upload } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox"
-import { fetchUserAdmin } from '@/lib/request';
+import { fetchUserAdmin, UpdateUserAdmin } from '@/lib/request';
 
 interface UserAdminFormData {
     email: string;
@@ -16,17 +14,19 @@ interface UserAdminFormData {
     lastname: string;
     username: string;
     photo: string | File;
-    emailVerify: boolean;
-    emailLink: string;
-    tokenPassword: boolean;
+    emailverify: boolean;
+    emaillink: string;
+    regenerateemaillink: boolean;
+    tokenpassword: string;
     regenerateToken: boolean;
     deleted_at: string;
     created_at: string;
+    disable: boolean;
 }
 
 const EditUsers: React.FC = () => {
     const [userId, setUserId] = useState<number | undefined>(undefined);
-    const [sizeerror , setSizeerror] = useState<boolean>(false);
+    const [sizeerror, setSizeerror] = useState<boolean>(false);
     const [formData, setFormData] = useState<UserAdminFormData>({
         email: '',
         role: '',
@@ -35,12 +35,14 @@ const EditUsers: React.FC = () => {
         lastname: '',
         username: '',
         photo: '',
-        emailVerify: false,
-        emailLink: '',
-        tokenPassword: false,
+        emailverify: false,
+        emaillink: '',
+        regenerateemaillink: false,
+        tokenpassword: '',
         regenerateToken: false,
         deleted_at: '',
         created_at: '',
+        disable: false,
     });
 
     useEffect(() => {
@@ -60,11 +62,19 @@ const EditUsers: React.FC = () => {
                 const response = await fetchUserAdmin(userId);
                 const data = await response.json();
                 console.log(data);
-                if(data.deleted_at === null || data.deleted_at === undefined){
+                if (data.deleted_at === null || data.deleted_at === undefined) {
                     data.deleted_at = "";
+                } else {
+                    const deletedAtDate = new Date(data.deleted_at);
+                    deletedAtDate.setHours(deletedAtDate.getHours() + 1);
+                    data.deleted_at = deletedAtDate.toISOString();
                 }
-                if(data.created_at === null || data.created_at === undefined){
+                if (data.created_at === null || data.created_at === undefined) {
                     data.created_at = "";
+                } else {
+                    const createdAtDate = new Date(data.created_at);
+                    createdAtDate.setHours(createdAtDate.getHours() + 1);
+                    data.created_at = createdAtDate.toISOString();
                 }
                 setFormData(data);
             } catch (error) {
@@ -88,48 +98,54 @@ const EditUsers: React.FC = () => {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-                const validExtensions = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml'];
-                const maxSize = 800; // 800px
+            const validExtensions = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml'];
+            const maxSize = 800; // 800px
 
-                if (!validExtensions.includes(file.type)) {
-                        setSizeerror(true);
-                        console.error('Invalid file type');
-                        return;
+            if (!validExtensions.includes(file.type)) {
+                setSizeerror(true);
+                console.error('Invalid file type');
+                return;
+            }
+
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                if (img.width > maxSize || img.height > maxSize) {
+                    setSizeerror(true);
+                    console.error('Image dimensions exceed 800x800px');
+                } else {
+                    setSizeerror(false);
+                    setFormData({
+                        ...formData,
+                        photo: file,
+                    });
                 }
-
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                img.onload = () => {
-                        if (img.width > maxSize || img.height > maxSize) {
-                                setSizeerror(true);
-                                console.error('Image dimensions exceed 800x800px');
-                        } else {
-                                setSizeerror(false);
-                                setFormData({
-                                        ...formData,
-                                        photo: file,
-                                });
-                        }
-                };
-                img.onerror = () => {
-                        setSizeerror(true);
-                        console.error('Error loading image');
-                };
+            };
+            img.onerror = () => {
+                setSizeerror(true);
+                console.error('Error loading image');
+            };
         }
     };
 
-    const [date, setDate] = useState<Date | undefined>(undefined);
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission
-        console.log(formData);
+        try {
+            let response = await UpdateUserAdmin(formData, userId);
+            console.log(response);
+        } catch (error) {
+            console.error('Error updating user:', error);
+        }
     };
 
-    const formatDateTime = (date: Date) => {
-        const offset = date.getTimezoneOffset();
-        const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
-        return adjustedDate.toISOString().slice(0, 16);
+    const handleDisableClick = () => {
+        const currentDate = new Date();
+        currentDate.setHours(currentDate.getHours() + 1);
+        setFormData({
+            ...formData,
+            disable: !formData.disable,
+            deleted_at: !formData.disable ? currentDate.toISOString() : '',
+        });
     };
 
     return (
@@ -144,7 +160,7 @@ const EditUsers: React.FC = () => {
             </div>
             <div>
                 <Label className="text-black">Password</Label>
-                <Input className="text-black" type="password" name="password" value={formData.password} onChange={handleChange} />
+                <Input className="text-black" type="password" readOnly name="password" value={formData.password} onChange={handleChange} />
             </div>
             <div>
                 <Label className="text-black">First Name</Label>
@@ -181,72 +197,37 @@ const EditUsers: React.FC = () => {
             </div>
             <div>
                 <Label className="text-black">Email Verify</Label>
-                <Input className="text-black" type="checkbox" name="emailVerify" checked={formData.emailVerify} onChange={handleChange} />
+                <Input className="text-black" type="checkbox" name="emailverify" checked={formData.emailverify} onChange={handleChange} />
             </div>
             <div>
                 <Label className="text-black">Email Link</Label>
-                <Input className="text-black" type="text" name="emailLink" value={formData.emailLink} onChange={handleChange} />
+                <Input className="text-black" type="text" readOnly name="emaillink" value={formData.emaillink} onChange={handleChange} />
+            </div>
+            <div className="flex flex-col gap-2 items-start justify-start">
+                <Label className="text-black w-fit">Envoyer un mail de vérification de mot de passe</Label>
+                <Checkbox className="text-black " name="regenerateemaillink" checked={formData.regenerateemaillink} onCheckedChange={(checked) => setFormData({ ...formData, regenerateemaillink: checked })} />
             </div>
             <div>
                 <Label className="text-black">Token Password</Label>
-                <Input className="text-black" type="text" name="tokenPassword" value={formData.emailLink} onChange={handleChange} />
+                <Input className="text-black" type="text" name="tokenpassword" readOnly value={formData.tokenpassword} onChange={handleChange} />
             </div>
             <div className="flex flex-col gap-2 items-start justify-start">
-                <Label className="text-black w-fit">Regenerate Token</Label>
-                <Checkbox className="text-black " name="regenerateToken" checked={formData.regenerateToken} onCheckedChange={(checked) => handleChange({ target: { name: 'regenerateToken', value: checked, type: 'checkbox', checked } } as React.ChangeEvent<HTMLInputElement>)} />
+                <Label className="text-black w-fit">Envoyer un mail de réinitialisation de mot de passe</Label>
+                <Checkbox className="text-black " name="regenerateToken" checked={formData.regenerateToken} onCheckedChange={(checked) => setFormData({ ...formData, regenerateToken: checked })} />
             </div>
             <div>
                 <Label className="text-black">Deleted At</Label>
                 <div className="flex items-center">
-                <Input className="text-black" type="datetime-local" name="deleted_at" value={formData.deleted_at.slice(0, 16)} onChange={handleChange} />
-                <Popover>
-                        <PopoverTrigger asChild>
-                            <Button type="button" className="ml-2">
-                            <CalendarIcon size={16} />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent>
-                            <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={(selectedDate) => {
-                                    setDate(selectedDate);
-                                    setFormData({
-                                        ...formData,
-                                        deleted_at: selectedDate ? formatDateTime(selectedDate) : '',
-                                    });
-                                }}
-                                className="rounded-md border mt-2"
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    <Input className="text-black" type="datetime-local" name="deleted_at" value={formData.deleted_at.slice(0, 16)} readOnly />
+                    <Button type="button" className="ml-2" onClick={handleDisableClick}>
+                        {formData.disable ? 'Enable' : 'Disable'}
+                    </Button>
                 </div>
             </div>
             <div>
                 <Label className="text-black">Created At</Label>
                 <div className="flex items-center">
-                <Input className="text-black" type="datetime-local" name="created_at" value={formData.created_at.slice(0, 16)} onChange={handleChange} />
-                <Popover>
-                        <PopoverTrigger asChild>
-                            <Button type="button" className="ml-2">
-                                <CalendarIcon size={16} />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent>
-                            <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={(selectedDate) => {
-                                    setDate(selectedDate);
-                                    setFormData({
-                                        ...formData,
-                                        created_at: selectedDate ? formatDateTime(selectedDate) : '',
-                                    });
-                                }}
-                                className="rounded-md border mt-2"
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    <Input className="text-black" type="datetime-local" name="created_at" value={formData.created_at.slice(0, 16)} readOnly />
                 </div>
             </div>
             <Button type="submit" className="mt-4">Save</Button>
