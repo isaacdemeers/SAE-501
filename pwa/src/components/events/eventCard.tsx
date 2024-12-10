@@ -6,6 +6,16 @@ import CustomBadge from "@/components/utils/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { Separator } from "@/components/ui/separator"
 
+const formatDateRange = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    });
+}
 
 interface EventCardProps {
     event: {
@@ -19,8 +29,6 @@ interface EventCardProps {
     };
     type: string;
 }
-
-
 
 export default function EventCard({ event, type }: EventCardProps) {
     let tags = ''
@@ -46,7 +54,7 @@ export default function EventCard({ event, type }: EventCardProps) {
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start gap-4">
                             <div className="flex items-center justify-between h-10  gap-2 rounded-lg">
                                 <Clock className="w-4 h-4 mr-1" />
-                                <p className="text-xs text-slate-600">{event.date}</p>
+                                <p className="text-xs text-slate-600">{formatDateRange(event.date)}</p>
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
@@ -93,7 +101,7 @@ export default function EventCard({ event, type }: EventCardProps) {
                         <h2 className="sm:text-xl text-lg font-bold text-ellipsis w-60 overflow-hidden text-nowrap">{event.title}</h2>
                         <div className="flex items-center sm:mb-0 mb-1 text-sm text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
-                            {event.date}
+                            {formatDateRange(event.date)}
                         </div>
                         <div className="flex gap-4">
                             {event.isPublic && (
@@ -127,39 +135,39 @@ export default function EventCard({ event, type }: EventCardProps) {
     )
 }
 
-let event = {
+// let event = {
 
-    dates: {
-        start: "2024-10-31",
-        end: "2024-11-30",
-        createdAt: "2024-10-31",
-        updatedAt: "2024-11-30",
-    },
-    creator: {
-        id: 1,
-        name: "John Doe",
-        email: "john.doe@example.com",
-        username: "John Doe",
-    },
-    infos: {
-        title: "Event 1",
-        description: "Description de l'événement",
-        isPublic: true,
-        imageUrl: "https://via.placeholder.com/150",
-        location: "Paris",
-        deleted: '2024-11-30',
+//     dates: {
+//         start: "2024-10-31",
+//         end: "2024-11-30",
+//         createdAt: "2024-10-31",
+//         updatedAt: "2024-11-30",
+//     },
+//     creator: {
+//         id: 1,
+//         name: "John Doe",
+//         email: "john.doe@example.com",
+//         username: "John Doe",
+//     },
+//     infos: {
+//         title: "Event 1",
+//         description: "Description de l'événement",
+//         isPublic: true,
+//         imageUrl: "https://via.placeholder.com/150",
+//         location: "Paris",
+//         deleted: '2024-11-30',
 
-    },
-    entrants: {
-        max: 100,
-        count: 50,
-        list: [
-            {
-                id: 1,
-                username: "John Doe",
-                joinedAt: "2024-10-31"
-            }
-        ]
-    }
+//     },
+//     entrants: {
+//         max: 100,
+//         count: 50,
+//         list: [
+//             {
+//                 id: 1,
+//                 username: "John Doe",
+//                 joinedAt: "2024-10-31"
+//             }
+//         ]
+//     }
 
-}
+// }

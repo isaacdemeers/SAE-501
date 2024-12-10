@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from "react";
 import Footer from "@/components/footer/footer";
 import { Metadata } from "next";
+import Loader from "@/components/utils/Loader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -61,6 +62,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <Loader />
+
         <div className="min-h-screen flex flex-col">
           {children}
           <Footer />
