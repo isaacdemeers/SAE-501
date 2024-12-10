@@ -584,3 +584,35 @@ export async function UpdateUserAdmin(data: any , userId: number) {
     console.error('Error fetching user admin:', error);
   }
 }
+
+export async function fetchEventAdmin(userId: number) {
+  try {
+    const response = await fetch(`/admin/events/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user');
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching user admin:', error);
+  }
+}
+
+export async function UpdateEventAdmin(data: any , userId: number) {
+  console.log(data);
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+  if (data.img && data.img instanceof File) {
+    formData.append("file", data.img, data.img.name);
+  }
+  try {
+    const response = await fetch(`/admin/events/${userId}` , {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to fetch user');
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching user admin:', error);
+  }
+}

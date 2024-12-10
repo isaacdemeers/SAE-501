@@ -4,44 +4,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalendarIcon, UserIcon, Upload } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox"
-import { fetchUserAdmin, UpdateUserAdmin } from '@/lib/request';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { fetchEventAdmin, UpdateEventAdmin, UpdateUserAdmin } from '@/lib/request';
 
 interface UserAdminFormData {
-    email: string;
-    role: string;
-    password: string;
-    firstname: string;
-    lastname: string;
-    username: string;
-    photo: string | File;
-    emailverify: boolean;
-    emaillink: string;
-    regenerateemaillink: boolean;
-    tokenpassword: string;
-    regenerateToken: boolean;
+    title: string;
+    description: string;
+    datestart: string;
+    dateend: string;
+    location: string;
+    Sharelink: string;
+    Img: string | File;
+    visibility: number;
+    maxparticipants: number;
+    userevent: any;
     deleted_at: string;
     created_at: string;
     disable: boolean;
 }
 
-const EditUsers: React.FC = () => {
+const EditEvents: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [userId, setUserId] = useState<number | undefined>(undefined);
     const [sizeerror, setSizeerror] = useState<boolean>(false);
     const [formData, setFormData] = useState<UserAdminFormData>({
-        email: '',
-        role: '',
-        password: '',
-        firstname: '',
-        lastname: '',
-        username: '',
-        photo: '',
-        emailverify: false,
-        emaillink: '',
-        regenerateemaillink: false,
-        tokenpassword: '',
-        regenerateToken: false,
+        title: '',
+        description: '',
+        datestart: '',
+        dateend: '',
+        location: '',
+        Sharelink: '',
+        Img: '',
+        visibility: 0,
+        maxparticipants: 0,
+        userevent: null,
         deleted_at: '',
         created_at: '',
         disable: false,
@@ -61,7 +58,7 @@ const EditUsers: React.FC = () => {
         // Fetch user data based on userId
         const fetchUserData = async () => {
             try {
-                const response = await fetchUserAdmin(userId);
+                const response = await fetchEventAdmin(userId);
                 if (!response) {
                     setError("Problème lors de la modification d'un utilisateur veuillez contacter la dsi");
                     return;
@@ -85,6 +82,14 @@ const EditUsers: React.FC = () => {
                     createdAtDate.setHours(createdAtDate.getHours() + 1);
                     data.created_at = createdAtDate.toISOString();
                 }
+                if (data.datestart) {
+                    const datestartDate = new Date(data.datestart);
+                    data.datestart = datestartDate.toISOString().slice(0, 16);
+                }
+                if (data.dateend) {
+                    const dateendDate = new Date(data.dateend);
+                    data.dateend = dateendDate.toISOString().slice(0, 16);
+                }
                 setFormData(data);
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -104,11 +109,17 @@ const EditUsers: React.FC = () => {
         });
     };
 
+    const handleVisibilityChange = (value: string) => {
+        setFormData({
+            ...formData,
+            visibility: parseInt(value, 10),
+        });
+    }
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const validExtensions = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml'];
-            const maxSize = 800; // 800px
+            const validExtensions = ['image/png', 'image/jpg', 'image/jpeg'];
+            const maxSizeInBytes = 8 * 1024 * 1024; // 8 MB
 
             if (!validExtensions.includes(file.type)) {
                 setSizeerror(true);
@@ -116,38 +127,35 @@ const EditUsers: React.FC = () => {
                 return;
             }
 
+            if (file.size > maxSizeInBytes) {
+                setSizeerror(true);
+                console.error('File size exceeds 8 MB');
+                return;
+            }
+
             const img = new Image();
             img.src = URL.createObjectURL(file);
             img.onload = () => {
-                if (img.width > maxSize || img.height > maxSize) {
-                    setSizeerror(true);
-                    console.error('Image dimensions exceed 800x800px');
-                } else {
                     setSizeerror(false);
                     setFormData({
                         ...formData,
-                        photo: file,
+                        Img: file,
                     });
                 }
             };
-            img.onerror = () => {
-                setSizeerror(true);
-                console.error('Error loading image');
-            };
-        }
     };
 
     const handleRemoveImage = () => {
         setFormData({
             ...formData,
-            photo: 'logimg.png',
+            Img: '',
         });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            let response = await UpdateUserAdmin(formData, userId);
+            let response = await UpdateEventAdmin(formData, userId);
             if (!response) {
                 setError("Problème lors de la modification d'un utilisateur veuillez contacter la dsi");
                 return;
@@ -180,72 +188,69 @@ const EditUsers: React.FC = () => {
             {error && <p className="flex w-full item-center justify-center my-2 text-red-500">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <Label className="text-black">Email</Label>
-                <Input className="text-black" type="email" name="email" value={formData.email} onChange={handleChange} />
+                <Label className="text-black">Title</Label>
+                <Input className="text-black" type="text" name="title" value={formData.title} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Role</Label>
-                <Input className="text-black" type="text" name="role" value={formData.role} onChange={handleChange} />
+                <Label className="text-black">Description</Label>
+                <Input className="text-black" type="text" name="description" value={formData.description} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Password</Label>
-                <Input className="text-black" type="password" readOnly name="password" value={formData.password} onChange={handleChange} />
+                <Label className="text-black">Date Start</Label>
+                <Input className="text-black" type="datetime-local" name="datestart" value={formData.datestart} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">First Name</Label>
-                <Input className="text-black" type="text" name="firstname" value={formData.firstname} onChange={handleChange} />
+                <Label className="text-black">Date End</Label>
+                <Input className="text-black" type="datetime-local" name="dateend" value={formData.dateend} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Last Name</Label>
-                <Input className="text-black" type="text" name="lastname" value={formData.lastname} onChange={handleChange} />
+                <Label className="text-black">Location</Label>
+                <Input className="text-black" type="text" name="location" value={formData.location} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Username</Label>
-                <Input className="text-black" type="text" name="username" value={formData.username} onChange={handleChange} />
+                <Label className="text-black">Share Link</Label>
+                <Input className="text-black" type="text" name="Sharelink" readOnly value={formData.Sharelink} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black text-center">Photo</Label>
+                <Label className="text-black text-center">Image</Label>
                 <div className={`flex flex-col items-center justify-center border-2 border-dashed ${sizeerror ? 'border-red-500' : 'border-gray-300'} rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors relative`}>
                     <input onChange={handleFileChange} type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/png, image/jpg, image/svg" />
-                    {formData.photo && formData.photo !== 'logimg.png' && formData.photo !== 'default.jpg' ? (
+                    {formData.Img && typeof formData.Img !== 'string' ? (
                         <>
-                            <img src={typeof formData.photo === 'string' ? formData.photo : URL.createObjectURL(formData.photo)} alt="Uploaded" className="w-32 h-32 rounded-full object-cover" />
+                            <img src={URL.createObjectURL(formData.Img)} alt="Uploaded" className="w-full h-32 rounded-lg object-cover" />
                             <Button type="button" className="mt-2" onClick={handleRemoveImage}>Remove Image</Button>
                         </>
                     ) : (
                         <>
                             <Upload className="w-10 h-10 text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500 text-center">
-                                Appuyez pour télécharger une image de profil ou faites glisser une image ici
+                                Appuyez pour télécharger une image ou faites glisser une image ici
                                 <br />
-                                SVG, PNG, or JPG (max. 800x800px)
+                                 PNG, or JPG (max. 8 mo)
                             </p>
                         </>
                     )}
                 </div>
-                {!formData.photo && (
-                    <UserIcon className="block mx-auto mt-2 w-32 h-32 rounded-full object-cover" size={36} />
-                )}
+            </div>
+            <div className='flex flex-col'>
+                <Label className="text-black">Visibility</Label>
+                <Select name="visibility" value={formData.visibility.toString()} onValueChange={(value) => handleVisibilityChange(value)}>
+                    <SelectTrigger className="text-black">
+                        <SelectValue placeholder="Select visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="1">Public</SelectItem>
+                        <SelectItem value="0">Private</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <div>
-                <Label className="text-black">Email Verify</Label>
-                <Input className="text-black" type="checkbox" name="emailverify" checked={formData.emailverify} onChange={handleChange} />
+                <Label className="text-black">Max Participants</Label>
+                <Input className="text-black" type="number" name="maxparticipants" value={formData.maxparticipants} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Email Link</Label>
-                <Input className="text-black" type="text" readOnly name="emaillink" value={formData.emaillink} onChange={handleChange} />
-            </div>
-            <div className="flex flex-col gap-2 items-start justify-start">
-                <Label className="text-black w-fit">Envoyer un mail de vérification de mot de passe</Label>
-                <Checkbox className="text-black " name="regenerateemaillink" checked={formData.regenerateemaillink} onCheckedChange={(checked) => setFormData({ ...formData, regenerateemaillink: checked })} />
-            </div>
-            <div>
-                <Label className="text-black">Token Password</Label>
-                <Input className="text-black" type="text" name="tokenpassword" readOnly value={formData.tokenpassword} onChange={handleChange} />
-            </div>
-            <div className="flex flex-col gap-2 items-start justify-start">
-                <Label className="text-black w-fit">Envoyer un mail de réinitialisation de mot de passe</Label>
-                <Checkbox className="text-black " name="regenerateToken" checked={formData.regenerateToken} onCheckedChange={(checked) => setFormData({ ...formData, regenerateToken: checked })} />
+                <Label className="text-black">User Event</Label>
+                <Input className="text-black" type="text" name="userevent" value={formData.userevent} onChange={handleChange} />
             </div>
             <div>
                 <Label className="text-black">Deleted At</Label>
@@ -262,10 +267,10 @@ const EditUsers: React.FC = () => {
                     <Input className="text-black" type="datetime-local" name="created_at" value={formData.created_at.slice(0, 16)} readOnly />
                 </div> 
             </div>
-            <Button type="submit">Update User</Button>
+            <Button type="submit">Update Event</Button>
             </form>
         </>
     );
 };
 
-export default EditUsers;
+export default EditEvents;
