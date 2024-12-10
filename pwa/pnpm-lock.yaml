@@ -77,9 +77,6 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.7
         version: 0.5.7(tailwindcss@3.4.3)
-      admin:v3.4.8:
-        specifier: link:@api-platform/admin:v3.4.8
-        version: link:@api-platform/admin:v3.4.8
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -105,7 +102,7 @@ importers:
         specifier: ^8.4.38
         version: 8.4.38
       react:
-        specifier: link:@types/fullcalendar/react
+        specifier: ^18.3.1
         version: 18.3.1
       react-day-picker:
         specifier: 8.10.1
