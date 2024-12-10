@@ -27,13 +27,25 @@ interface Event {
     sharelink: string;
 }
 
+interface FormattedEvent {
+    id: string;
+    imageUrl: string;
+    location: string;
+    title: string;
+    description: string;
+    date: string;
+    buttonText: string;
+}
+
 export default function DashboardClient() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState<string>('');
-    const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
+    const [suggestedEvents, setSuggestedEvents] = useState<FormattedEvent[]>([]);
     const [myEvents, setMyEvents] = useState<Event[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
     const searchParams = useSearchParams();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Fetch upcoming events
     const fetchUpcomingEvents = async (page: number = 1) => {
@@ -41,10 +53,11 @@ export default function DashboardClient() {
             const response = await fetch(`/api/events/upcoming?page=${page}`);
             if (!response.ok) throw new Error('Failed to fetch events');
 
-            const { events } = await response.json();
-            const formattedEvents = events.map((event: any) => ({
-                id: event.eventId || event.id,
-                imageUrl: event.img || event.imageUrl,
+            const { events, totalPages } = await response.json();
+            setTotalPages(totalPages);
+            const formattedEvents = events.map((event: Event) => ({
+                id: event.eventId,
+                imageUrl: event.img,
                 location: event.location,
                 title: event.title,
                 description: event.description,
@@ -140,7 +153,15 @@ export default function DashboardClient() {
                 ) : (
                     <AuthPrompt />
                 )}
-                <SuggestedEvents initialEvents={suggestedEvents} />
+                <SuggestedEvents
+                    initialEvents={suggestedEvents}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                        setCurrentPage(page);
+                        fetchUpcomingEvents(page);
+                    }}
+                />
             </div>
         </div>
     );
