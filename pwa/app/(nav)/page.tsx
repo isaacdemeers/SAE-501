@@ -1,5 +1,10 @@
-import DashboardClient from '@/components/dashboard/DashboardClient'
-// Server component
+import React, { Suspense } from "react";
+import DashboardClient from "@/components/dashboard/DashboardClient";
+
 export default function Dashboard() {
-  return <DashboardClient />
+  return (
+    <Suspense fallback={<div>Chargement du tableau de bord...</div>}>
+      <DashboardClient />
+    </Suspense>
+  );
 }
