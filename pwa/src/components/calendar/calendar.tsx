@@ -23,21 +23,21 @@ const randomColor = () => {
 
 // Add this function before the Calendar component
 function transformEvents(events: any[]) {
-    console.log(events);
+    console.log("Events before transform:", events);  // Pour debug
     return events.map(event => ({
-        id: event.id,
+        id: event.eventId || event.id,  // Utiliser eventId ou id s'il existe
         title: event.title,
-        start: event.datestart.replace(' ', 'T'),  // Convert "2024-11-26 08:39:00" to "2024-11-26T08:39:00"
+        start: event.datestart.replace(' ', 'T'),
         end: event.dateend.replace(' ', 'T'),
-        color: '#475569',  // Slate 600
-        extendedProps: {  // Store additional properties
+        color: '#475569',
+        extendedProps: {
             description: event.description,
             location: event.location,
             maxparticipant: event.maxparticipant,
             sharelink: event.sharelink,
             img: event.img,
             isPublic: event.isPublic,
-            id: event.id
+            id: event.eventId || event.id  // Ajouter aussi l'ID dans extendedProps
         }
     }));
 }
@@ -192,7 +192,7 @@ export function Calendar() {
                         };
 
                         let event = {
-                            id: info.event.extendedProps.id,
+                            id: info.event.id || info.event.extendedProps.id,  // Utiliser l'ID de l'événement ou celui dans extendedProps
                             title: info.event.title,
                             image: info.event.extendedProps.img,
                             location: info.event.extendedProps.location,
