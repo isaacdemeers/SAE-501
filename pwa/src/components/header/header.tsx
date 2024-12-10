@@ -125,7 +125,7 @@ export default function Header() {
                                     <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/account" className="flex items-center">
+                                        <Link href="/account" className="flex items-center cursor-pointer">
                                             <UserIcon className="mr-2 h-4 w-4" />
                                             <span>Profil</span>
                                         </Link>
@@ -133,7 +133,7 @@ export default function Header() {
 
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem className="text-red-600" asChild>
-                                        <Link href="/logout" className="flex items-center">
+                                        <Link href="/logout" className="flex items-center cursor-pointer">
                                             <LogOut className="mr-2 h-4 w-4" />
                                             <span>Déconnexion</span>
                                         </Link>
