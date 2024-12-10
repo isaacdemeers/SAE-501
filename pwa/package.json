@@ -36,6 +36,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.5.1",
     "formik": "^2.4.6",
     "isomorphic-unfetch": "^4.0.2",
     "lucide-react": "^0.452.0",
