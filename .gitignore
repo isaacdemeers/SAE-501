@@ -17,3 +17,4 @@ pwa/.env.local
 pwa/.env
 
 api/.env
+.env.prod
