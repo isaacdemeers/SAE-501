@@ -35,9 +35,11 @@ const Admin = () => {
               create={EventForm}
               edit={EditEvents}
             />
-            <ResourceGuesser name="users" 
-            create={Signin}
-            edit={EditUsers}/>
+            <ResourceGuesser
+              name="users"
+              create={Signin}
+              edit={EditUsers}
+            />
             <ResourceGuesser name="user_events" />
             <ResourceGuesser name="user_invitations" />
           </HydraAdmin>

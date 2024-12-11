@@ -585,7 +585,7 @@ export async function UpdateUserAdmin(data: any , userId: number) {
   }
 }
 
-export async function fetchEventAdmin(userId: number) {
+export async function fetchEventAdmin(userId: number | undefined) {
   try {
     const response = await fetch(`/admin/events/${userId}`);
     if (!response.ok) throw new Error('Failed to fetch user');
@@ -596,7 +596,7 @@ export async function fetchEventAdmin(userId: number) {
   }
 }
 
-export async function UpdateEventAdmin(data: any , userId: number) {
+export async function UpdateEventAdmin(data: any , userId: number | undefined) {
   console.log(data);
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));

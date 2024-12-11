@@ -13,6 +13,7 @@ use App\Controller\RegisterController;
 use App\Controller\UserController;
 use App\Controller\ResetPasswordController;
 use App\Repository\UserRepository;
+use App\Controller\AdminController;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -191,7 +192,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Post(),
         new Put(),
         new Patch(),
-        new Delete(),
+        new Delete(
+            uriTemplate: '/users/{id}',
+            controller: AdminController::class . '::deleteAdminUser',
+            normalizationContext: ['groups' => ['user:read']],
+        ),
         new GetCollection()
     ],
     normalizationContext: ['groups' => ['user:read']],

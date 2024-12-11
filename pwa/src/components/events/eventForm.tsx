@@ -198,7 +198,7 @@ export default function EventForm({ onClose }: { onClose: () => void }) {
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                PNG ou JPEG (max. 10 Mo)
+                PNG ou JPEG (max. 8 Mo)
               </p>
             </div>
           </div>

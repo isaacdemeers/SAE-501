@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
 use App\Controller\EventController;
 use App\Controller\UserEventController;
+use App\Controller\AdminController;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -25,7 +26,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Put(),
         new Get(),
         new GetCollection(),
-        new Delete(),
+        new Delete(
+            uriTemplate: '/events/{id}',
+            controller: AdminController::class . '::deleteAdminEvent',
+            normalizationContext: ['groups' => ['event:read']],
+        ),
         new Get(
             uriTemplate: '/events/{id}',
             controller: EventController::class . '::getEvent',
