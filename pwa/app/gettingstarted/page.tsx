@@ -36,7 +36,7 @@ export default function Page() {
     function Step({ title, description, index, button, terms }: { title: string; description: string; index: number; button: string; terms: React.ReactNode }) {
         console.log(currentStep, index)
         return (
-            <li className={`w-[40rem] absolute top-0 left-0 gap-6 flex-col h-full flex items-center justify-between px-8 py-10 rounded-3xl  ${currentStep > index ? "-translate-x-full" : currentStep === index ? `translate-x-0 blur-0` : "translate-x-full blur-3xl"} transition-all duration-300 `}>
+            <li className={`w-[40rem] absolute top-0 left-0 gap-6 flex-col h-full flex items-center justify-between px-8 py-10 rounded-3xl  ${currentStep > index ? "-translate-x-full " : currentStep === index ? `translate-x-0 active` : "translate-x-full blur-3xl"} transition-all duration-300 `}>
                 <div className="flex w-full h-full flex-col gap-2 items-center justify-center">
                     <h1 className={`text-5xl mt-10 text-slate-700 font-bold ${abhayalibre.className}`}>{title}</h1>
                     <p className={`text-sm text-gray-500 ${inter.className}`}>
