@@ -111,6 +111,10 @@ export default function PageEvent({ params }: EventPageProps) {
       const urlParams = new URLSearchParams(window.location.search);
       try {
         const [eventData, authData] = await Promise.all([GetEvent(id), IsAuthentificated()]);
+        if(eventData.error && eventData.error === "Event not found") {
+          router.push('/');
+          return;
+        }
         setEvent(eventData);
 
         if (eventData.visibility === 0 && !authData.isValid) {
