@@ -51,7 +51,7 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
         $signatureCookie = new Cookie(
             '5756e9a6f92de5329d245b9d278f89c802d8db852de09ecdf26d66aefae4d7c0',
             $signature,
-            time() + 7200,
+            time() + 3600,
             '/',
             null,
             true, // HttpOnly

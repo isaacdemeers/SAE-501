@@ -953,7 +953,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
         }
     }
 
-    #[Route('/events/{eventId}/users/{userId}', name: 'remove_user_from_event', methods: ['DELETE'])]
+    #[Route('/event/{eventId}/users/{userId}', name: 'remove_user_from_event', methods: ['DELETE'])]
     public function removeUserFromEvent(
         int $eventId,
         int $userId,

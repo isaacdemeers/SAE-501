@@ -88,7 +88,7 @@ export async function VerifyEmailToken(data: string) {
 export async function LoginUser(data: any) {
   try {
     console.log(data);
-    const response = await fetch(`${API_BASE_URL}/users/username`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/username`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -521,7 +521,7 @@ export async function GetEventUsers(eventId: number) {
 
 export async function RemoveEventUser(eventId: number, userId: number) {
   try {
-    const response = await fetch(`${API_BASE_URL}/events/${eventId}/users/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/event/${eventId}/users/${userId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -553,7 +553,7 @@ export async function fetchUserEvents(userId: number) {
   }
 }
 
-export async function fetchUserAdmin(userId: number) {
+export async function fetchUserAdmin(userId: number | undefined) {
   try {
     const response = await fetch(`/admin/users/${userId}`);
     if (!response.ok) throw new Error('Failed to fetch user');
@@ -564,7 +564,7 @@ export async function fetchUserAdmin(userId: number) {
   }
 }
 
-export async function UpdateUserAdmin(data: any , userId: number) {
+export async function UpdateUserAdmin(data: any , userId: number | undefined) {
   console.log(data);
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));

@@ -16,9 +16,9 @@ interface UserAdminFormData {
     photo: string | File;
     emailverify: boolean;
     emaillink: string;
-    regenerateemaillink: boolean;
+    regenerateemaillink: any;
     tokenpassword: string;
-    regenerateToken: boolean;
+    regenerateToken: any;
     deleted_at: string;
     created_at: string;
     disable: boolean;
@@ -245,7 +245,7 @@ const EditUsers: React.FC = () => {
             </div>
             <div className="flex flex-col gap-2 items-start justify-start">
                 <Label className="text-black w-fit">Envoyer un mail de réinitialisation de mot de passe</Label>
-                <Checkbox className="text-black " name="regenerateToken" checked={formData.regenerateToken} onCheckedChange={(checked) => setFormData({ ...formData, regenerateToken: checked })} />
+                <Checkbox className="text-black " name="regenerateToken" checked={!!formData.regenerateToken} onCheckedChange={(checked) => setFormData({ ...formData, regenerateToken: checked })} />
             </div>
             <div>
                 <Label className="text-black">Deleted At</Label>
