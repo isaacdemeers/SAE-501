@@ -371,7 +371,7 @@ class EventController extends AbstractController
 public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
 {
     $event = $eventRepository->find($request->get('id'));
-    if (!$event) {
+    if (!$event || $event->getDeletedDate()) {
         return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
     }
     // Retrieve the email of the event creator (ROLE_ADMIN)
@@ -432,6 +432,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
+                ->andWhere('e.DeletedDate IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1) // 1 means public
                 ->orderBy('e.datestart', 'ASC')
@@ -440,7 +441,6 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
             $events = $queryBuilder->getQuery()->getResult();
 
-
             // Get total count for pagination
             $totalQueryBuilder = $entityManager->createQueryBuilder();
             $totalQueryBuilder
@@ -448,11 +448,11 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
+                ->andWhere('e.deletedAt IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1);
 
             $totalEvents = $totalQueryBuilder->getQuery()->getSingleScalarResult();
-
 
             // Format the events for the response
             $formattedEvents = [];
@@ -494,7 +494,10 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     #[Route('/events', name: 'get_all_events', methods: ['GET'])]
     public function getAllEvents(EventRepository $eventRepository): JsonResponse
     {
-        $events = $eventRepository->findAll();
+        $events = $eventRepository->createQueryBuilder('e')
+            ->where('e.DeletedDate IS NULL')
+            ->getQuery()
+            ->getResult();
 
         $formattedEvents = [];
         foreach ($events as $event) {

@@ -14,13 +14,15 @@ Table "user" {
   "email" varchar(180) [unique, not null]
   "roles" json [not null]
   "password" varchar(255) [not null]
-  "firstname" varchar(255) [not null]
-  "lastname" varchar(255) [not null]
-  "username" varchar(255) [unique, not null]
+  "firstname" varchar(255)
+  "lastname" varchar(255)
+  "username" varchar(255) [unique]
   "photo" varchar(255) [not null]
-  "emailverify" bool [not null]
-  "emaillink" varchar(255) [not null]
+  "emailverify" bool
+  "emaillink" varchar(255)
   "tokenpassword" text
+  "deleted_at" timestamp [default: `NULL::timestamp without time zone`]
+  "created_at" timestamp [not null, note: '(DC2Type:datetime_immutable)']
 }
 
 Table "event" {
@@ -30,11 +32,12 @@ Table "event" {
   "datestart" timestamp [not null]
   "dateend" timestamp [not null]
   "location" text [not null]
-  "visibility" bool [not null]
   "sharelink" varchar(255) [not null]
-  "maxparticipant" int8 [not null]
+  "maxparticipant" int4 [not null]
   "img" varchar(255) [not null]
   "deleted_date" timestamp [default: `NULL::timestamp without time zone`]
+  "created_at" timestamp [not null, note: '(DC2Type:datetime_immutable)']
+  "visibility" int2 [not null]
 }
 
 Table "user_event" {
@@ -42,7 +45,6 @@ Table "user_event" {
   "event_id" int4 [not null]
   "user_id" int4
   "role" varchar(255) [not null]
-  "user_email" varchar(255)
 
   Indexes {
     event_id [type: btree, name: "idx_d96cf1ff71f7e88b"]
@@ -53,12 +55,17 @@ Table "user_event" {
 Table "user_invitation" {
   "id" int4 [pk, not null]
   "event_id" int4 [not null]
-  "email" varchar(255) [not null]
   "link" varchar(255) [not null]
   "expiration" timestamp [not null]
+  "user_id_id" int4 [not null]
+  "date_invitation" timestamp [not null]
+  "date_acceptinvitation" timestamp [default: `NULL::timestamp without time zone`]
+  "user_invite_id" int4
 
   Indexes {
     event_id [type: btree, name: "idx_567aa74e71f7e88b"]
+    user_id_id [type: btree, name: "idx_567aa74e9d86650f"]
+    user_invite_id [type: btree, name: "idx_567aa74eeaa1faa3"]
   }
 }
 
@@ -67,3 +74,7 @@ Ref "fk_d96cf1ff71f7e88b":"event"."id" < "user_event"."event_id"
 Ref "fk_d96cf1ffa76ed395":"user"."id" < "user_event"."user_id" [delete: set null]
 
 Ref "fk_567aa74e71f7e88b":"event"."id" < "user_invitation"."event_id"
+
+Ref "fk_567aa74e9d86650f":"user"."id" < "user_invitation"."user_id_id"
+
+Ref "fk_567aa74eeaa1faa3":"user"."id" < "user_invitation"."user_invite_id"
