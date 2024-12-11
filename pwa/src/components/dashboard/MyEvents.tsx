@@ -44,7 +44,7 @@ const timeFrameLabels: Record<TimeFrame, string> = {
     nextMonth: 'Le mois prochain'
 };
 
-export default function MyEvents({ events, onEventCreated }: MyEventsProps) {
+export default function MyEvents({ events, onEventCreated }: any) {
     const [showEventForm, setShowEventForm] = useState(false);
     const [timeFrame, setTimeFrame] = useState<TimeFrame>('all');
 
