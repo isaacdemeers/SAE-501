@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Pencil } from "lucide-react";
 import { ProfilePhotoUpload } from "./changePhoto";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const animateHeight =
   "transition-[max-height] duration-300 ease-in-out overflow-hidden";
@@ -26,6 +28,35 @@ interface AuthResponse {
     lastName: string;
     photo: string;
   };
+}
+
+function ProfileSkeleton() {
+  return (
+    <Card className="w-full max-w-3xl mx-auto">
+      <div className="p-6">
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <Skeleton className="w-32 h-32 rounded-full" />
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <Skeleton className="h-10 w-full mt-6" />
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 export default function ProfileSettings() {
@@ -43,7 +74,8 @@ export default function ProfileSettings() {
   });
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [message , setMessage] = useState("")
+  const [message, setMessage] = useState("");
+
   const fetchUserData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -87,11 +119,12 @@ export default function ProfileSettings() {
   }, [fetchUserData]);
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return <ProfileSkeleton />;
   }
 
   if (!userData) {
-    return null;
+    router.push("/login");
+    return <ProfileSkeleton />;
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,31 +139,31 @@ export default function ProfileSettings() {
         lastname: formData.lastname,
         username: formData.username,
       });
-      alert("Compte mis à jour avec succès !");
-      fetchUserData(); // Rafraîchir les données utilisateur
+      toast.success("Compte mis à jour avec succès !");
+      fetchUserData();
     } catch (error) {
-      console.error("Error updating account:", error);
+      toast.error("Une erreur est survenue lors de la mise à jour.");
     }
   };
 
   const handleUpdateEmail = async () => {
     if (formData.newEmail !== formData.confirmEmail) {
-      alert("Les e-mails ne correspondent pas !");
+      toast.error("Les e-mails ne correspondent pas !");
       return;
     }
 
     try {
       await editUser(userData!.id, { email: formData.newEmail });
-      alert("E-mail mis à jour avec succès !");
-      fetchUserData(); // Rafraîchir les données utilisateur
+      toast.success("E-mail mis à jour avec succès !");
+      fetchUserData();
     } catch (error) {
-      console.error("Error updating email:", error);
+      toast.error("Une erreur est survenue lors de la mise à jour.");
     }
   };
 
   const handleUpdatePassword = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("Les nouveaux mots de passe ne correspondent pas !");
+      toast.error("Les nouveaux mots de passe ne correspondent pas !");
       return;
     }
 
@@ -139,16 +172,16 @@ export default function ProfileSettings() {
         oldPassword: formData.oldPassword,
         newPassword: formData.newPassword,
       });
-      alert("Mot de passe mis à jour avec succès !");
+      toast.success("Mot de passe mis à jour avec succès !");
       setFormData((prev) => ({
         ...prev,
         oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       }));
-      fetchUserData(); // Rafraîchir les données utilisateur
+      fetchUserData();
     } catch (error) {
-      console.error("Error updating password:", error);
+      toast.error("Une erreur est survenue lors de la mise à jour.");
     }
   };
 
