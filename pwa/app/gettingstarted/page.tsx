@@ -16,7 +16,7 @@ export default function Page() {
         { title: "Bienvenue sur PlanIt", description: "L'agenda partagé pour tous vos événements.", button: "Commencer" },
         { title: "Créer et collaborer", description: "Créez et participez à des événements avec vos amis ou contacts.", button: "Suivant" },
         { title: "Inviter", description: "Invitez vos amis ou contacts à l'événement pour gérer vos événements ensemble.", button: "Suivant" },
-        { title: "Accéder à PlanIt", description: `En continuant, vous acceptez les `, terms: <Link href="/cgu" className="font-bold underline text-slate-700">termes et conditions</Link>, button: "Accéder à PlanIt" },
+        { title: "Accéder à PlanIt", description: `En continuant, vous acceptez les `, terms: <Link href="/cgu" className="font-bold text-slate-700">termes et conditions.</Link>, button: "Accéder à PlanIt" },
     ];
 
     const [currentStep, setCurrentStep] = useState(0);
@@ -56,7 +56,7 @@ export default function Page() {
         <section className="w-screen h-screen flex items-center justify-center relative">
             <Image src={Background} alt="Background" className="absolute top-0 left-0 w-full h-full" />
             <div className="w-screen h-screen bg-slate-100 bg-opacity-65 backdrop-blur-3xl flex items-center justify-center">
-                <div className="flex items-center justify-start bg-slate-50 bg-opacity-20 overflow-hidden backdrop-blur-3xl w-[40rem] h-1/2 rounded-3xl shadow-2xl">
+                <div className={` ${currentStep === 4 ? 'blur-2xl opacity-0' : ''} flex items-center justify-start bg-slate-50 bg-opacity-20 overflow-hidden backdrop-blur-3xl w-[40rem] h-1/2 rounded-3xl shadow-2xl transition-all duration-500`}>
                     <ul className="w-full h-full relative flex  rounded-3xl ">
                         {steps.map((step, index) => (
                             <Step key={index} title={step.title} description={step.description} index={index} button={step.button} terms={step.terms} />
