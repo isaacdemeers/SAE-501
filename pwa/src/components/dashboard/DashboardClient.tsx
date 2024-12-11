@@ -16,7 +16,7 @@ interface AuthResponse {
 }
 
 interface Event {
-    eventId: string;
+    id: string;
     title: string;
     description: string;
     datestart: string;
@@ -54,9 +54,10 @@ export default function DashboardClient() {
             if (!response.ok) throw new Error('Failed to fetch events');
 
             const { events, totalPages } = await response.json();
-            setTotalPages(totalPages);
+            console.log('API Response:', events);
+
             const formattedEvents = events.map((event: Event) => ({
-                id: event.eventId,
+                id: event.id,
                 imageUrl: event.img,
                 location: event.location,
                 title: event.title,
@@ -70,6 +71,7 @@ export default function DashboardClient() {
                 }),
                 buttonText: "Voir l'Événement"
             }));
+            console.log('Formatted Events:', formattedEvents);
             setSuggestedEvents(formattedEvents);
         } catch (error) {
             console.error('Error fetching upcoming events:', error);
