@@ -38,6 +38,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { UpdateEvent } from "@/lib/request";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -91,7 +92,9 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [endTime, setEndTime] = useState("12:00");
+  const [startTime, setStartTime] = useState("12:00");
+
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -105,57 +108,81 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
         image: null,
       },
     });
+
+
+    // Function to combine date and time
+  const combineDateAndTime = (
+    date: Date | undefined,
+    time: string
+  ): Date | undefined => {
+    if (!date) return undefined;
+    const [hours, minutes] = time.split(":").map(Number);
+    const newDate = new Date(date);
+    newDate.setHours(hours, minutes);
+    return newDate;
+  };
   
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
       try {
-        setIsSubmitting(true);
-        setError(null);
-  
-        // Créer l'objet de données à envoyer
-        const formData: any = {};
-  
-        // Ne mettre à jour que les champs modifiés
-        if (values.title !== event.title) {
-          formData.title = values.title;
-        }
-        if (values.description !== event.description) {
-          formData.description = values.description;
-        }
-        if (values.startDate) {
-          formData.datestart = values.startDate.toISOString().split('.')[0];
-        }
-        if (values.endDate) {
-          formData.dateend = values.endDate.toISOString().split('.')[0];
-        }
-        if (values.location !== event.location) {
-          formData.location = values.location;
-        }
-        if (values.maxAttendees !== event.maxparticipant.toString()) {
-          formData.maxparticipant = parseInt(values.maxAttendees);
-        }
-        if ((values.visibility === "public") !== event.visibility) {
-          formData.visibility = values.visibility;
-        }
-        if(values.image !== null) {
-          formData.image = image;
+      setIsSubmitting(true);
+      setError(null);
 
-        }
-        // N'envoyer la requête que si des modifications ont été faites
-        if (Object.keys(formData).length > 0) {
-          const response = await UpdateEvent(event.id, formData);
-          if (response.event) {
-            onUpdate?.();
-            onClose?.();
-          }
-        } else {
-          onClose?.();
-        }
-      } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Une erreur est survenue lors de la mise à jour");
-        console.error("Erreur lors de la mise à jour:", err);
-      } finally {
+      // Vérifier si la date de début est supérieure à la date de fin
+      if (values.startDate && values.endDate && values.startDate > values.endDate) {
+        setError("La date de début ne peut pas être supérieure à la date de fin.");
         setIsSubmitting(false);
+        return;
+      }
+
+      // Créer l'objet de données à envoyer
+      const formData: any = {};
+
+      // Ne mettre à jour que les champs modifiés
+      if (values.title !== event.title) {
+        formData.title = values.title;
+      }
+      if (values.description !== event.description) {
+        formData.description = values.description;
+      }
+      if (values.startDate) {
+        const adjustedStartDate = new Date(values.startDate);
+        adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
+        formData.datestart = adjustedStartDate.toISOString().split('.')[0];
+      }
+      if (values.endDate) {
+        const adjustedEndDate = new Date(values.endDate);
+        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+        formData.dateend = adjustedEndDate.toISOString().split('.')[0];
+      }
+      if (values.location !== event.location) {
+        formData.location = values.location;
+      }
+      if (values.maxAttendees !== event.maxparticipant.toString()) {
+        formData.maxparticipant = parseInt(values.maxAttendees);
+      }
+      if ((values.visibility === "public") !== event.visibility) {
+        formData.visibility = values.visibility;
+      }
+      if(values.image !== null) {
+        formData.image = image;
+      }
+
+      // N'envoyer la requête que si des modifications ont été faites
+      if (Object.keys(formData).length > 0) {
+        const response = await UpdateEvent(event.id, formData);
+        if (response.event) {
+        onUpdate?.();
+        onClose?.();
+        }
+      } else {
+        onClose?.();
+      }
+      } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Une erreur est survenue lors de la mise à jour");
+      console.error("Erreur lors de la mise à jour:", err);
+      } finally {
+      setIsSubmitting(false);
       }
     };
   
@@ -292,7 +319,31 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
                   </FormItem>
                 )}
               />
-  
+  <div className="flex items-center gap-2">
+                      <Label className="w-20">Heure :</Label>
+                      <Select value={startTime} onValueChange={setStartTime}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, hour) =>
+                            Array.from({ length: 4 }, (_, quarterHour) => {
+                              const minutes = quarterHour * 15;
+                              const timeString = `${hour
+                                .toString()
+                                .padStart(2, "0")}:${minutes
+                                  .toString()
+                                  .padStart(2, "0")}`;
+                              return (
+                                <SelectItem key={timeString} value={timeString}>
+                                  {timeString}
+                                </SelectItem>
+                              );
+                            })
+                          ).flat()}
+                        </SelectContent>
+                      </Select>
+                    </div>
               <FormField
                 control={form.control}
                 name="endDate"
