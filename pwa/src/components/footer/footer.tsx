@@ -1,16 +1,16 @@
 import Link from "next/link"
-import { abhayalibre } from '@/lib/fonts'
+import { abhayalibre, inter } from '@/lib/fonts'
 
 export default function Footer() {
     return (
-        <footer className="bg-navy-900 text-white py-12 px-6 bg-slate-800 ">
-            <div className="max-w-6xl mx-auto">
+        <footer className="bg-navy-900 text-white py-12 px-6 bg-slate-900 ">
+            <div className={`max-w-6xl mx-auto ${inter.className}`}>
                 <h2 className={`mb-8 drop-shadow-lg  text-4xl font-bold text-slate-50 ${abhayalibre.className}`}>PlanIt</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-slate-50">A Propos</h3>
-                        <p className="text-slate-50">
+                        <p className={`text-slate-50 ${inter.className}`}>
                             Organisez, découvrez et participez à des événements en toute simplicité grâce à notre application intuitive et sécurisée.
                         </p>
                     </div>
@@ -39,7 +39,7 @@ export default function Footer() {
                 </div>
 
                 <div className="mt-12 text-center ">
-                    <p className="text-slate-50">&copy; Tous droits réservés FLIQ Inc. - 2024©</p>
+                    <p className="text-slate-50 text-sm ">&copy; Tous droits réservés FLIQ Inc. - 2024©</p>
                 </div>
             </div>
         </footer>

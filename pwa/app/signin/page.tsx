@@ -77,7 +77,7 @@ export default function Signin() {
     }
 
     return (
-        <>
+        <div className="w-full h-full flex items-center justify-center p-10">
             {recap ? (
                 <div>
                     <SignRecap signdata={signdata} pushdata={pushdata} handleRecap={handleRecap} />
@@ -95,6 +95,6 @@ export default function Signin() {
                     <Addimage signdata={signdata} handleImageData={handleImageData} handleRecap={handleRecap} handleBack={handleBack} />
                 </div>
             )}
-        </>
+        </div>
     );
 }
