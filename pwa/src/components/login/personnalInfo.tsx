@@ -1,6 +1,6 @@
 'use client'
 import * as React from "react"
-import { useState , useEffect } from "react" 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TestUsername } from "@/lib/request"
- 
+
 interface LoginFormProps {
   handlePersonnalData: (data: { firstname: string; lastname: string; username: string }) => void;
   signdata: {
@@ -20,7 +20,7 @@ interface LoginFormProps {
   };
 }
 
-export default function Loginform({ handlePersonnalData , signdata }: LoginFormProps): JSX.Element {
+export default function Loginform({ handlePersonnalData, signdata }: LoginFormProps): JSX.Element {
   const [loginErrors, setLoginErrors] = useState<{ firstname: boolean; lastname: boolean; username: boolean }>({
     firstname: false,
     lastname: false,
@@ -43,12 +43,10 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
     if (signdata.username) {
       setLogdata((prevLogdata) => ({ ...prevLogdata, username: signdata.username }));
     }
-  console.log(signdata);
-}, [signdata.firstname, signdata.lastname, signdata.username]);
+  }, [signdata.firstname, signdata.lastname, signdata.username]);
 
 
   const handleFirstname = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    console.log(logdata);
     setLogdata({ ...logdata, firstname: e.target.value });
   };
 
@@ -78,18 +76,16 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
       return;
     }
     let verifyusername = await TestUsername(logdata.username);
-      console.log(verifyusername);
-      if(verifyusername.message === "Username already exists"){
-        setUsernameerror(true);
-        setTimeout(() => {
-          setUsernameerror(false);
-        },5000);
-      }
-      else if(verifyusername.message === "OK"){
-    handlePersonnalData(logdata);
-      }
+    if (verifyusername.message === "Username already exists") {
+      setUsernameerror(true);
+      setTimeout(() => {
+        setUsernameerror(false);
+      }, 5000);
+    }
+    else if (verifyusername.message === "OK") {
+      handlePersonnalData(logdata);
+    }
     // Ici, tu peux ajouter la logique une fois tous les champs remplis correctement
-    console.log("Tous les champs sont remplis");
   };
 
   // Function pour gérer l'affichage de l'erreur
@@ -115,7 +111,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
             Ce pseudo est déjà pris
           </div>
         )}
-        
+
         <form onSubmit={handleLogin}>
           <div className="grid w-full items-center gap-6">
             <div className="flex flex-col space-y-1.5">
@@ -159,7 +155,7 @@ export default function Loginform({ handlePersonnalData , signdata }: LoginFormP
             </div>
           </div>
           <CardFooter className="flex flex-col gap-2 w-full px-0 justify-between">
-            <Button size={"lg"} onClick={ () => handleLogin} className="w-full mt-10 md:text-lg">
+            <Button size={"lg"} onClick={() => handleLogin} className="w-full mt-10 md:text-lg">
               Suivant
             </Button>
           </CardFooter>

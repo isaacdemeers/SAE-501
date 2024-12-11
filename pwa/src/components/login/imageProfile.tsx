@@ -1,8 +1,8 @@
 'use client'
-import { useState , useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload , ArrowLeft } from "lucide-react"
+import { Upload, ArrowLeft } from "lucide-react"
 interface HandleImageProps {
   handleImageData: (data: File) => void;
   handleBack: () => void;
@@ -13,17 +13,17 @@ interface HandleImageProps {
   handleRecap: () => void;
 }
 
-export default function AddImage({ handleImageData, handleBack , handleRecap ,  signdata }: HandleImageProps): JSX.Element {
+export default function AddImage({ handleImageData, handleBack, handleRecap, signdata }: HandleImageProps): JSX.Element {
   const [sizeerror, setSizeerror] = useState<boolean>(false);
-  const [fileok , setFileok] = useState<boolean>(false);
+  const [fileok, setFileok] = useState<boolean>(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
-  if (signdata.image) {
-    setImageSrc(URL.createObjectURL(signdata.image));
+    if (signdata.image) {
+      setImageSrc(URL.createObjectURL(signdata.image));
+    }
   }
-}
-, [signdata.image]);
+    , [signdata.image]);
 
 
   const handleuploadimage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +33,6 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
       img.onload = () => {
         const width = img.width;
         const height = img.height;
-        console.log(`Width: ${width}, Height: ${height}`);
         if (width > 800 || height > 800) {
           setSizeerror(true);
           setTimeout(() => {
@@ -45,7 +44,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
           setTimeout(() => {
             setFileok(false);
           }, 5000);
-           handleImageData(file);
+          handleImageData(file);
           setImageSrc(URL.createObjectURL(file));
         }
       };
@@ -64,7 +63,7 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
       {fileok && (
         <div className="text-green-600 flex items-center rounded-xl mb-6 justify-center bg-green-300 h-12 text-base md:text-lg w-full">
           Votre image a été téléchargée avec succès
-          </div>
+        </div>
       )}
       {sizeerror && (
         <div className="text-red-600 flex items-center rounded-xl mb-6 justify-center bg-red-300 h-12 text-base md:text-lg w-full">
@@ -72,10 +71,10 @@ export default function AddImage({ handleImageData, handleBack , handleRecap ,  
         </div>
       )}
 
-    <ArrowLeft className="w-10 h-10 text-gray-400 mb-2 cursor-pointer" onClick={() => handleBack()} />
+      <ArrowLeft className="w-10 h-10 text-gray-400 mb-2 cursor-pointer" onClick={() => handleBack()} />
       <Card className="w-full  md:w-[450px]">
         <CardHeader>
-            <CardTitle className="text-2xl font-bold">Aidez les gens à vous reconnaître</CardTitle>
+          <CardTitle className="text-2xl font-bold">Aidez les gens à vous reconnaître</CardTitle>
         </CardHeader>
         <CardContent>
           <div className={`flex flex-col items-center justify-center border-2 border-dashed ${sizeerror ? 'border-red-500' : 'border-gray-300'} rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors relative`}>

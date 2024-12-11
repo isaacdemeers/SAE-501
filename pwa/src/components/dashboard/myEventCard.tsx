@@ -25,7 +25,6 @@ export default function MyEventCard({
         minute: 'numeric'
     }) : 'Date non disponible';
 
-    // console.log("Image URL:", imageUrl); // Log the img to check its value
 
     return (
         <Link href={`/events/${eventId}`}>
