@@ -11,22 +11,30 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Uid\Uuid;
 use App\Entity\User;
+use App\Entity\Event;
+use App\Entity\UserInvitation;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use DateTime;
 
 class UserController extends AbstractController
 {
     private $s3Service;
+    private $params;
 
 
-    public function __construct(AmazonS3Service $s3Service)
+    public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
     {
         $this->s3Service = $s3Service;
+        $this->params = $params;
     }
 
-
-    #[Route('/users/username' , name:'app_users_username', methods: ['POST'])]
+    #[Route('/api/users/username' , name:'app_users_username', methods: ['POST'])]
     public function index(Request $request,  EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $data = json_decode($request->getContent(), true);
@@ -156,18 +164,23 @@ class UserController extends AbstractController
 
         $events = [];
         foreach ($userEvents as $userEvent) {
-            $imgName = $userEvent->getEvent()->getImg();
+            $event = $userEvent->getEvent();
+            if ($event->getDeletedDate() !== null) {
+                continue;
+            }
+
+            $imgName = $event->getImg();
             $fullImgUrl = $imgName ? $this->s3Service->getObjectUrl($imgName) : null;
 
             $eventData = [
-                'eventId' => $userEvent->getEvent()->getId(),
-                'title' => $userEvent->getEvent()->getTitle(),
-                'description' => $userEvent->getEvent()->getDescription(),
-                'datestart' => $userEvent->getEvent()->getDatestart()->format('Y-m-d H:i:s'),
-                'dateend' => $userEvent->getEvent()->getDateend()->format('Y-m-d H:i:s'),
-                'location' => $userEvent->getEvent()->getLocation(),
+                'eventId' => $event->getId(),
+                'title' => $event->getTitle(),
+                'description' => $event->getDescription(),
+                'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                'location' => $event->getLocation(),
                 'img' => $fullImgUrl,
-                'visibility' => $userEvent->getEvent()->getVisibility(),
+                'visibility' => $event->getVisibility(),
             ];
 
             $events[] = $eventData;

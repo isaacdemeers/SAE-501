@@ -10,6 +10,7 @@ import Footer from "@/components/footer/footer";
 import { Metadata } from "next";
 import Loader from "@/components/utils/Loader";
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 const metadata: Metadata = {

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { HydraAdmin, ResourceGuesser } from "@api-platform/admin";
 import EventForm from "@/components/events/eventForm";
 import Signin from "../signin/page";
+import EditUsers from "@/components/admin/EditUser";
+import EditEvents from "@/components/admin/EditEvent";
 
 const Admin = () => {
   const [DynamicAdmin, setDynamicAdmin] = useState(<p>Loading...</p>);
@@ -31,9 +33,13 @@ const Admin = () => {
             <ResourceGuesser
               name="events"
               create={EventForm}
+              edit={EditEvents}
             />
-            <ResourceGuesser name="users" 
-            create={Signin}/>
+            <ResourceGuesser
+              name="users"
+              create={Signin}
+              edit={EditUsers}
+            />
             <ResourceGuesser name="user_events" />
             <ResourceGuesser name="user_invitations" />
           </HydraAdmin>

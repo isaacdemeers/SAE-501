@@ -367,21 +367,23 @@ class EventController extends AbstractController
         ], Response::HTTP_OK);
     }
 
-    #[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
-    public function getevent(Request $request, EventRepository $eventRepository, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $event = $eventRepository->find($request->get('id'));
-        if (!$event) {
-            return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
-        }
-        // Retrieve the email of the event creator (ROLE_ADMIN)
-        $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
-            'event' => $event,
-            'role' => 'ROLE_ADMIN'
-        ]);
+
+#[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
+public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
+{
+    $event = $eventRepository->find($request->get('id'));
+    if (!$event || $event->getDeletedDate()) {
+        return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
+    }
+    // Retrieve the email of the event creator (ROLE_ADMIN)
+    $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+        'event' => $event,
+        'role' => 'ROLE_ADMIN'
+    ]);
 
         $adminEmail = $adminUserEvent ? $adminUserEvent->getUser()->getEmail() : null;
         $adminUsername = $adminUserEvent ? $adminUserEvent->getUser()->getUsername() : null;
+
 
         // Count the number of users registered for the event
         $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);
@@ -433,6 +435,7 @@ class EventController extends AbstractController
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
+                ->andWhere('e.DeletedDate IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1); // 1 means public
 
@@ -462,6 +465,7 @@ class EventController extends AbstractController
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
+                ->andWhere('e.deletedAt IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1);
 
@@ -519,7 +523,10 @@ class EventController extends AbstractController
     #[Route('/events', name: 'get_all_events', methods: ['GET'])]
     public function getAllEvents(EventRepository $eventRepository): JsonResponse
     {
-        $events = $eventRepository->findAll();
+        $events = $eventRepository->createQueryBuilder('e')
+            ->where('e.DeletedDate IS NULL')
+            ->getQuery()
+            ->getResult();
 
         $formattedEvents = [];
         foreach ($events as $event) {
@@ -976,7 +983,7 @@ class EventController extends AbstractController
         }
     }
 
-    #[Route('/events/{eventId}/users/{userId}', name: 'remove_user_from_event', methods: ['DELETE'])]
+    #[Route('/event/{eventId}/users/{userId}', name: 'remove_user_from_event', methods: ['DELETE'])]
     public function removeUserFromEvent(
         int $eventId,
         int $userId,

@@ -5,3 +5,37 @@ Error: PostgreSQL connection error: Error: getaddrinfo ENOTFOUND database
     at async fetchSchemaJson (/usr/local/share/nvm/versions/node/v20.17.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:415:20)
     at async connectionHandler (/usr/local/share/nvm/versions/node/v20.17.0/lib/node_modules/@dbml/cli/lib/cli/connector.js:24:24)
 
+2024-12-11T07:47:16.764Z
+Error: PostgreSQL connection error: Error: connect ECONNREFUSED 127.0.0.1:5432
+    at getValidatedClient (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:21:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async fetchSchemaJson (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:415:20)
+    at async connectionHandler (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/lib/cli/connector.js:24:24)
+
+2024-12-11T07:50:06.719Z
+error: missing FROM-clause entry for table "t"
+    at /config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/pg/lib/client.js:535:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async generateTablesAndFields (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:159:35)
+    at async Promise.all (index 0)
+    at async fetchSchemaJson (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:420:17)
+    at async connectionHandler (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/lib/cli/connector.js:24:24)
+
+2024-12-11T07:52:15.127Z
+error: missing FROM-clause entry for table "t"
+    at /config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/pg/lib/client.js:535:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async generateTablesAndFields (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:159:35)
+    at async Promise.all (index 0)
+    at async fetchSchemaJson (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:420:17)
+    at async connectionHandler (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/lib/cli/connector.js:24:24)
+
+2024-12-11T07:54:15.487Z
+error: missing FROM-clause entry for table "t"
+    at /config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/pg/lib/client.js:535:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async generateTablesAndFields (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:159:35)
+    at async Promise.all (index 0)
+    at async fetchSchemaJson (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/node_modules/@dbml/connector/dist/connectors/postgresConnector.js:420:17)
+    at async connectionHandler (/config/nvm/versions/node/v22.12.0/lib/node_modules/@dbml/cli/lib/cli/connector.js:24:24)
+
