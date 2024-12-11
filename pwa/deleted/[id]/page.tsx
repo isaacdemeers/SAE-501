@@ -18,11 +18,11 @@ import {
 import Image from "next/image";
 import eventImage from "@images/event-background-desktop.png";
 import Link from "next/link";
-import { Dialog, DialogTrigger, DialogContent , DialogHeader , DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { IsAuthentificated, JoinEvent ,  VerifyConnectionUUID , VerifyConnectionConnectedUser , unsubscribeConnectedUser , unsubscribeUUID , NewConnectionUUID } from "@/lib/request";
+import { IsAuthentificated, JoinEvent, VerifyConnectionUUID, VerifyConnectionConnectedUser, unsubscribeConnectedUser, unsubscribeUUID, NewConnectionUUID } from "@/lib/request";
 import { DialogClose } from "@radix-ui/react-dialog";
 
 interface EventPageProps {
@@ -37,7 +37,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [Role, setRole] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [connectionuuid , setConnectionuuid] = useState("");
+  const [connectionuuid, setConnectionuuid] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -61,21 +61,21 @@ export default function EventPage({ params }: EventPageProps) {
     const connection = urlParams.get("connection");
     if (connection) {
       setConnectionuuid(connection);
-      verifyConnectionUUID(connection , id);
+      verifyConnectionUUID(connection, id);
     }
     const newconnection = urlParams.get("newconnection");
     if (newconnection) {
       setConnectionuuid(newconnection);
-      NewConnectionUUID(newconnection , id);
-      verifyConnectionUUID(newconnection , id);
+      NewConnectionUUID(newconnection, id);
+      verifyConnectionUUID(newconnection, id);
     }
   }, []);
 
-  async function verifyConnectionUUID(connectionUUID: string , id : number) {
+  async function verifyConnectionUUID(connectionUUID: string, id: number) {
     try {
-      const response = await VerifyConnectionUUID(connectionUUID , id);
+      const response = await VerifyConnectionUUID(connectionUUID, id);
       if (response.isValid) {
-        console.log("Connection UUID is valid" );
+        console.log("Connection UUID is valid");
         setIsSubscribed(true);
       } else {
         console.log("Connection UUID is invalid");
@@ -86,23 +86,23 @@ export default function EventPage({ params }: EventPageProps) {
   }
 
   async function handleSubscribe() {
-    let sub = await JoinEvent(id , email);
+    let sub = await JoinEvent(id, email);
     if (sub.message === "User successfully joined the event") {
       setIsDialogOpen(false);
       setIsSubscribed(true);
-      if(sub.link !== "") {
-      setConnectionuuid(sub.link);      // Replace alert with console log or any other notification method
-      console.log("Vous avez rejoint l'événement avec succès");
+      if (sub.link !== "") {
+        setConnectionuuid(sub.link);      // Replace alert with console log or any other notification method
+        console.log("Vous avez rejoint l'événement avec succès");
+      }
     }
-  }
-    else  {
+    else {
       console.log(sub);
     }
   }
 
   async function handleUnsubscribe() {
-    if(isAuthenticated) {
-      let unsub  = await unsubscribeConnectedUser(id);
+    if (isAuthenticated) {
+      let unsub = await unsubscribeConnectedUser(id);
       if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
@@ -110,18 +110,18 @@ export default function EventPage({ params }: EventPageProps) {
       } else {
         console.log(unsub);
       }
-  }
-  else if (connectionuuid !== "" && isSubscribed) {
-    let unsub = await unsubscribeUUID(connectionuuid , id);
-    if (unsub.message === "User successfully left the event") {
-      setIsDialogOpen(false);
-      setIsSubscribed(false);
-      console.log("Vous vous êtes désinscrit avec succès");
-    } else {
-      console.log(unsub);
+    }
+    else if (connectionuuid !== "" && isSubscribed) {
+      let unsub = await unsubscribeUUID(connectionuuid, id);
+      if (unsub.message === "User successfully left the event") {
+        setIsDialogOpen(false);
+        setIsSubscribed(false);
+        console.log("Vous vous êtes désinscrit avec succès");
+      } else {
+        console.log(unsub);
+      }
     }
   }
-}
 
   return (
     <div className="max-w-2xl p-4 mt-20 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12">
@@ -138,17 +138,17 @@ export default function EventPage({ params }: EventPageProps) {
           </Button>
         </Link>
         {Role === "ROLE_ADMIN" ? (
-        <Link href={`/event/${id}/edit`}>
-          <Button
-            // onClick={() => router.push(`/event/${id}/edit`)}
-            variant="default"
-            size="sm"
-            className="md:flex"
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Éditer
-          </Button>
-        </Link>
+          <Link href={`/event/${id}/edit`}>
+            <Button
+              // onClick={() => router.push(`/event/${id}/edit`)}
+              variant="default"
+              size="sm"
+              className="md:flex"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Éditer
+            </Button>
+          </Link>
         ) : null}
       </header>
 
@@ -179,94 +179,94 @@ export default function EventPage({ params }: EventPageProps) {
               <Button variant="default" className="">
                 <Share2 className="w-4 h-4 mr-2" /> Partager
               </Button>
-    {isSubscribed ? (
-     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-     <DialogTrigger asChild>
-       <Button
-         variant="default"
-         className="bg-blue-500 md:flex hover:bg-blue-400"
-         onClick={() => setIsDialogOpen(true)}
-       >
-         <Check className="w-4 h-4 mr-2" /> Inscrit
-       </Button>
-     </DialogTrigger>
-     <DialogContent>
-       <DialogHeader>
-         <h2 className="text-lg font-bold">Désinscription</h2>
-       </DialogHeader>
-       <div className="space-y-4">
-         <p className="text-sm text-muted-foreground">
-           Attention, vous allez vous désinscrire de cet évènement. Voulez-vous vraiment continuer ?
-         </p>
-       </div>
-       <DialogFooter>
-         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-           Annuler
-         </Button>
-         <Button variant="destructive" onClick={handleUnsubscribe}>
-           Se désinscrire
-         </Button>
-       </DialogFooter>
-     </DialogContent>
-   </Dialog>
-    ) : (
-      isAuthenticated ? (
-      <Button variant="default" onClick={handleSubscribe}>
-        <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
-      </Button>
-      ) : (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="default">
-            <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <h2 className="text-lg font-bold">S'inscrire à l'évènement</h2>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Pour vous inscrire, connectez-vous.
-            </p>
-            <div className="flex flex-col gap-4">
-              <Link href={`/login?returnUrl=/event/${id}`} passHref>
-                <Button className="flex w-full items-center justify-center" variant="secondary">Se connecter</Button>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                ou inscrivez-vous avec votre email
-              </p>
-                <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubscribe();
-                }}
-                className="space-y-2"
-                >
-                <Label htmlFor="email">Votre email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Entrez votre email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <Button type="submit">S'inscrire avec votre email</Button>
-                </form>
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose>
-              <Button variant="outline" onClick={() => setEmail("")}>
-                Fermer
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      )
-    )}
+              {isSubscribed ? (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="default"
+                      className="bg-blue-500 md:flex hover:bg-blue-400"
+                      onClick={() => setIsDialogOpen(true)}
+                    >
+                      <Check className="w-4 h-4 mr-2" /> Inscrit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <h2 className="text-lg font-bold">Désinscription</h2>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Attention, vous allez vous désinscrire de cet évènement. Voulez-vous vraiment continuer ?
+                      </p>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        Annuler
+                      </Button>
+                      <Button variant="destructive" onClick={handleUnsubscribe}>
+                        Se désinscrire
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                isAuthenticated ? (
+                  <Button variant="default" onClick={handleSubscribe}>
+                    <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
+                  </Button>
+                ) : (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="default">
+                        <Plus className="w-4 h-4 mr-2" /> S&apos;inscrire
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <h2 className="text-lg font-bold">S'inscrire à l'évènement</h2>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          Pour vous inscrire, connectez-vous.
+                        </p>
+                        <div className="flex flex-col gap-4">
+                          <Link href={`/login?returnUrl=/event/${id}`} passHref>
+                            <Button className="flex w-full items-center justify-center" variant="secondary">Se connecter</Button>
+                          </Link>
+                          <p className="text-sm text-muted-foreground">
+                            ou inscrivez-vous avec votre email
+                          </p>
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleSubscribe();
+                            }}
+                            className="space-y-2"
+                          >
+                            <Label htmlFor="email">Votre email</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="Entrez votre email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                            />
+                            <Button type="submit">S'inscrire avec votre email</Button>
+                          </form>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose>
+                          <Button variant="outline" onClick={() => setEmail("")}>
+                            Fermer
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )
+              )}
             </div>
 
             <div className="flex flex-col gap-4 mb-3 md:mb-6">

@@ -541,7 +541,7 @@ export async function fetchUserEvents(userId: number) {
     const response = await fetch(`/user/${userId}/events`);
     if (!response.ok) throw new Error('Failed to fetch events');
     const data = await response.json();
-    console.log('fez', data)
+    // console.log('fez', data)
     return data;
   } catch (error) {
     console.error('Error fetching user events:', error);

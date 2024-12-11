@@ -53,7 +53,7 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
             icon={<MapPin />}
             content={event.location}
           />
-          <EventInfoTag
+          {/* <EventInfoTag
             type="full"
             title="Organisateur"
             icon={<Star />}
@@ -64,7 +64,7 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
             title="Contact"
             icon={<Mail />}
             content={user.email}
-          />
+          /> */}
 
         </ul>
 

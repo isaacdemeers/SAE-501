@@ -21,8 +21,7 @@ const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function transformEvents(events: any[]) {
-    console.log(events)
+function transformEvents(events: any[], currentUser: any) {
     return events.map(event => ({
         id: event.eventId || event.id,
         title: event.title,
@@ -36,7 +35,11 @@ function transformEvents(events: any[]) {
             sharelink: event.sharelink,
             img: event.img,
             visibility: event.visibility,
-            id: event.eventId || event.id
+            id: event.eventId || event.id,
+            organizer: event.creator?.username || event.organizer || 'Non spécifié',
+            contact: event.creator?.email || event.contact || 'Non spécifié',
+            currentParticipants: event.attendees?.length || event.currentParticipants || 0,
+            isAdmin: event.creator_id === currentUser?.id || event.user_id === currentUser?.id || false
         }
     }));
 }
@@ -64,9 +67,8 @@ export function Calendar() {
     useEffect(() => {
         IsAuthentificated().then((data) => {
             setUser(data.user);
-            fetchUserEvents(data.user.id).then((data) => {
-                const transformedEvents = transformEvents(data);
-                console.log(transformedEvents)
+            fetchUserEvents(data.user.id).then((eventData) => {
+                const transformedEvents = transformEvents(eventData, data.user);
                 setEvents(transformedEvents);
             });
         });
@@ -171,26 +173,39 @@ export function Calendar() {
                         }}
                     eventClick={function (info) {
                         const formatDate = (dateStr: string) => {
-                            const date = new Date(dateStr);
-                            const day = new Intl.DateTimeFormat('fr-FR', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                            }).format(date);
+                            try {
+                                let date;
+                                if (dateStr.includes('T')) {
+                                    date = new Date(dateStr);
+                                } else {
+                                    date = new Date(dateStr.replace(' ', 'T'));
+                                }
 
-                            const time = new Intl.DateTimeFormat('fr-FR', {
-                                hour: 'numeric',
-                                minute: 'numeric'
-                            }).format(date);
+                                if (isNaN(date.getTime())) {
+                                    console.error('Invalid date:', dateStr);
+                                    return { day: 'Invalid date', time: '' };
+                                }
 
-                            return {
-                                day,
-                                time
-                            };
+                                const day = new Intl.DateTimeFormat('fr-FR', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                }).format(date);
+
+                                const time = new Intl.DateTimeFormat('fr-FR', {
+                                    hour: 'numeric',
+                                    minute: 'numeric'
+                                }).format(date);
+
+                                return { day, time };
+                            } catch (error) {
+                                console.error('Error formatting date:', error, dateStr);
+                                return { day: 'Invalid date', time: '' };
+                            }
                         };
 
                         let event = {
-                            id: info.event.id || info.event.extendedProps.id,  // Utiliser l'ID de l'événement ou celui dans extendedProps
+                            id: info.event.id || info.event.extendedProps.id,
                             title: info.event.title,
                             image: info.event.extendedProps.img,
                             location: info.event.extendedProps.location,
@@ -203,8 +218,13 @@ export function Calendar() {
                                 }
                                 return `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
                             })(),
-                            participants: info.event.extendedProps.maxparticipant,
-                            visibility: info.event.extendedProps.visibility
+                            maxparticipant: info.event.extendedProps.maxparticipant,
+                            visibility: info.event.extendedProps.visibility,
+                            description: info.event.extendedProps.description,
+                            organizer: info.event.extendedProps.organizer || 'Non spécifié',
+                            contact: info.event.extendedProps.contact || 'Non spécifié',
+                            currentParticipants: info.event.extendedProps.currentParticipants || 0,
+                            sharelink: info.event.extendedProps.sharelink
                         }
                         setSelectedEvent(event);
                     }}
