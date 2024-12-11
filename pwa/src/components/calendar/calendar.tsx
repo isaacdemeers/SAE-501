@@ -21,11 +21,9 @@ const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// Add this function before the Calendar component
 function transformEvents(events: any[]) {
-    console.log("Events before transform:", events);  // Pour debug
     return events.map(event => ({
-        id: event.eventId || event.id,  // Utiliser eventId ou id s'il existe
+        id: event.eventId || event.id,
         title: event.title,
         start: event.datestart.replace(' ', 'T'),
         end: event.dateend.replace(' ', 'T'),
@@ -37,12 +35,11 @@ function transformEvents(events: any[]) {
             sharelink: event.sharelink,
             img: event.img,
             isPublic: event.isPublic,
-            id: event.eventId || event.id  // Ajouter aussi l'ID dans extendedProps
+            id: event.eventId || event.id
         }
     }));
 }
 
-// Add this interface before the EventSideShow component
 interface Event {
     id: string;
     title: string;
@@ -51,7 +48,6 @@ interface Event {
     participants: number;
     visibility: string;
     location: string;
-    // Add other properties your event object has
 }
 
 
@@ -64,9 +60,7 @@ export function Calendar() {
 
     useEffect(() => {
         IsAuthentificated().then((data) => {
-            console.log("ddfs", data)
             fetchUserEvents(data.user.id).then((data) => {
-                // const eventsArray = data['hydra:member'] || [];
                 const transformedEvents = transformEvents(data);
                 setEvents(transformedEvents);
             });
@@ -251,25 +245,7 @@ interface RenderedEventSideShowProps {
 }
 
 export function RenderedEventSideShow({ selectedEvent }: RenderedEventSideShowProps) {
-    console.log(selectedEvent);
-    // React.useEffect(() => {
-    //     const bar = document.querySelector<HTMLDivElement>("#sideShow");
 
-    //     const showEvent = (e: CustomEvent<Event>) => {
-    //     };
-
-    //     const handleBlur = () => {
-    //         bar?.classList.remove("active");
-    //     };
-
-    //     bar?.addEventListener("showEvent", showEvent as EventListener);
-    //     document.addEventListener("click", handleBlur);
-
-    //     return () => {
-    //         bar?.removeEventListener("showEvent", showEvent as EventListener);
-    //         document.removeEventListener("click", handleBlur);
-    //     };
-    // }, []);
 
     return (
         <Card className="relative w-full md:w-96 h-fit min-h-[500px] p-0 overflow-x-hidden max-h-full">
@@ -278,7 +254,7 @@ export function RenderedEventSideShow({ selectedEvent }: RenderedEventSideShowPr
                     <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">
                         Rien à afficher
                     </p>
-                    <section id="sideShow" className="w-full z-10 h-full opacity-100 overflow-y-scroll bg-red-500 rounded-sm overflow-hidden">
+                    <section id="sideShow" className="w-full z-10 h-full opacity-100 overflow-y-scroll rounded-sm overflow-hidden">
                         <EventSideShow event={selectedEvent} />
 
                     </section>

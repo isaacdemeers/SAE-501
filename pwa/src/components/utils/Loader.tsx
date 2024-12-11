@@ -14,7 +14,6 @@ export default function Loader() {
 
         const timer = setTimeout(() => {
             setIsLoading(false);
-            // Attendre que l'animation d'opacité soit terminée avant de retirer le composant
             setTimeout(() => {
                 setShouldRender(false);
             }, 300); // Même durée que la transition

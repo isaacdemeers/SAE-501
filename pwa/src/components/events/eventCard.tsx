@@ -32,7 +32,6 @@ interface EventCardProps {
 
 export default function EventCard({ event, type }: EventCardProps) {
     let tags = ''
-    console.log(event, type)
     return (
         type === "searchResult" ? (
             <Card className={`w-full flex relative text-slate-600  overflow-hidden`}>

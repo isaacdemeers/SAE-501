@@ -140,14 +140,12 @@ export default function PageEvent({ params }: EventPageProps) {
             }
           }
           const subscriptionData = await VerifyConnectionConnectedUser(id);
-          console.log(subscriptionData);
           if (eventData.visibility === 0 && subscriptionData.message === "User is not joined to the event") {
             router.push('/');
             return;
           } else if (subscriptionData.isLog === true) {
             setIsSubscribed(true);
             setIsAdmin(subscriptionData.Role);
-            console.log(subscriptionData);
           }
         }
         else if (authData.isValid === false) {
@@ -194,14 +192,10 @@ export default function PageEvent({ params }: EventPageProps) {
     try {
       const response = await VerifyConnectionUUID(connectionUUID, id);
       if (response.isValid) {
-        console.log("Connection UUID is valid");
         setIsSubscribed(true);
-      } else {
-        console.log("Connection UUID is invalid");
       }
       return response;
     } catch (error) {
-      console.error("Error verifying connection UUID:", error);
       return { isValid: false };
     }
   }
@@ -211,14 +205,11 @@ export default function PageEvent({ params }: EventPageProps) {
     if (sub.message === "User successfully joined the event") {
       setIsDialogOpen(false);
       setIsSubscribed(true);
-      console.log(sub);
       if (sub.uuid !== "") {
         setConnectionuuid(sub.uuid);      // Replace alert with console log or any other notification method
-        console.log("Vous avez rejoint l'événement avec succès");
       }
     }
     else if (sub.error) {
-      console.log(sub);
       setDialogMessage(sub.error);
     }
   }
@@ -235,7 +226,6 @@ export default function PageEvent({ params }: EventPageProps) {
           }
           return prevEvent;
         });
-        console.log("Vous vous êtes désinscrit avec succès");
       }
       if (unsub.error === "Admin users cannot unsubscribe from the event") {
         setIsDialogOpen(false);
@@ -256,9 +246,6 @@ export default function PageEvent({ params }: EventPageProps) {
           }
           return prevEvent;
         });
-        console.log("Vous vous êtes désinscrit avec succès");
-      } else {
-        console.log(unsub);
       }
     }
   }
@@ -308,7 +295,6 @@ export default function PageEvent({ params }: EventPageProps) {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    console.log("Lien copié dans le presse-papiers");
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
@@ -325,12 +311,8 @@ export default function PageEvent({ params }: EventPageProps) {
   };
 
   const handleSendInvitations = async (e: React.FormEvent) => {
-    console.log(invitees, inviteeEmail)
     let invitation = await ShareInvitation(id, invitees);
     if (invitation.message === "Invitations sent successfully") {
-      console.log("Invitations envoyées avec succès");
-    } else {
-      console.log(invitation);
     }
   };
 
@@ -343,7 +325,6 @@ export default function PageEvent({ params }: EventPageProps) {
     return <p>Aucun événement trouvé.</p>;
   }
 
-  console.log(event);
   // Rendu principal
   return (
     <div className="max-w-2xl p-4 mx-auto md:max-w-3xl lg:max-w-5xl md:p-8 lg:p-12 mt-20">

@@ -1,7 +1,7 @@
 'use client'
 import * as React from "react"
 import Link from "next/link"
-import { useState } from "react" 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -15,7 +15,7 @@ import { redirect, usePathname } from "next/navigation"
 import { LoginUser } from "@/lib/request"
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { EyeIcon , EyeOffIcon } from "lucide-react"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 
 export default function Loginform(): JSX.Element {
   const [loginerror, setLoginerror] = useState<boolean>(false);
@@ -36,20 +36,19 @@ export default function Loginform(): JSX.Element {
     setLogdata({ ...logdata, password: e.target.value });
   };
 
-  const handleLogin = async() => {
+  const handleLogin = async () => {
     if (!emailRegex.test(logdata.email) || logdata.password === "") {
       errorlog();
       return;
     }
     let log = await LoginUser(logdata);
-    console.log(log)
-    if(log.message === "Invalid credentials."){
+    if (log.message === "Invalid credentials.") {
       errorlog();
     }
-    else if (log.message === "Authentication successful"){
+    else if (log.message === "Authentication successful") {
       router.push(returnUrl)
     }
-  }; 
+  };
 
   const errorlog = (): void => {
     setLoginerror(true);
@@ -91,7 +90,7 @@ export default function Loginform(): JSX.Element {
                   Mot de passe
                 </Label>
               </div>
-                <div className="relative">
+              <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -107,7 +106,7 @@ export default function Loginform(): JSX.Element {
                 >
                   {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
-                </div>
+              </div>
               <Link href={`${pathname}/forgotpassword`} className="text-gray-500 pl-2 text-sm">
                 Mot de passe oublié?
               </Link>
@@ -116,7 +115,7 @@ export default function Loginform(): JSX.Element {
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 justify-between">
-        <Button size={"lg"} onClick={() => {  handleLogin(); }} className="w-full md:text-lg">
+        <Button size={"lg"} onClick={() => { handleLogin(); }} className="w-full md:text-lg">
           Se connecter
         </Button>
         <div className="mt-4 text-center text-sm md:text-md">

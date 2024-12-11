@@ -18,7 +18,6 @@ const Admin = () => {
           headers: { Accept: "application/ld+json" },
         });
         const data = await response.json();
-        console.log(data["hydra:entrypoint"]);
       } catch (error) {
         console.error("Error fetching API docs:", error);
       }
@@ -40,6 +39,8 @@ const Admin = () => {
               create={Signin}
               edit={EditUsers}
             />
+            <ResourceGuesser name="users"
+              create={Signin} />
             <ResourceGuesser name="user_events" />
             <ResourceGuesser name="user_invitations" />
           </HydraAdmin>

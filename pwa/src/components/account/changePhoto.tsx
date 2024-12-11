@@ -102,10 +102,8 @@ export function ProfilePhotoUpload({
       });
 
       const response = await editUserPhoto(userId, selectedFile);
-      console.log('Upload response:', response);
 
       if (response.message === 'User photo updated successfully') {
-        console.log('Upload successful');
         onUpload(selectedFile);
       } else {
         console.error('Invalid response format:', response);
@@ -146,10 +144,9 @@ export function ProfilePhotoUpload({
           ) : (
             <div
               className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-12 transition-colors
-                ${
-                  dragActive
-                    ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/25"
+                ${dragActive
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/25"
                 }
               `}
               onDragEnter={handleDrag}

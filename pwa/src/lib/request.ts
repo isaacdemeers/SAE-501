@@ -8,7 +8,6 @@ export async function AddUser(data: any) {
   }
 
   try {
-    console.log(data);
     const response = await fetch(`${API_BASE_URL}/register`, {
       method: "POST",
       body: formData,
@@ -44,7 +43,6 @@ export async function editUser(id: number, data: any) {
 }
 
 export async function editUserPhoto(id: number, file: File) {
-  console.log(file);
   const data = new FormData();
   data.append("file", file);
   try {
@@ -70,7 +68,6 @@ export async function VerifyEmailToken(data: string) {
     emailtoken: data,
   };
   try {
-    console.log(data);
     const response = await fetch(`${API_BASE_URL}/verify-email`, {
       method: "POST",
       headers: {
@@ -87,8 +84,7 @@ export async function VerifyEmailToken(data: string) {
 
 export async function LoginUser(data: any) {
   try {
-    console.log(data);
-    const response = await fetch(`${API_BASE_URL}/api/users/username`, {
+    const response = await fetch(`${API_BASE_URL}/users/username`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -122,7 +118,6 @@ export async function TestEmail(data: string) {
     email: data,
   };
   try {
-    console.log(formData);
     const response = await fetch(`${API_BASE_URL}/users/testemail`, {
       method: "POST",
       headers: {
@@ -142,7 +137,6 @@ export async function TestUsername(data: string) {
     username: data,
   };
   try {
-    console.log(formData);
     const response = await fetch(`${API_BASE_URL}/users/testusername`, {
       method: "POST",
       headers: {
@@ -557,14 +551,14 @@ export async function fetchUserAdmin(userId: number | undefined) {
   try {
     const response = await fetch(`/admin/users/${userId}`);
     if (!response.ok) throw new Error('Failed to fetch user');
-    
+
     return response;
   } catch (error) {
     console.error('Error fetching user admin:', error);
   }
 }
 
-export async function UpdateUserAdmin(data: any , userId: number | undefined) {
+export async function UpdateUserAdmin(data: any, userId: number | undefined) {
   console.log(data);
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
@@ -572,13 +566,13 @@ export async function UpdateUserAdmin(data: any , userId: number | undefined) {
     formData.append("file", data.photo, data.photo.name);
   }
   try {
-    const response = await fetch(`/admin/users/${userId}` , {
+    const response = await fetch(`/admin/users/${userId}`, {
       method: "POST",
       credentials: "include",
       body: formData,
     });
     if (!response.ok) throw new Error('Failed to fetch user');
-    
+
     return response;
   } catch (error) {
     console.error('Error fetching user admin:', error);
@@ -589,14 +583,14 @@ export async function fetchEventAdmin(userId: number | undefined) {
   try {
     const response = await fetch(`/admin/events/${userId}`);
     if (!response.ok) throw new Error('Failed to fetch user');
-    
+
     return response;
   } catch (error) {
     console.error('Error fetching user admin:', error);
   }
 }
 
-export async function UpdateEventAdmin(data: any , userId: number | undefined) {
+export async function UpdateEventAdmin(data: any, userId: number | undefined) {
   console.log(data);
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
@@ -604,13 +598,13 @@ export async function UpdateEventAdmin(data: any , userId: number | undefined) {
     formData.append("file", data.img, data.img.name);
   }
   try {
-    const response = await fetch(`/admin/events/${userId}` , {
+    const response = await fetch(`/admin/events/${userId}`, {
       method: "POST",
       credentials: "include",
       body: formData,
     });
     if (!response.ok) throw new Error('Failed to fetch user');
-    
+
     return response;
   } catch (error) {
     console.error('Error fetching user admin:', error);

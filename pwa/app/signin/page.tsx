@@ -40,20 +40,16 @@ export default function Signin() {
 
     const handleSignData = (data: SignData) => {
         setSigndata((prevData: SignData) => ({ ...prevData, ...data }));
-        console.log("Data from child:", data);
         setPersonnalinfo(true);
     };
 
     const handlePersonnalData = (data: SignData) => {
         setSigndata((prevData: SignData) => ({ ...prevData, ...data }));
-        console.log("Personnal data from child:", data);
         setAddimage(true);
     };
 
     const handleImageData = (data: File) => {
         setSigndata((prevData: SignData) => ({ ...prevData, image: data }));
-        console.log("Image data from child:", data);
-        console.log(signdata);
     }
 
     const handleRecap = () => {
@@ -73,7 +69,6 @@ export default function Signin() {
         Object.entries(signdata).forEach(([key, value]) => {
             formData.append(key, value instanceof File ? value : String(value));
         });
-        console.log(formData);
         const data = await AddUser(signdata);
         if (data.message === "User created successfully") {
             router.push('/login');

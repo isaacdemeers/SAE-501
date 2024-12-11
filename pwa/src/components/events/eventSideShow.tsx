@@ -78,10 +78,10 @@ export default function EventSideShow({ event }: { event: Event }) {
           <Pencil className="w-4 h-4 mr-2" />
           Éditer l&apos;événement
         </Button>
-        <Button variant="default" className="w-full text-sm font-semibold">
+        {/* <Button variant="default" className="w-full text-sm font-semibold">
           <Share className="w-4 h-4 mr-2" />
           Partager
-        </Button>
+        </Button> */}
 
 
 
