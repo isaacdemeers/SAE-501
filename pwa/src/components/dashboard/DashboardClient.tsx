@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import SuggestedEvents from '@/components/dashboard/SuggestedEvents';
 import MyEvents from '@/components/dashboard/MyEvents';
 import AuthPrompt from '@/components/dashboard/loginPrompt';
+import { useSearchParams } from 'next/navigation';
 
 interface AuthResponse {
     isValid: boolean;
@@ -15,7 +16,7 @@ interface AuthResponse {
 }
 
 interface Event {
-    eventId: string;
+    id: string;
     title: string;
     description: string;
     datestart: string;
@@ -26,12 +27,25 @@ interface Event {
     sharelink: string;
 }
 
+interface FormattedEvent {
+    id: string;
+    imageUrl: string;
+    location: string;
+    title: string;
+    description: string;
+    date: string;
+    buttonText: string;
+}
+
 export default function DashboardClient() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState<string>('');
-    const [suggestedEvents, setSuggestedEvents] = useState<Event[]>([]);
+    const [suggestedEvents, setSuggestedEvents] = useState<FormattedEvent[]>([]);
     const [myEvents, setMyEvents] = useState<Event[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
+    const searchParams = useSearchParams();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Fetch upcoming events
     const fetchUpcomingEvents = async (page: number = 1) => {
@@ -39,10 +53,12 @@ export default function DashboardClient() {
             const response = await fetch(`/api/events/upcoming?page=${page}`);
             if (!response.ok) throw new Error('Failed to fetch events');
 
-            const { events } = await response.json();
-            const formattedEvents = events.map((event: any) => ({
-                id: event.eventId || event.id,
-                imageUrl: event.img || event.imageUrl,
+            const { events, totalPages } = await response.json();
+            console.log('API Response:', events);
+
+            const formattedEvents = events.map((event: Event) => ({
+                id: event.id,
+                imageUrl: event.img,
                 location: event.location,
                 title: event.title,
                 description: event.description,
@@ -55,6 +71,7 @@ export default function DashboardClient() {
                 }),
                 buttonText: "Voir l'Événement"
             }));
+            console.log('Formatted Events:', formattedEvents);
             setSuggestedEvents(formattedEvents);
         } catch (error) {
             console.error('Error fetching upcoming events:', error);
@@ -116,6 +133,13 @@ export default function DashboardClient() {
         fetchUpcomingEvents(); // Fetch events when component mounts
     }, []);
 
+    useEffect(() => {
+        if (userId) {
+            const refresh = searchParams.get('refresh');
+            refreshEvents();
+        }
+    }, [searchParams, userId]);
+
     return (
         <div className="container mt-16 mx-auto p-4 md:p-8 lg:p-12">
 
@@ -131,7 +155,15 @@ export default function DashboardClient() {
                 ) : (
                     <AuthPrompt />
                 )}
-                <SuggestedEvents initialEvents={suggestedEvents} />
+                <SuggestedEvents
+                    initialEvents={suggestedEvents}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                        setCurrentPage(page);
+                        fetchUpcomingEvents(page);
+                    }}
+                />
             </div>
         </div>
     );

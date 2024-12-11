@@ -367,6 +367,7 @@ class EventController extends AbstractController
         ], Response::HTTP_OK);
     }
 
+
 #[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
 public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
 {
@@ -382,6 +383,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
         $adminEmail = $adminUserEvent ? $adminUserEvent->getUser()->getEmail() : null;
         $adminUsername = $adminUserEvent ? $adminUserEvent->getUser()->getUsername() : null;
+
 
         // Count the number of users registered for the event
         $userCount = $entityManager->getRepository(UserEvent::class)->count(['event' => $event]);

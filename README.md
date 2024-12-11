@@ -105,3 +105,17 @@ Travaille sur la structure des fichiers, correction de bugs et lancement des nou
 - Possibilité de modifier les informations d’un utilisateur (sauf photo de profil "s3 issue") 
   
 
+## [Rendu 4 - Semaine du 9 Decembre]
+
+### - Links
+  
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU4)
+ 
+ ### - Changelog
+
+#### Updated
+- Logout après 30j de l'application.
+
+#### Added
+- Page Getting Started (/gettingstarted)
+
