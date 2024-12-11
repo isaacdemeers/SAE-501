@@ -180,7 +180,8 @@ class UserController extends AbstractController
                 'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
                 'location' => $event->getLocation(),
                 'img' => $fullImgUrl,
-                'visibility' => $event->getVisibility(),
+                'visibility' => $userEvent->getEvent()->getVisibility(),
+                'maxparticipant' => $userEvent->getEvent()->getMaxparticipant(),
             ];
 
             $events[] = $eventData;

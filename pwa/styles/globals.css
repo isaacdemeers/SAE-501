@@ -134,6 +134,8 @@
     border-color: transparent;
     padding: 1px;
     border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
 }
 
 .fc-toolbar-title {

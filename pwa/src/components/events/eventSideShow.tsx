@@ -12,15 +12,17 @@ interface Event {
   title: string;
   image: string;
   dates: string;
-  participants: number | string;
-  visibility: string;
+  maxparticipant: number;
+  visibility: number;
   location: string;
   // Add other properties your event object has
 }
 
 
-export default function EventSideShow({ event }: { event: Event }) {
-  const participantsCount = event.participants ? event.participants.toString() : "0";
+export default function EventSideShow({ event, user }: { event: Event, user: any }) {
+  console.log(event, user)
+
+  const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";
 
   return (
     <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
@@ -39,7 +41,7 @@ export default function EventSideShow({ event }: { event: Event }) {
 
         <div className="flex items-center justify-start gap-2  mb-4">
           <CustomBadge icon={<Users />} content={participantsCount} color={2} />
-          <CustomBadge icon={<Lock />} content={event.visibility === "true" ? "PUBLIC" : "PRIVATE"} color={1} />
+          <CustomBadge icon={<Lock />} content={event.visibility === 1 ? "PUBLIC" : "PRIVATE"} color={1} />
         </div>
         <h3 className="font-semibold mb-2 text-sm">Informations</h3>
         <ul className="flex flex-col gap-2">
@@ -55,13 +57,13 @@ export default function EventSideShow({ event }: { event: Event }) {
             type="full"
             title="Organisateur"
             icon={<Star />}
-            content="@MairiedeLimoges"
+            content={user.username}
           />
           <EventInfoTag
             type="full"
             title="Contact"
             icon={<Mail />}
-            content="mairie@limoges.fr"
+            content={user.email}
           />
 
         </ul>
@@ -70,14 +72,23 @@ export default function EventSideShow({ event }: { event: Event }) {
       </CardContent>
 
       <CardFooter className="flex flex-col justify-between pt-6 gap-2 border-t">
+        <Button variant="default" className="w-full text-sm font-semibold">
+          <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
+            <Eye className="w-4 h-4 mr-2 " />
+            Voir l&apos;événement
+          </Link>
+        </Button>
+        <Button variant="outline" className="w-full text-sm font-semibold">
+          <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
+            <Pencil className="w-4 h-4 mr-2" />
+            Éditer l&apos;événement
+          </Link>
+        </Button>
         <Button variant="outline" className="w-full  hover:bg-red-600 hover:text-white text-sm font-semibold">
           <X className="w-4 h-4 mr-2" />
           Quitter l&apos;événement
         </Button>
-        <Button variant="outline" className="w-full text-sm font-semibold">
-          <Pencil className="w-4 h-4 mr-2" />
-          Éditer l&apos;événement
-        </Button>
+
         {/* <Button variant="default" className="w-full text-sm font-semibold">
           <Share className="w-4 h-4 mr-2" />
           Partager
@@ -86,12 +97,7 @@ export default function EventSideShow({ event }: { event: Event }) {
 
 
 
-        <Button variant="default" className="w-full text-sm font-semibold">
-          <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
-            <Eye className="w-4 h-4 mr-2 " />
-            Voir l&apos;événement
-          </Link>
-        </Button>
+
 
       </CardFooter>
     </Card>
