@@ -84,7 +84,7 @@ export async function VerifyEmailToken(data: string) {
 
 export async function LoginUser(data: any) {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/username`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/username`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
