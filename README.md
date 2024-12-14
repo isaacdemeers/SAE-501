@@ -104,8 +104,7 @@ Travaille sur la structure des fichiers, correction de bugs et lancement des nou
 - Ajout de la page de profil
 - Possibilité de modifier les informations d’un utilisateur (sauf photo de profil "s3 issue") 
   
-
-## [Rendu 4 - Semaine du 9 Decembre]
+## [Rendu 4 - Semaine du 2 Décembre]
 
 ### - Links
   
@@ -114,7 +113,31 @@ Travaille sur la structure des fichiers, correction de bugs et lancement des nou
  ### - Changelog
 
 #### Updated
+- event : modification de l'ui de création d'évènement
+- event : modification de certain élément de la page d'évènemeent
+- login : modification du login avec 2 cookie pour le jwttoken séparer entre le payload et la signature + sécurisation d'accès a certaines route
+
+
+#### Added
+- Superadmin
+- Logout
+- Modération d'évènement
+- Modification des informations d'un utilisateur
+
+- 
+## [Rendu 5 - Semaine du 9 Decembre]
+
+### - Links
+  
+  - [Branche du rendu](https://github.com/isaacdemeers/sae-501/tree/RENDU5)
+ 
+ ### - Changelog
+
+#### Updated
 - Logout après 30j de l'application.
+- Super admin 100% fonctionnel
+- modification de l'heure et date pour un évènement
+- fix de nombreux bug
 
 #### Added
 - Page Getting Started (/gettingstarted)
