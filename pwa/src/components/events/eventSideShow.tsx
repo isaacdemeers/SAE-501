@@ -9,6 +9,8 @@ import eventImage from "@images/image_mairie_limoges.png"
 import Link from "next/link"
 import { IsAuthentificated, JoinEvent, unsubscribeConnectedUser, unsubscribeUUID } from "@/lib/request"
 import { useEffect, useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+
 interface Event {
   id: string;
   title: string;
@@ -35,6 +37,7 @@ export default function EventSideShow({ event: initialEvent, user, onUnsubscribe
   const [error, setError] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [id, setId] = useState(event.id);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   console.log(event, user)
 
@@ -84,6 +87,11 @@ export default function EventSideShow({ event: initialEvent, user, onUnsubscribe
       }
     }
   }
+
+  const confirmUnsubscribe = () => {
+    setShowConfirmDialog(false);
+    handleUnsubscribe();
+  };
 
   return (
     <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
@@ -146,10 +154,28 @@ export default function EventSideShow({ event: initialEvent, user, onUnsubscribe
           </Link>
         </Button>
         {isSubscribed && (
-          <Button onClick={handleUnsubscribe} variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
-            <X className="w-4 h-4 mr-2" />
-            Quitter l&apos;événement
-          </Button>
+          <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
+                <X className="w-4 h-4 mr-2" />
+                Quitter l&apos;événement
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirmer la désinscription</DialogTitle>
+              </DialogHeader>
+              <p>Êtes-vous sûr de vouloir vous désinscrire de cet événement ?</p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+                  Annuler
+                </Button>
+                <Button variant="destructive" onClick={confirmUnsubscribe}>
+                  Confirmer
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* <Button variant="default" className="w-full text-sm font-semibold">
