@@ -386,6 +386,7 @@ export async function unsubscribeUUID(uuid: string, id: number) {
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({ "uuid": uuid }),
     });
     return await response.json();

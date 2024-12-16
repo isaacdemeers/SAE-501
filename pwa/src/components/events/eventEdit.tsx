@@ -92,29 +92,26 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>("test");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState("12:00");
+  const [startTime, setStartTime] = useState("12:00");
+
+    const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+        title: event.title,
+        description: event.description,
+        startDate: new Date(event.datestart),
+        endDate: new Date(event.dateend),
+        location: event.location,
+        maxAttendees: event.maxparticipant.toString(),
+        visibility: event.visibility ? "public" : "private",
+        image: null,
+      },
+    });
 
 
-  const initialStartTime = new Date(event.datestart).toTimeString().slice(0, 5);
-  const initialEndTime = new Date(event.dateend).toTimeString().slice(0, 5);
-
-  const [endTime, setEndTime] = useState(initialEndTime);
-  const [startTime, setStartTime] = useState(initialStartTime);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: event.title,
-      description: event.description,
-      startDate: new Date(event.datestart),
-      endDate: new Date(event.dateend),
-      location: event.location,
-      maxAttendees: event.maxparticipant.toString(),
-      visibility: event.visibility ? "public" : "private",
-      image: null,
-    },
-  });
-
-  // Function to combine date and time
+    // Function to combine date and time
   const combineDateAndTime = (
     date: Date | undefined,
     time: string
@@ -122,16 +119,21 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
     if (!date) return undefined;
     const [hours, minutes] = time.split(":").map(Number);
     const newDate = new Date(date);
-    newDate.setHours(hours + 1, minutes, 0, 0); // Set hours (+1), minutes, seconds, and milliseconds
-    newDate.setDate(newDate.getDate() - 1); // Adjust date to remove the extra day
+    newDate.setHours(hours, minutes);
     return newDate;
   };
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
+  
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+      try {
       setIsSubmitting(true);
       setError(null);
 
+      // Vérifier si la date de début est supérieure à la date de fin
+      if (values.startDate && values.endDate && values.startDate > values.endDate) {
+        setError("La date de début ne peut pas être supérieure à la date de fin.");
+        setIsSubmitting(false);
+        return;
+      }
 
       // Créer l'objet de données à envoyer
       const formData: any = {};
@@ -144,24 +146,14 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
         formData.description = values.description;
       }
       if (values.startDate) {
-        const adjustedStartDate = combineDateAndTime(new Date(values.startDate), startTime);
-        if (adjustedStartDate) {
-          adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
-          formData.datestart = adjustedStartDate.toISOString().split('.')[0];
-        }
+        const adjustedStartDate = new Date(values.startDate);
+        adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
+        formData.datestart = adjustedStartDate.toISOString().split('.')[0];
       }
       if (values.endDate) {
-        const adjustedEndDate = combineDateAndTime(new Date(values.endDate), endTime);
-        if (adjustedEndDate) {
-          adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-          formData.dateend = adjustedEndDate.toISOString().split('.')[0];
-        }
-      }
-       // Vérifier si la date de début est supérieure à la date de fin
-      if (formData.datestart && formData.dateend && formData.datestart > formData.dateend) {
-        setError("La date de début ne peut pas être supérieure à la date de fin.");
-        setIsSubmitting(false);
-        return;
+        const adjustedEndDate = new Date(values.endDate);
+        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+        formData.dateend = adjustedEndDate.toISOString().split('.')[0];
       }
       if (values.location !== event.location) {
         formData.location = values.location;
@@ -180,17 +172,17 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
       if (Object.keys(formData).length > 0) {
         const response = await UpdateEvent(event.id, formData);
         if (response.event) {
-          onUpdate?.();
-          onClose?.();
+        onUpdate?.();
+        onClose?.();
         }
       } else {
         onClose?.();
       }
-    } catch (err) {
+      } catch (err) {
       const error = err as Error;
       setError(error.message || "Une erreur est survenue lors de la mise à jour");
       console.error("Erreur lors de la mise à jour:", err);
-    } finally {
+      } finally {
       setIsSubmitting(false);
     }
   };
@@ -278,255 +270,230 @@ const handleDelete = () => {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Donner une image à votre événement :</FormLabel>
-                  <FormControl>
-                    <div
-                      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
-                      onClick={() =>
-                        document.getElementById("image-upload")?.click()
-                      }
-                    >
-                      <input
-                        id="image-upload"
-                        type="file"
-                        className="hidden"
-                        accept="image/png,image/jpeg"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setImage(file);
-                            setImagePreview(URL.createObjectURL(file));
-                          }
-                          field.onChange(e);
-                        }}
-                      />
-                      {imagePreview ? (
-                        <div className="mt-4">
-                          <img
-                            src={imagePreview}
-                            alt="Aperçu de l'image"
-                            className="max-h-40 mx-auto"
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Donner une image à votre événement :</FormLabel>
+                    <FormControl>
+                      <div
+                        className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
+                        onClick={() =>
+                          document.getElementById("image-upload")?.click()
+                        }
+                      >
+                        <input
+                          id="image-upload"
+                          type="file"
+                          className="hidden"
+                          accept="image/png,image/jpeg"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setImage(file);
+                              setImagePreview(URL.createObjectURL(file));
+                            }
+                            field.onChange(e);
+                            }}
                           />
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            Cliquez pour télécharger ou faites glisser et déposez un
-                            PNG ou JPEG (max. 10 Mo)
-                          </p>
-                        </>
-                      )}
+                          {imagePreview ? (
+                            <div className="mt-4">
+                            <img
+                              src={imagePreview}
+                              alt="Aperçu de l'image"
+                              className="max-h-40 mx-auto"
+                            />
+                            </div>
+                          ) : (
+                            <>
+                            <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              Cliquez pour télécharger ou faites glisser et déposez un
+                              PNG ou JPEG (max. 10 Mo)
+                            </p>
+                            </>
+                          )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date de début</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              formatDate(field.value)
+                            ) : (
+                              <span>Choisir une date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  <div className="flex items-center gap-2">
+                      <Label className="w-20">Heure :</Label>
+                      <Select value={startTime} onValueChange={setStartTime}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, hour) =>
+                            Array.from({ length: 4 }, (_, quarterHour) => {
+                              const minutes = quarterHour * 15;
+                              const timeString = `${hour
+                                .toString()
+                                .padStart(2, "0")}:${minutes
+                                  .toString()
+                                  .padStart(2, "0")}`;
+                              return (
+                                <SelectItem key={timeString} value={timeString}>
+                                  {timeString}
+                                </SelectItem>
+                              );
+                            })
+                          ).flat()}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date de début</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            formatDate(field.value)
-                          ) : (
-                            <span>Choisir une date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center gap-2">
-              <Label className="w-20">Heure :</Label>
-              <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sélectionner l'heure" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, hour) =>
-                    Array.from({ length: 4 }, (_, quarterHour) => {
-                      const minutes = quarterHour * 15;
-                      const timeString = `${hour
-                        .toString()
-                        .padStart(2, "0")}:${minutes
-                          .toString()
-                          .padStart(2, "0")}`;
-                      return (
-                        <SelectItem key={timeString} value={timeString}>
-                          {timeString}
-                        </SelectItem>
-                      );
-                    })
-                  ).flat()}
-                </SelectContent>
-              </Select>
-            </div>
-            <FormField
-              control={form.control}
-              name="endDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date de fin</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            formatDate(field.value)
-                          ) : (
-                            <span>Choisir une date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center gap-2">
-              <Label className="w-20">Heure :</Label>
-              <Select value={endTime} onValueChange={setEndTime}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sélectionner l'heure" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, hour) =>
-                    Array.from({ length: 4 }, (_, quarterHour) => {
-                      const minutes = quarterHour * 15;
-                      const timeString = `${hour
-                        .toString()
-                        .padStart(2, "0")}:${minutes
-                          .toString()
-                          .padStart(2, "0")}`;
-                      return (
-                        <SelectItem key={timeString} value={timeString}>
-                          {timeString}
-                        </SelectItem>
-                      );
-                    })
-                  ).flat()}
-                </SelectContent>
-              </Select>
-            </div>
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lieu</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Adresse de l'événement" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="maxAttendees"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre de personne maximum</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="12" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="visibility"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Visibilité</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez la visibilité" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Privé</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Annuler
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Mise à jour..." : "Sauvegarder"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-}
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date de fin</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              formatDate(field.value)
+                            ) : (
+                              <span>Choisir une date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lieu</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Adresse de l'événement" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="maxAttendees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre de personne maximum</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="12" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="visibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Visibilité</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez la visibilité" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="public">Public</SelectItem>
+                          <SelectItem value="private">Privé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Mise à jour..." : "Sauvegarder"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  }
