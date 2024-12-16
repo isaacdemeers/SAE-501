@@ -222,7 +222,7 @@ export async function GetEvent(id: number) {
 
 export async function GetAllEvents() {
   try {
-    const response = await fetch(`${API_BASE_URL}/events`, {
+    const response = await fetch(`${API_BASE_URL}/api/event/search`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

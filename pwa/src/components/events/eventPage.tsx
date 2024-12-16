@@ -149,7 +149,9 @@ export default function PageEvent({ params }: EventPageProps) {
             return;
           } else if (subscriptionData.isLog === true) {
             setIsSubscribed(true);
-            setIsAdmin(subscriptionData.Role);
+            if(subscriptionData.Role === "ROLE_ADMIN") {
+            setIsAdmin(true);
+            }
           }
         }
         else if (authData.isValid === false) {

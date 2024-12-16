@@ -435,7 +435,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.DeletedDate IS NULL')
+                ->andWhere('e.deleted_date IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1); // 1 means public
 
@@ -465,7 +465,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.deletedAt IS NULL')
+                ->andWhere('e.deleted_date IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1);
 
@@ -521,10 +521,10 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     }
 
     #[Route('/events', name: 'get_all_events', methods: ['GET'])]
-    public function getAllEvents(EventRepository $eventRepository): JsonResponse
+    public function getAllEvents( Request $request, EntityManagerInterface $entityManager , EventRepository $eventRepository): JsonResponse
     {
         $events = $eventRepository->createQueryBuilder('e')
-            ->where('e.DeletedDate IS NULL')
+            ->where('e.deleted_date IS NULL')
             ->getQuery()
             ->getResult();
 
@@ -550,7 +550,58 @@ public function getevent (Request $request , EventRepository $eventRepository , 
         return new JsonResponse($formattedEvents, JsonResponse::HTTP_OK);
     }
 
+    #[Route('/api/event/search', name: 'search_events', methods: ['GET'])]
+    public function searchEvents(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+       $user = $this->getUser();
 
+       if($user){
+        $queryBuilder = $entityManager->createQueryBuilder();
+        $queryBuilder
+            ->select('e')
+            ->from(Event::class, 'e')
+            ->leftJoin(UserEvent::class, 'ue', 'WITH', 'ue.event = e.id')
+            ->where('ue.user = :user OR e.visibility = :visibility')
+            ->andWhere('e.deleted_date IS NULL')
+            ->setParameter('user', $user)
+            ->setParameter('visibility', 1)
+            ->orderBy('e.datestart', 'ASC');
+
+        $events = $queryBuilder->getQuery()->getResult();
+       }
+         else{
+            $queryBuilder = $entityManager->createQueryBuilder();
+            $queryBuilder
+                ->select('e')
+                ->from(Event::class, 'e')
+                ->where('e.visibility = :visibility')
+                ->andWhere('e.deleted_date IS NULL')
+                ->setParameter('visibility', 1)
+                ->orderBy('e.datestart', 'ASC');
+
+            $events = $queryBuilder->getQuery()->getResult();
+         }
+        $formattedEvents = [];
+        foreach ($events as $event) {
+            $imageName = $event->getImg();
+            $imageUrl = $this->s3Service->getObjectUrl($imageName);
+
+            $formattedEvents[] = [
+                'id' => $event->getId(),
+                'title' => $event->getTitle(),
+                'description' => $event->getDescription(),
+                'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
+                'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
+                'location' => $event->getLocation(),
+                'maxparticipant' => $event->getMaxparticipant(),
+                'img' => $imageUrl,
+                'sharelink' => $event->getSharelink(),
+                'visibility' => $event->getVisibility()
+            ];
+        }
+        
+        return new JsonResponse($formattedEvents, JsonResponse::HTTP_OK);
+    }
 
     #[Route('/userevents/{eventid}', name: 'get_event_users_1', methods: ['GET'])]
     public function getEventUsers($eventid, Request $request, EntityManagerInterface $entityManager, JWTEncoderInterface $jwtEncoder, UserProviderInterface $userProvider): JsonResponse

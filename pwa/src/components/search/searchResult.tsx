@@ -27,45 +27,44 @@ interface SearchResultProps {
     search: string
 }
 
-const searchEvents = (search: string, activeFilters: string[]) => {
-    return GetAllEvents().then(data => {
-        const events = data['hydra:member'] || [];
-        // Filtrer d'abord par visibilité si le filtre private est actif
-        let filteredEvents = events;
-        if (activeFilters.includes('private')) {
-            filteredEvents = events.filter((event: Event) => event.visibility == 0);
+const filterEvents = (events: Event[], search: string, activeFilters: string[]) => {
+    // Si aucun filtre n'est actif, retourner tous les événements
+    if (activeFilters.length === 0) {
+        return events.filter(event => event.title.toLowerCase().includes(search.toLowerCase()));
+    }
+
+    // Filtrer d'abord par visibilité si le filtre private est actif
+    let filteredEvents = events;
+    if (activeFilters.includes('private')) {
+        filteredEvents = events.filter((event: Event) => event.visibility == 0);
+    }
+
+    // Ensuite appliquer les autres filtres
+    return filteredEvents.filter((event: Event) => {
+        // Obtenir les filtres actifs sans le filtre private
+        const contentFilters = activeFilters.filter(f => f !== 'private');
+
+        if (contentFilters.length === 0) {
+            return event.title.toLowerCase().includes(search.toLowerCase());
         }
 
-        // Ensuite appliquer les autres filtres
-        return filteredEvents.filter((event: Event) => {
-            // Obtenir les filtres actifs sans le filtre private
-            const contentFilters = activeFilters.filter(f => f !== 'private');
-
-            if (contentFilters.length === 0) {
-                return event.title.toLowerCase().includes(search.toLowerCase());
+        return contentFilters.some(filter => {
+            switch (filter) {
+                case 'title':
+                    return event.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
+                case 'description':
+                    return event.description?.toLowerCase().includes(search.toLowerCase()) ?? false;
+                case 'date':
+                    return (
+                        (event.datestart?.toLowerCase().includes(search.toLowerCase()) ||
+                            event.dateend?.toLowerCase().includes(search.toLowerCase())) ?? false
+                    );
+                case 'users':
+                    return event.maxparticipant?.toString().includes(search) ?? false;
+                default:
+                    return false;
             }
-
-            return contentFilters.some(filter => {
-                switch (filter) {
-                    case 'title':
-                        return event.title?.toLowerCase().includes(search.toLowerCase()) ?? false;
-                    case 'description':
-                        return event.description?.toLowerCase().includes(search.toLowerCase()) ?? false;
-                    case 'date':
-                        return (
-                            (event.datestart?.toLowerCase().includes(search.toLowerCase()) ||
-                                event.dateend?.toLowerCase().includes(search.toLowerCase())) ?? false
-                        );
-                    case 'users':
-                        return event.maxparticipant?.toString().includes(search) ?? false;
-                    default:
-                        return false;
-                }
-            });
         });
-    }).catch(error => {
-        console.error('Error fetching events:', error);
-        return [];
     });
 };
 
@@ -76,13 +75,30 @@ const getFilterLabel = (filterId: string): string => {
 }
 
 export default function SearchResult({ isOpen, search }: SearchResultProps) {
+    const [allEvents, setAllEvents] = useState<Event[]>([])
     const [events, setEvents] = useState<Event[]>([])
     const [activeFilters, setActiveFilters] = useState<string[]>(["title"])
     const [activeFilterColors, setActiveFilterColors] = useState<string[]>([])
 
     useEffect(() => {
-        searchEvents(search, activeFilters).then(setEvents)
-    }, [search, activeFilters])
+        const fetchEvents = async () => {
+            try {
+                const data = await GetAllEvents();
+                const events = data['hydra:member'] || [];
+                console.log('Fetched events:', data); // Debugging line
+                setAllEvents(data);
+                setEvents(filterEvents(events, search, activeFilters));
+            } catch (error) {
+                console.error('Error fetching events:', error);
+            }
+        };
+
+        fetchEvents();
+    }, []);
+
+    useEffect(() => {
+        setEvents(filterEvents(allEvents, search, activeFilters));
+    }, [search, activeFilters, allEvents]);
 
     // pour les couleurs
     useEffect(() => {
