@@ -34,21 +34,21 @@ export default function RootLayout({
       toast({
         title: "Nous utilisons des cookies",
         description:
-          "Ce site utilise des cookies pour améliorer votre expérience de navigation.",
+          "Ce site utilise des cookies pour fonctionner.",
         action: (
           <div className="flex flex-col gap-1">
             <ToastAction
               altText="Accepter"
               onClick={() => handleCookieChoice(true)}
             >
-              Accepter
+              Fermer
             </ToastAction>
-            <ToastAction
+            {/* <ToastAction
               altText="Refuser"
               onClick={() => handleCookieChoice(false)}
             >
               Refuser
-            </ToastAction>
+            </ToastAction> */}
           </div>
         ),
       });

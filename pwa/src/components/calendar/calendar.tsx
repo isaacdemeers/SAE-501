@@ -21,11 +21,10 @@ const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// Add this function before the Calendar component
 function transformEvents(events: any[]) {
-    console.log("Events before transform:", events);  // Pour debug
+    console.log(events)
     return events.map(event => ({
-        id: event.eventId || event.id,  // Utiliser eventId ou id s'il existe
+        id: event.eventId || event.id,
         title: event.title,
         start: event.datestart.replace(' ', 'T'),
         end: event.dateend.replace(' ', 'T'),
@@ -36,22 +35,20 @@ function transformEvents(events: any[]) {
             maxparticipant: event.maxparticipant,
             sharelink: event.sharelink,
             img: event.img,
-            isPublic: event.isPublic,
-            id: event.eventId || event.id  // Ajouter aussi l'ID dans extendedProps
+            visibility: event.visibility,
+            id: event.eventId || event.id
         }
     }));
 }
 
-// Add this interface before the EventSideShow component
 interface Event {
     id: string;
     title: string;
     image: string;
     dates: string;
-    participants: number;
-    visibility: string;
+    maxparticipant: number;
+    visibility: number;
     location: string;
-    // Add other properties your event object has
 }
 
 
@@ -60,14 +57,16 @@ export function Calendar() {
     const [currentTitle, setCurrentTitle] = useState('');
     const [events, setEvents] = useState<any[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [user, setUser] = useState<any>(null);
+
 
 
     useEffect(() => {
         IsAuthentificated().then((data) => {
-            console.log("ddfs", data)
+            setUser(data.user);
             fetchUserEvents(data.user.id).then((data) => {
-                // const eventsArray = data['hydra:member'] || [];
                 const transformedEvents = transformEvents(data);
+                console.log(transformedEvents)
                 setEvents(transformedEvents);
             });
         });
@@ -75,8 +74,8 @@ export function Calendar() {
 
     return (
 
-        <Card className='h-full relative min-h-[500px] w-full border-none transition-all flex shadow-none gap-4 flex-row'>
-            <Card className='p-4  h-full min-h-[500px] w-full transition-all'>
+        <Card className=' relative  h-[87vh]  w-full border-none transition-all flex shadow-none gap-4 flex-row'>
+            <Card className='p-4  overflow-hidden pb-14 h-full w-full transition-all'>
                 <div className='flex justify-between items-center  '>
                     <h2 id='title' className={`text-slate-600 font-semibold text-4xl ${abhayalibre.className} `}>{currentTitle}</h2>
 
@@ -103,8 +102,10 @@ export function Calendar() {
                     initialView="timeGridWeek"
                     eventContent={renderEventContent}
                     themeSystem='bootstrap5'
-                    height={'auto'}
-                    contentHeight={600}
+                    height={'100%'}
+                    slotDuration={'01:00:00'}
+
+
                     headerToolbar={{
                         start: 'title', // will normally be on the left. if RTL, will be on the right
                         center: '',
@@ -169,9 +170,6 @@ export function Calendar() {
                             // }
                         }}
                     eventClick={function (info) {
-                        let sideShow = document.querySelector<HTMLDivElement>("#sideShow");
-                        sideShow?.classList.remove("active");
-
                         const formatDate = (dateStr: string) => {
                             const date = new Date(dateStr);
                             const day = new Intl.DateTimeFormat('fr-FR', {
@@ -206,10 +204,9 @@ export function Calendar() {
                                 return `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
                             })(),
                             participants: info.event.extendedProps.maxparticipant,
-                            visibility: info.event.extendedProps.isPublic
+                            visibility: info.event.extendedProps.visibility
                         }
                         setSelectedEvent(event);
-                        sideShow?.classList.add("active");
                     }}
                     eventMouseLeave={function (info) {
                         // // reset the border
@@ -230,7 +227,7 @@ export function Calendar() {
                 />
             </Card>
 
-            <RenderedEventSideShow selectedEvent={selectedEvent} />
+            <RenderedEventSideShow selectedEvent={selectedEvent} user={user} />
         </Card >
 
 
@@ -248,44 +245,19 @@ function renderEventContent(eventInfo: any) {
 
 interface RenderedEventSideShowProps {
     selectedEvent: Event | null;
+    user: any;
 }
 
-export function RenderedEventSideShow({ selectedEvent }: RenderedEventSideShowProps) {
-    console.log(selectedEvent);
-    // React.useEffect(() => {
-    //     const bar = document.querySelector<HTMLDivElement>("#sideShow");
-
-    //     const showEvent = (e: CustomEvent<Event>) => {
-    //     };
-
-    //     const handleBlur = () => {
-    //         bar?.classList.remove("active");
-    //     };
-
-    //     bar?.addEventListener("showEvent", showEvent as EventListener);
-    //     document.addEventListener("click", handleBlur);
-
-    //     return () => {
-    //         bar?.removeEventListener("showEvent", showEvent as EventListener);
-    //         document.removeEventListener("click", handleBlur);
-    //     };
-    // }, []);
-
+export function RenderedEventSideShow({ selectedEvent, user }: RenderedEventSideShowProps) {
     return (
         <Card className="relative w-full md:w-96 h-fit min-h-[500px] p-0 overflow-x-hidden max-h-full">
             {selectedEvent ? (
-                <>
-                    <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                        Rien à afficher
-                    </p>
-                    <section id="sideShow" className="w-full z-10 h-full opacity-100 overflow-y-scroll bg-red-500 rounded-sm overflow-hidden">
-                        <EventSideShow event={selectedEvent} />
-
-                    </section>
-
-                </>
+                <section className="w-full z-10 h-full opacity-100 overflow-y-scroll rounded-sm overflow-hidden">
+                    <EventSideShow event={selectedEvent} user={user} />
+                </section>
             ) : (
-                <p className="">
+                <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                    Rien à afficher
                 </p>
             )}
         </Card>

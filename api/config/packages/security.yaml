@@ -26,6 +26,8 @@ security:
     - { path: ^/auth, roles: PUBLIC_ACCESS }
     - { path: ^/users/verify-email, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: PUBLIC_ACCESS }
+    - {path: /users/testemail, roles: PUBLIC_ACCESS}
+    - {path: /users/testusername, roles: PUBLIC_ACCESS}
     - {path: ^/events, roles: ROLE_ADMIN, methods: [DELETE]}
     - {path: ^/users, roles: ROLE_ADMIN, methods: [DELETE]}
     - {path: ^/events, roles: IS_AUTHENTICATED_FULLY}

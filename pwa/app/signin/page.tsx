@@ -6,7 +6,7 @@ import Addimage from "@/components/login/imageProfile";
 import SignRecap from "@/components/login/signInRecap";
 import { AddUser } from "@/lib/request";
 import { useEffect } from "react";
-import { IsAuthentificated } from "@/lib/request";
+import { IsAuthentificated , LoginUser } from "@/lib/request";
 import { useRouter } from 'next/navigation';
 
 interface SignData {
@@ -40,20 +40,16 @@ export default function Signin() {
 
     const handleSignData = (data: SignData) => {
         setSigndata((prevData: SignData) => ({ ...prevData, ...data }));
-        console.log("Data from child:", data);
         setPersonnalinfo(true);
     };
 
     const handlePersonnalData = (data: SignData) => {
         setSigndata((prevData: SignData) => ({ ...prevData, ...data }));
-        console.log("Personnal data from child:", data);
         setAddimage(true);
     };
 
     const handleImageData = (data: File) => {
         setSigndata((prevData: SignData) => ({ ...prevData, image: data }));
-        console.log("Image data from child:", data);
-        console.log(signdata);
     }
 
     const handleRecap = () => {
@@ -73,15 +69,15 @@ export default function Signin() {
         Object.entries(signdata).forEach(([key, value]) => {
             formData.append(key, value instanceof File ? value : String(value));
         });
-        console.log(formData);
         const data = await AddUser(signdata);
         if (data.message === "User created successfully") {
-            router.push('/login');
+            const auth = await LoginUser(signdata);
+             router.push('/login');
         }
     }
 
     return (
-        <>
+        <div className="w-full h-full flex items-center justify-center p-10">
             {recap ? (
                 <div>
                     <SignRecap signdata={signdata} pushdata={pushdata} handleRecap={handleRecap} />
@@ -99,6 +95,6 @@ export default function Signin() {
                     <Addimage signdata={signdata} handleImageData={handleImageData} handleRecap={handleRecap} handleBack={handleBack} />
                 </div>
             )}
-        </>
+        </div>
     );
 }

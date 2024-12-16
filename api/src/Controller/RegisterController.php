@@ -40,7 +40,7 @@ class RegisterController extends AbstractController
 
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-        if (null !== $user && in_array('ROLE_USER', $user->getRoles())) {
+        if (null !== $user && (in_array('ROLE_USER', $user->getRoles()) || in_array('ROLE_ADMIN', $user->getRoles()))) {
             return $this->json(['message' => 'Email already exists'], Response::HTTP_CONFLICT);
         }
 

@@ -39,7 +39,6 @@ export default function Signinform({ handleSignData }: SigninformProps): JSX.Ele
 
   const handleLogin = async () => {
     let Terms = document.getElementById('terms');
-    console.log(Terms);
     if (!emailRegex.test(signdata.email) || signdata.password === "") {
       (document.getElementById('email') as HTMLInputElement).value = "";
       (document.getElementById('password') as HTMLInputElement).value = "";
@@ -50,7 +49,6 @@ export default function Signinform({ handleSignData }: SigninformProps): JSX.Ele
       return;
     }
     else if (Terms && Terms.getAttribute('data-state') === 'unchecked') {
-      console.log(Terms);
       setTermserror(true);
       setTimeout(() => {
         setTermserror(false);
@@ -58,7 +56,6 @@ export default function Signinform({ handleSignData }: SigninformProps): JSX.Ele
       return;
     }
     let verify = await TestEmail(signdata.email);
-    console.log(verify);
     if (verify.message === "Email already exists") {
       setEmailerror(true);
       setTimeout(() => {

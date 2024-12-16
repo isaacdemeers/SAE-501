@@ -1,10 +1,13 @@
-
 import AccountCard from "@/components/account/accountCard";
+import { Toaster } from "sonner";
 
-export default function Page() {
+export default async function AccountPage() {
   return (
-    <div className="flex justify-center w-full mt-32 mb-32 align-middle">
-      <AccountCard />
+    <div className="min-h-[calc(100vh-theme(spacing.32))]">
+      <div className="flex justify-center w-full mt-32 mb-32 align-middle">
+        <AccountCard />
+      </div>
+      <Toaster />
     </div>
   );
 }

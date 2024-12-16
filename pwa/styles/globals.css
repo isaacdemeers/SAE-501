@@ -134,6 +134,13 @@
     border-color: transparent;
     padding: 1px;
     border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #475569;
+}
+.fc-event-main,
+.fc-event:hover {
+    background-color: #475569;
 }
 
 .fc-toolbar-title {
