@@ -22,7 +22,7 @@ interface EventCardProps {
         id: string;
         title: string;
         date: string;
-        visibility: number;
+        isPublic: number;
         attendees: number;
         imageUrl: string;
         description: string;
@@ -57,14 +57,14 @@ export default function EventCard({ event, type }: EventCardProps) {
                             </div>
                             <Separator orientation="vertical" className="h-5" />
                             <ul className="flex items-center justify-between h-10  gap-2 rounded-lg">
-                                <li>
-                                    {event.visibility == 1 && (
+                                {/* <li>
+                                    {event.isPublic == 1 && (
                                         <CustomBadge color={1} content="PUBLIC" icon={<LockOpen />} />
                                     )}
-                                    {event.visibility == 0 && (
+                                    {event.isPublic == 0 && (
                                         <CustomBadge color={0} content="PRIVATE" icon={<Lock />} />
                                     )}
-                                </li>
+                                </li> */}
                                 <li>
                                     <CustomBadge color={2} content={event.attendees.toString()} icon={<Users />} />
                                 </li>
@@ -103,12 +103,12 @@ export default function EventCard({ event, type }: EventCardProps) {
                             {formatDateRange(event.date)}
                         </div>
                         <div className="flex gap-4">
-                            {event.visibility == 1 && (
+                            {event.isPublic && (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-semibold">
                                     PUBLIC
                                 </span>
                             )}
-                            {event.visibility == 0 && (
+                            {!event.isPublic && (
                                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-md text-xs font-semibold">
                                     PRIVATE
                                 </span>

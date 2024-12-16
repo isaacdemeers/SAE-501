@@ -19,7 +19,7 @@ interface Event {
     location: string;
     maxparticipant: string;
     sharelink: string;
-    visibility: number;
+    isPublic: boolean;
 }
 
 interface SearchResultProps {
@@ -33,7 +33,7 @@ const searchEvents = (search: string, activeFilters: string[]) => {
         // Filtrer d'abord par visibilité si le filtre private est actif
         let filteredEvents = events;
         if (activeFilters.includes('private')) {
-            filteredEvents = events.filter((event: Event) => event.visibility == 0);
+            filteredEvents = events.filter((event: Event) => !event.isPublic);
         }
 
         // Ensuite appliquer les autres filtres
@@ -120,7 +120,7 @@ export default function SearchResult({ isOpen, search }: SearchResultProps) {
                             id: event.id.toString(),
                             title: event.title,
                             date: event.datestart,
-                            visibility: event.visibility,
+                            isPublic: event.isPublic,
                             attendees: parseInt(event.maxparticipant),
                             imageUrl: event.img,
                             description: event.description
