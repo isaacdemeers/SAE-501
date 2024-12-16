@@ -39,7 +39,6 @@ import * as z from "zod";
 import { UpdateEvent } from "@/lib/request";
 import { Label } from "@/components/ui/label";
 import { DeleteEvent } from "@/lib/request";
-import { set } from "date-fns";
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Le titre doit contenir au moins 2 caractères.",
