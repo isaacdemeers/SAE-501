@@ -20,7 +20,6 @@ interface Event {
   visibility: number;
   location: string;
   userCount: number;
-  // Add other properties your event object has
 }
 
 
