@@ -72,6 +72,13 @@ export function Calendar() {
         });
     }, []);
 
+    const handleUnsubscribe = async () => {
+        // Refresh events after unsubscribe
+        const data = await fetchUserEvents(user.id);
+        const transformedEvents = transformEvents(data);
+        setEvents(transformedEvents);
+    };
+
     return (
 
         <Card className=' relative  h-[87vh]  w-full border-none transition-all flex shadow-none gap-4 flex-row'>
@@ -227,7 +234,7 @@ export function Calendar() {
                 />
             </Card>
 
-            <RenderedEventSideShow selectedEvent={selectedEvent} user={user} />
+            <RenderedEventSideShow selectedEvent={selectedEvent} user={user} onUnsubscribe={handleUnsubscribe} />
         </Card >
 
 
@@ -246,14 +253,15 @@ function renderEventContent(eventInfo: any) {
 interface RenderedEventSideShowProps {
     selectedEvent: Event | null;
     user: any;
+    onUnsubscribe: () => void;
 }
 
-export function RenderedEventSideShow({ selectedEvent, user }: RenderedEventSideShowProps) {
+export function RenderedEventSideShow({ selectedEvent, user, onUnsubscribe }: RenderedEventSideShowProps) {
     return (
         <Card className="relative w-full md:w-96 h-fit min-h-[500px] p-0 overflow-x-hidden max-h-full">
             {selectedEvent ? (
                 <section className="w-full z-10 h-full opacity-100 overflow-y-scroll rounded-sm overflow-hidden">
-                    <EventSideShow event={selectedEvent} user={user} />
+                    <EventSideShow event={selectedEvent} user={user} onUnsubscribe={onUnsubscribe} />
                 </section>
             ) : (
                 <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">
