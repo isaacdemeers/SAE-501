@@ -7,6 +7,8 @@ import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
 import eventImage from "@images/image_mairie_limoges.png"
 import Link from "next/link"
+import { JoinEvent, unsubscribeConnectedUser, unsubscribeUUID } from "@/lib/request"
+import { useState } from "react"
 interface Event {
   id: string;
   title: string;
@@ -15,14 +17,78 @@ interface Event {
   maxparticipant: number;
   visibility: number;
   location: string;
+  userCount: number;
   // Add other properties your event object has
 }
 
 
-export default function EventSideShow({ event, user }: { event: Event, user: any }) {
+
+
+
+export default function EventSideShow({ event: initialEvent, user }: { event: Event, user: any }) {
+  const [event, setEvent] = useState(initialEvent);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [connectionuuid, setConnectionuuid] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [id, setId] = useState(event.id);
+
   console.log(event, user)
 
   const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";
+
+  async function handleSubscribe() {
+    let sub = await JoinEvent(id, email);
+    if (sub.message === "User successfully joined the event") {
+      setIsDialogOpen(false);
+      setIsSubscribed(true);
+      if (sub.uuid !== "") {
+        setConnectionuuid(sub.uuid);
+      }
+    }
+    else if (sub.error) {
+      setDialogMessage(sub.error);
+    }
+  }
+
+  async function handleUnsubscribe() {
+    if (isAuthenticated) {
+      let unsub = await unsubscribeConnectedUser(id);
+      if (unsub.message === "User successfully left the event") {
+        setIsDialogOpen(false);
+        setIsSubscribed(false);
+        setEvent((prevEvent) => {
+          if (prevEvent) {
+            return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+          }
+          return prevEvent;
+        });
+      }
+      if (unsub.error === "Admin users cannot unsubscribe from the event") {
+        setIsDialogOpen(false);
+        setError(" Le créateur ne peut pas se désinscrire de l'événement");
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+      }
+    }
+    else if (connectionuuid !== "" && isSubscribed) {
+      let unsub = await unsubscribeUUID(connectionuuid, id);
+      if (unsub.message === "User successfully left the event") {
+        setIsDialogOpen(false);
+        setIsSubscribed(false);
+        setEvent((prevEvent) => {
+          if (prevEvent) {
+            return { ...prevEvent, userCount: prevEvent.userCount - 1 };
+          }
+          return prevEvent;
+        });
+      }
+    }
+  }
 
   return (
     <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
