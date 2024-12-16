@@ -5,7 +5,7 @@ import { Circle, CirclePlus, Clock, Users, ChevronRight, Eye, Lock, LockOpen } f
 import CustomBadge from "@/components/utils/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
 import { Separator } from "@/components/ui/separator"
-
+import Link from "next/link"
 const formatDateRange = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR', {
@@ -71,11 +71,12 @@ export default function EventCard({ event, type }: EventCardProps) {
                             </ul>
                         </div>
                         <div className="flex flex-col lg:flex-row gap-2 items-end justify-center lg:items-center   rounded-lg">
+                            <Link href={`/events/${event.id}`}>
                             <Button variant="outline">
                                 <Eye className="w-4 h-4 mr-2 " />
                                 Voir l&apos;événement
                             </Button>
-
+                            </Link>
                         </div>
 
                     </div>
