@@ -193,7 +193,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Put(),
         new Patch(),
         new Delete(
-            uriTemplate: '/users/{id}',
+            uriTemplate: '/admin/users/{id}',
             controller: AdminController::class . '::deleteAdminUser',
             normalizationContext: ['groups' => ['user:read']],
         ),

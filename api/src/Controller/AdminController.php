@@ -346,7 +346,7 @@ class AdminController extends AbstractController
 
     }
     
-#[Route('/events/{id}', name: 'app_events_delete', methods: ['DELETE'])]
+#[Route('/admin/events/{id}', name: 'app_admin_events_delete', methods: ['DELETE'])]
 public function deleteAdminEvent(int $id, EntityManagerInterface $entityManager): Response
 {
     $event = $entityManager->getRepository(Event::class)->find($id);
@@ -374,7 +374,7 @@ public function deleteAdminEvent(int $id, EntityManagerInterface $entityManager)
     return $this->json(['message' => 'Event, related user events, and user invitations deleted successfully'], Response::HTTP_OK);
 }
 
-#[Route('/users/{id}', name: 'app_users_delete', methods: ['DELETE'])]
+#[Route('/admin/users/{id}', name: 'app_admin_users_delete', methods: ['DELETE'])]
 public function deleteAdminUser(int $id, EntityManagerInterface $entityManager): Response
 {
     $user = $entityManager->getRepository(User::class)->find($id);

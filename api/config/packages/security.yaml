@@ -30,6 +30,7 @@ security:
     - {path: /users/testusername, roles: PUBLIC_ACCESS}
     - {path: ^/events, roles: ROLE_ADMIN, methods: [DELETE]}
     - {path: ^/users, roles: ROLE_ADMIN, methods: [DELETE]}
+    - {path: ^/admin, roles: ROLE_ADMIN}
     - {path: ^/events, roles: IS_AUTHENTICATED_FULLY}
     - {path: ^/users, roles: IS_AUTHENTICATED_FULLY}
     - {path: /api/auth/logout, roles: IS_AUTHENTICATED_FULLY}

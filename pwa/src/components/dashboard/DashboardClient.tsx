@@ -54,6 +54,7 @@ export default function DashboardClient() {
             if (!response.ok) throw new Error('Failed to fetch events');
 
             const { events, totalPages } = await response.json();
+            console.log('API Response:', events);
 
             const formattedEvents = events.map((event: Event) => ({
                 id: event.id,
@@ -70,6 +71,7 @@ export default function DashboardClient() {
                 }),
                 buttonText: "Voir l'Événement"
             }));
+            console.log('Formatted Events:', formattedEvents);
             setSuggestedEvents(formattedEvents);
         } catch (error) {
             console.error('Error fetching upcoming events:', error);

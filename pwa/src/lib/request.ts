@@ -1,3 +1,4 @@
+import { log } from "console";
 import API_BASE_URL from "../../utils/apiConfig";
 
 export async function AddUser(data: any) {
@@ -609,5 +610,28 @@ export async function UpdateEventAdmin(data: any, userId: number | undefined) {
     return response;
   } catch (error) {
     console.error('Error fetching user admin:', error);
+  }
+}
+
+
+export async function DeleteEvent(id: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/delete/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to delete event");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    throw error;
   }
 }

@@ -368,18 +368,18 @@ class EventController extends AbstractController
     }
 
 
-    #[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
-    public function getevent(Request $request, EventRepository $eventRepository, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $event = $eventRepository->find($request->get('id'));
-        if (!$event || $event->getDeletedDate()) {
-            return $this->json(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
-        }
-        // Retrieve the email of the event creator (ROLE_ADMIN)
-        $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
-            'event' => $event,
-            'role' => 'ROLE_ADMIN'
-        ]);
+#[Route('/event/{id}', name: 'app_event_get', methods: ['GET'])]
+public function getevent (Request $request , EventRepository $eventRepository , EntityManagerInterface $entityManager): JsonResponse
+{
+    $event = $eventRepository->find($request->get('id'));
+    if (!$event || $event->getDeletedDate()) {
+        return $this->json(['error'=> 'Event not found'], Response::HTTP_NOT_FOUND);
+    }
+    // Retrieve the email of the event creator (ROLE_ADMIN)
+    $adminUserEvent = $entityManager->getRepository(UserEvent::class)->findOneBy([
+        'event' => $event,
+        'role' => 'ROLE_ADMIN'
+    ]);
 
         $adminEmail = $adminUserEvent ? $adminUserEvent->getUser()->getEmail() : null;
         $adminUsername = $adminUserEvent ? $adminUserEvent->getUser()->getUsername() : null;
@@ -435,7 +435,7 @@ class EventController extends AbstractController
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.deleted_date IS NULL')
+                ->andWhere('e.DeletedDate IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1); // 1 means public
 
@@ -465,7 +465,7 @@ class EventController extends AbstractController
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.deleted_date IS NULL')
+                ->andWhere('e.deletedAt IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1);
 
@@ -524,7 +524,7 @@ class EventController extends AbstractController
     public function getAllEvents(EventRepository $eventRepository): JsonResponse
     {
         $events = $eventRepository->createQueryBuilder('e')
-            ->where('e.deleted_date IS NULL')
+            ->where('e.DeletedDate IS NULL')
             ->getQuery()
             ->getResult();
 
@@ -907,12 +907,26 @@ class EventController extends AbstractController
 
     ): JsonResponse {
         try {
+            $user = $this->getUser();
+            if (!$user) {
+                return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
             // Récupérer l'événement
             $event = $entityManager->getRepository(Event::class)->find($id);
             if (!$event) {
                 return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
             }
 
+            // Vérifier si l'utilisateur est l'administrateur de l'événement
+            $useradmin = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user' => $user,
+                'role' => 'ROLE_ADMIN'
+            ]);
+
+            if (!$useradmin) {
+                return new JsonResponse(['error' => 'Only the event administrator can edit the event'], Response::HTTP_FORBIDDEN);
+            }
             // Récupérer les données de la requête
             $data = json_decode($request->getContent(), true);
             $file = $request->files->get('file');
@@ -991,12 +1005,26 @@ class EventController extends AbstractController
         UserEventRepository $userEventRepository
     ): JsonResponse {
         try {
-            // Vérifier si l'événement existe
-            $event = $entityManager->getRepository(Event::class)->find($eventId);
+            $user = $this->getUser();
+            if (!$user) {
+                return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
+            // Récupérer l'événement
+            $event = $entityManager->getRepository(Event::class)->find($id);
             if (!$event) {
                 return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
             }
 
+            // Vérifier si l'utilisateur est l'administrateur de l'événement
+            $useradmin = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $event,
+                'user' => $user,
+                'role' => 'ROLE_ADMIN'
+            ]);
+
+            if (!$useradmin) {
+                return new JsonResponse(['error' => 'Only the event administrator can edit the event'], Response::HTTP_FORBIDDEN);
+            }
             // Vérifier si l'utilisateur existe
             $user = $entityManager->getRepository(User::class)->find($userId);
             if (!$user) {
@@ -1042,6 +1070,41 @@ class EventController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(
                 ['error' => 'An error occurred while removing user from event: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+    
+    #[Route('/events/delete/{id}', name: 'delete_event', methods: ['POST'])]
+    public function deleteEvent(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user) {
+                return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            }
+            $useradmin = $entityManager->getRepository(UserEvent::class)->findOneBy([
+                'event' => $id,
+                'user' => $user,
+                'role' => 'ROLE_ADMIN'
+            ]);
+            if (!$useradmin) {
+                return new JsonResponse(['error' => 'User is not the admin of this event'], Response::HTTP_FORBIDDEN);
+            }
+            // Récupérer l'événement
+            $event = $entityManager->getRepository(Event::class)->find($id);
+            if (!$event) {
+                return new JsonResponse(['error' => 'Event not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Supprimer l'événement
+            $event->setDeletedDate(new \DateTime());
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'Event deleted successfully'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'An error occurred while deleting the event: ' . $e->getMessage()],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

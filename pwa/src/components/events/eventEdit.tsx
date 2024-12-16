@@ -1,5 +1,4 @@
 "use client";
-
 import { CalendarIcon, Upload } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { UpdateEvent } from "@/lib/request";
 import { Label } from "@/components/ui/label";
-
+import { DeleteEvent } from "@/lib/request";
+import { set } from "date-fns";
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Le titre doit contenir au moins 2 caractères.",
@@ -91,7 +91,9 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>("test");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
 
   const initialStartTime = new Date(event.datestart).toTimeString().slice(0, 5);
   const initialEndTime = new Date(event.dateend).toTimeString().slice(0, 5);
@@ -194,14 +196,55 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
     }
   };
 
+
+  const DeleteEvents = async () => {
+    try {
+      const response = await(DeleteEvent(event.id));
+      if (!response.ok) {
+        setError("Une erreur est survenue lors de la suppression de l'évènement");
+      }
+      window.location.href=("/");
+      onUpdate?.();
+      onClose?.();
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Une erreur est survenue lors de la suppression");
+      console.error("Erreur lors de la suppression:", err);
+    }
+  }
+
+
+const handleCancel = () => {
+  setIsPopoverOpen(false);
+};
+
+const handleDelete = () => {
+  DeleteEvents();
+  setIsPopoverOpen(false);
+};
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-3xl font-bold">Modifications</CardTitle>
-        {error && (
-          <p className="text-red-500 text-sm mt-2">{error}</p>
-        )}
-      </CardHeader>
+       {error && (
+        <p className="flex items-center justify-center text-red-500 text-sm mt-4">{error}</p>
+      )}
+   <CardHeader className="flex flex-row justify-between">
+      <CardTitle className="text-3xl font-bold">Modifications</CardTitle>
+      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button className="w-fit" onClick={() => setIsPopoverOpen(true)}>Supprimer l'évènement</Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="p-4">
+            <p>Êtes-vous sûr de vouloir supprimer l'évènement ?</p>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={handleCancel}>Annuler</Button>
+              <Button variant="destructive" onClick={handleDelete}>Supprimer</Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
