@@ -36,7 +36,8 @@ function transformEvents(events: any[]) {
             sharelink: event.sharelink,
             img: event.img,
             visibility: event.visibility,
-            id: event.eventId || event.id
+            id: event.eventId || event.id,
+            adminEmail: event.adminEmail
         }
     }));
 }
@@ -71,6 +72,108 @@ export function Calendar() {
             });
         });
     }, []);
+
+    const refreshCalendar = async () => {
+        if (user) {
+            // Fetch all events
+            const data = await fetchUserEvents(user.id);
+            const transformedEvents = transformEvents(data);
+            setEvents(transformedEvents);
+
+            // If there's a selected event, fetch its updated data
+            if (selectedEvent) {
+                const updatedEventResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${selectedEvent.id}`);
+                const updatedEventData = await updatedEventResponse.json();
+
+                // Update the calendar event
+                const calendarApi = calendarRef.current?.getApi();
+                if (calendarApi) {
+                    const existingEvent = calendarApi.getEventById(selectedEvent.id);
+                    if (existingEvent) {
+                        existingEvent.setProp('title', updatedEventData.title);
+                        existingEvent.setStart(updatedEventData.datestart);
+                        existingEvent.setEnd(updatedEventData.dateend);
+                    }
+                }
+
+                // Update the side panel
+                const updatedEvent = {
+                    id: selectedEvent.id,
+                    title: updatedEventData.title,
+                    image: updatedEventData.img,
+                    location: updatedEventData.location,
+                    dates: (() => {
+                        const start = formatDate(updatedEventData.datestart);
+                        const end = formatDate(updatedEventData.dateend);
+                        if (start.day === end.day) {
+                            return `Le ${start.day}, de ${start.time} à ${end.time}`;
+                        }
+                        return `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
+                    })(),
+                    maxparticipant: updatedEventData.maxparticipant,
+                    visibility: updatedEventData.visibility,
+                    adminEmail: updatedEventData.adminEmail,
+                    description: updatedEventData.description
+                };
+                setSelectedEvent(updatedEvent);
+            }
+        }
+    };
+
+    const refreshSidePanel = async (eventId: string) => {
+        try {
+            // Fetch updated event data
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${eventId}`);
+            const updatedEventData = await response.json();
+
+            // Format the dates for display
+            const formatDate = (dateStr: string) => {
+                const date = new Date(dateStr);
+                const day = new Intl.DateTimeFormat('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(date);
+
+                const time = new Intl.DateTimeFormat('fr-FR', {
+                    hour: 'numeric',
+                    minute: 'numeric'
+                }).format(date);
+
+                return { day, time };
+            };
+
+            const start = formatDate(updatedEventData.datestart);
+            const end = formatDate(updatedEventData.dateend);
+            const formattedDates = start.day === end.day
+                ? `Le ${start.day}, de ${start.time} à ${end.time}`
+                : `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
+
+            // Update the selected event with new data
+            const updatedEvent = {
+                id: eventId,
+                title: updatedEventData.title,
+                image: updatedEventData.img,
+                location: updatedEventData.location,
+                dates: formattedDates,
+                maxparticipant: updatedEventData.maxparticipant,
+                visibility: updatedEventData.visibility,
+                adminEmail: updatedEventData.adminEmail,
+                description: updatedEventData.description
+            };
+
+            // Update both the selected event and calendar events
+            setSelectedEvent(updatedEvent);
+
+            // Fetch and update all calendar events
+            const allEvents = await fetchUserEvents(user.id);
+            const transformedEvents = transformEvents(allEvents);
+            setEvents(transformedEvents);
+
+        } catch (error) {
+            console.error('Error refreshing event data:', error);
+        }
+    };
 
     return (
 
@@ -190,7 +293,7 @@ export function Calendar() {
                         };
 
                         let event = {
-                            id: info.event.id || info.event.extendedProps.id,  // Utiliser l'ID de l'événement ou celui dans extendedProps
+                            id: info.event.id || info.event.extendedProps.id,
                             title: info.event.title,
                             image: info.event.extendedProps.img,
                             location: info.event.extendedProps.location,
@@ -203,8 +306,10 @@ export function Calendar() {
                                 }
                                 return `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
                             })(),
-                            participants: info.event.extendedProps.maxparticipant,
-                            visibility: info.event.extendedProps.visibility
+                            maxparticipant: info.event.extendedProps.maxparticipant,
+                            visibility: info.event.extendedProps.visibility,
+                            adminEmail: info.event.extendedProps.adminEmail,
+                            description: info.event.extendedProps.description
                         }
                         setSelectedEvent(event);
                     }}
@@ -227,7 +332,7 @@ export function Calendar() {
                 />
             </Card>
 
-            <RenderedEventSideShow selectedEvent={selectedEvent} user={user} />
+            <RenderedEventSideShow selectedEvent={selectedEvent} user={user} refreshSidePanel={refreshSidePanel} />
         </Card >
 
 
@@ -246,14 +351,19 @@ function renderEventContent(eventInfo: any) {
 interface RenderedEventSideShowProps {
     selectedEvent: Event | null;
     user: any;
+    refreshSidePanel: (eventId: string) => Promise<void>;
 }
 
-export function RenderedEventSideShow({ selectedEvent, user }: RenderedEventSideShowProps) {
+export function RenderedEventSideShow({ selectedEvent, user, refreshSidePanel }: RenderedEventSideShowProps) {
     return (
         <Card className="relative w-full md:w-96 h-fit min-h-[500px] p-0 overflow-x-hidden max-h-full">
             {selectedEvent ? (
                 <section className="w-full z-10 h-full opacity-100 overflow-y-scroll rounded-sm overflow-hidden">
-                    <EventSideShow event={selectedEvent} user={user} />
+                    <EventSideShow
+                        event={selectedEvent}
+                        user={user}
+                        refreshSidePanel={refreshSidePanel}
+                    />
                 </section>
             ) : (
                 <p className="absolute top-1/2 z-0 text-center left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 font-medium">

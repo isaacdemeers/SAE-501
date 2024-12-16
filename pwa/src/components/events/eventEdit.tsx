@@ -131,7 +131,6 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
       setIsSubmitting(true);
       setError(null);
 
-
       // Créer l'objet de données à envoyer
       const formData: any = {};
 
@@ -142,26 +141,40 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
       if (values.description !== event.description) {
         formData.description = values.description;
       }
-      if (values.startDate) {
+
+      // Only update dates if they've been changed
+      const originalStart = new Date(event.datestart);
+      const originalEnd = new Date(event.dateend);
+      const newStart = values.startDate ? new Date(values.startDate) : null;
+      const newEnd = values.endDate ? new Date(values.endDate) : null;
+
+      if (newStart && (
+        newStart.getDate() !== originalStart.getDate() ||
+        newStart.getMonth() !== originalStart.getMonth() ||
+        newStart.getFullYear() !== originalStart.getFullYear() ||
+        startTime !== originalStart.toTimeString().slice(0, 5)
+      )) {
         const adjustedStartDate = combineDateAndTime(new Date(values.startDate), startTime);
         if (adjustedStartDate) {
           adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
           formData.datestart = adjustedStartDate.toISOString().split('.')[0];
         }
       }
-      if (values.endDate) {
+
+      if (newEnd && (
+        newEnd.getDate() !== originalEnd.getDate() ||
+        newEnd.getMonth() !== originalEnd.getMonth() ||
+        newEnd.getFullYear() !== originalEnd.getFullYear() ||
+        endTime !== originalEnd.toTimeString().slice(0, 5)
+      )) {
         const adjustedEndDate = combineDateAndTime(new Date(values.endDate), endTime);
         if (adjustedEndDate) {
           adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
           formData.dateend = adjustedEndDate.toISOString().split('.')[0];
         }
       }
-       // Vérifier si la date de début est supérieure à la date de fin
-      if (formData.datestart && formData.dateend && formData.datestart > formData.dateend) {
-        setError("La date de début ne peut pas être supérieure à la date de fin.");
-        setIsSubmitting(false);
-        return;
-      }
+
+      // Continue with other fields...
       if (values.location !== event.location) {
         formData.location = values.location;
       }
@@ -171,7 +184,7 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
       if ((values.visibility === "public") !== event.visibility) {
         formData.visibility = values.visibility;
       }
-      if(values.image !== null) {
+      if (values.image !== null) {
         formData.image = image;
       }
 
