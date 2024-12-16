@@ -435,7 +435,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.DeletedDate IS NULL')
+                ->andWhere('e.deleted_date IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1); // 1 means public
 
@@ -465,7 +465,7 @@ public function getevent (Request $request , EventRepository $eventRepository , 
                 ->from(Event::class, 'e')
                 ->where('e.datestart > :currentDate')
                 ->andWhere('e.visibility = :visibility')
-                ->andWhere('e.deletedAt IS NULL')
+                ->andWhere('e.deleted_date IS NULL')
                 ->setParameter('currentDate', $currentDate)
                 ->setParameter('visibility', 1);
 
@@ -521,10 +521,10 @@ public function getevent (Request $request , EventRepository $eventRepository , 
     }
 
     #[Route('/events', name: 'get_all_events', methods: ['GET'])]
-    public function getAllEvents(EventRepository $eventRepository): JsonResponse
+    public function getAllEvents( Request $request, EntityManagerInterface $entityManager , EventRepository $eventRepository): JsonResponse
     {
         $events = $eventRepository->createQueryBuilder('e')
-            ->where('e.DeletedDate IS NULL')
+            ->where('e.deleted_date IS NULL')
             ->getQuery()
             ->getResult();
 
