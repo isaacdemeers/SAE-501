@@ -50,6 +50,8 @@ interface Event {
     maxparticipant: number;
     visibility: number;
     location: string;
+    adminEmail: string;
+    description: string;
 }
 
 
@@ -103,8 +105,8 @@ export function Calendar() {
                     image: updatedEventData.img,
                     location: updatedEventData.location,
                     dates: (() => {
-                        const start = formatDate(updatedEventData.datestart);
-                        const end = formatDate(updatedEventData.dateend);
+                        const start = formatDateHelper(updatedEventData.datestart);
+                        const end = formatDateHelper(updatedEventData.dateend);
                         if (start.day === end.day) {
                             return `Le ${start.day}, de ${start.time} à ${end.time}`;
                         }
@@ -373,3 +375,19 @@ export function RenderedEventSideShow({ selectedEvent, user, refreshSidePanel }:
         </Card>
     )
 }
+
+const formatDateHelper = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = new Intl.DateTimeFormat('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }).format(date);
+
+    const time = new Intl.DateTimeFormat('fr-FR', {
+        hour: 'numeric',
+        minute: 'numeric'
+    }).format(date);
+
+    return { day, time };
+};
