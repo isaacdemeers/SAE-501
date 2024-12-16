@@ -333,7 +333,7 @@ export async function NewConnectionUUID(uuid: string, id: number) {
 }
 
 
-export async function VerifyConnectionConnectedUser(id: number) {
+export async function VerifyConnectionConnectedUser(id: string | number) {
   try {
     const response = await fetch(`${API_BASE_URL}/userevents/${id}`);
     const data = await response.json();

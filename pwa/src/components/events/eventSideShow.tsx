@@ -13,9 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import EventModerate from "./eventModerate"
 import EventEdit from "./eventEdit"
+import { VerifyConnectionConnectedUser } from "@/lib/request"
 
 interface Event {
   id: string;
@@ -46,6 +47,32 @@ export default function EventSideShow({
 }) {
   const [showModerateDialog, setShowModerateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if user is admin when component mounts
+    const checkAdmin = async () => {
+      try {
+        // Make sure we're passing a number
+        const eventId = typeof event.id === 'string' ? parseInt(event.id) : event.id;
+        const subscriptionData = await VerifyConnectionConnectedUser(eventId);
+
+        if (subscriptionData && subscriptionData.isLog === true && subscriptionData.Role === "ROLE_ADMIN") {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    if (event.id) {
+      checkAdmin();
+    }
+  }, [event.id]);
+
   const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";
 
   // Helper function to parse date strings
@@ -188,49 +215,51 @@ export default function EventSideShow({
           </Link>
         </Button>
 
-        <>
-          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-            <Button
-              variant="outline"
-              className="w-full text-sm font-semibold"
-              onClick={() => setShowEditDialog(true)}
-            >
-              <Pencil className="w-4 h-4 mr-2" />
-              Éditer l&apos;événement
-            </Button>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="hidden text-lg font-bold">
-                  Éditer l&apos;événement
-                </DialogTitle>
-              </DialogHeader>
-              <EventEdit
-                event={formattedEvent}
-                onClose={() => setShowEditDialog(false)}
-                onUpdate={refreshEventData}
-              />
-            </DialogContent>
-          </Dialog>
+        {isAdmin && (
+          <>
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+              <Button
+                variant="outline"
+                className="w-full text-sm font-semibold"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Éditer l&apos;événement
+              </Button>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="hidden text-lg font-bold">
+                    Éditer l&apos;événement
+                  </DialogTitle>
+                </DialogHeader>
+                <EventEdit
+                  event={formattedEvent}
+                  onClose={() => setShowEditDialog(false)}
+                  onUpdate={refreshEventData}
+                />
+              </DialogContent>
+            </Dialog>
 
-          <Dialog open={showModerateDialog} onOpenChange={setShowModerateDialog}>
-            <Button
-              variant="outline"
-              className="w-full text-sm font-semibold"
-              onClick={() => setShowModerateDialog(true)}
-            >
-              <UserCog className="w-4 h-4 mr-2" />
-              Modérer l&apos;événement
-            </Button>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="hidden text-lg font-bold">
-                  Modérer l&apos;événement
-                </DialogTitle>
-              </DialogHeader>
-              <EventModerate eventId={Number(event.id)} />
-            </DialogContent>
-          </Dialog>
-        </>
+            <Dialog open={showModerateDialog} onOpenChange={setShowModerateDialog}>
+              <Button
+                variant="outline"
+                className="w-full text-sm font-semibold"
+                onClick={() => setShowModerateDialog(true)}
+              >
+                <UserCog className="w-4 h-4 mr-2" />
+                Modérer l&apos;événement
+              </Button>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="hidden text-lg font-bold">
+                    Modérer l&apos;événement
+                  </DialogTitle>
+                </DialogHeader>
+                <EventModerate eventId={Number(event.id)} />
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
 
         <Button variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
           <X className="w-4 h-4 mr-2" />

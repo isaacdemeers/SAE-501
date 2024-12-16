@@ -111,7 +111,7 @@ export default function PageEvent({ params }: EventPageProps) {
       const urlParams = new URLSearchParams(window.location.search);
       try {
         const [eventData, authData] = await Promise.all([GetEvent(id), IsAuthentificated()]);
-        if(eventData.error && eventData.error === "Event not found") {
+        if (eventData.error && eventData.error === "Event not found") {
           router.push('/');
           return;
         }
@@ -149,7 +149,7 @@ export default function PageEvent({ params }: EventPageProps) {
             return;
           } else if (subscriptionData.isLog === true) {
             setIsSubscribed(true);
-            setIsAdmin(subscriptionData.Role);
+            setIsAdmin(subscriptionData.Role === "ROLE_ADMIN");
           }
         }
         else if (authData.isValid === false) {
