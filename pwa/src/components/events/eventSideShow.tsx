@@ -32,7 +32,7 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
       <CardContent className="flex flex-col h-full overflow-y-scroll p-4">
         {/* image */}
         <div className="w-full h-40 bg-slate-100 rounded-lg mb-4">
-          <img src={eventImage.src} alt="Event" className="w-full h-full object-cover rounded-lg shadow-md" />
+          <img src={event.image} alt="Event" className="w-full h-full object-cover rounded-lg shadow-md" />
         </div>
 
         <h3 className="font-semibold mb-2 text-sm">Dates</h3>
