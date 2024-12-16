@@ -7,8 +7,8 @@ import CustomBadge from "@/components/utils/badge"
 import Image from "next/image"
 import eventImage from "@images/image_mairie_limoges.png"
 import Link from "next/link"
-import { JoinEvent, unsubscribeConnectedUser, unsubscribeUUID } from "@/lib/request"
-import { useState } from "react"
+import { IsAuthentificated, JoinEvent, unsubscribeConnectedUser, unsubscribeUUID } from "@/lib/request"
+import { useEffect, useState } from "react"
 interface Event {
   id: string;
   title: string;
@@ -25,9 +25,9 @@ interface Event {
 
 
 
-export default function EventSideShow({ event: initialEvent, user }: { event: Event, user: any }) {
+export default function EventSideShow({ event: initialEvent, user, onUnsubscribe }: { event: Event, user: any, onUnsubscribe?: () => void }) {
   const [event, setEvent] = useState(initialEvent);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [connectionuuid, setConnectionuuid] = useState("");
@@ -40,23 +40,17 @@ export default function EventSideShow({ event: initialEvent, user }: { event: Ev
 
   const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";
 
-  async function handleSubscribe() {
-    let sub = await JoinEvent(id, email);
-    if (sub.message === "User successfully joined the event") {
-      setIsDialogOpen(false);
-      setIsSubscribed(true);
-      if (sub.uuid !== "") {
-        setConnectionuuid(sub.uuid);
-      }
-    }
-    else if (sub.error) {
-      setDialogMessage(sub.error);
-    }
-  }
+  useEffect(() => {
+    IsAuthentificated().then((data: any) => {
+      setIsAuthenticated(data.isValid);
+      setId(event.id);
+    });
+  }, [initialEvent]);
+
 
   async function handleUnsubscribe() {
     if (isAuthenticated) {
-      let unsub = await unsubscribeConnectedUser(id);
+      let unsub = await unsubscribeConnectedUser(parseInt(id));
       if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
@@ -66,6 +60,7 @@ export default function EventSideShow({ event: initialEvent, user }: { event: Ev
           }
           return prevEvent;
         });
+        onUnsubscribe?.();
       }
       if (unsub.error === "Admin users cannot unsubscribe from the event") {
         setIsDialogOpen(false);
@@ -76,7 +71,7 @@ export default function EventSideShow({ event: initialEvent, user }: { event: Ev
       }
     }
     else if (connectionuuid !== "" && isSubscribed) {
-      let unsub = await unsubscribeUUID(connectionuuid, id);
+      let unsub = await unsubscribeUUID(connectionuuid, parseInt(id));
       if (unsub.message === "User successfully left the event") {
         setIsDialogOpen(false);
         setIsSubscribed(false);
@@ -150,10 +145,12 @@ export default function EventSideShow({ event: initialEvent, user }: { event: Ev
             Éditer l&apos;événement
           </Link>
         </Button>
-        <Button variant="outline" className="w-full  hover:bg-red-600 hover:text-white text-sm font-semibold">
-          <X className="w-4 h-4 mr-2" />
-          Quitter l&apos;événement
-        </Button>
+        {isSubscribed && (
+          <Button onClick={handleUnsubscribe} variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
+            <X className="w-4 h-4 mr-2" />
+            Quitter l&apos;événement
+          </Button>
+        )}
 
         {/* <Button variant="default" className="w-full text-sm font-semibold">
           <Share className="w-4 h-4 mr-2" />
