@@ -6,7 +6,7 @@ import Addimage from "@/components/login/imageProfile";
 import SignRecap from "@/components/login/signInRecap";
 import { AddUser } from "@/lib/request";
 import { useEffect } from "react";
-import { IsAuthentificated , LoginUser } from "@/lib/request";
+import { IsAuthentificated, LoginUser } from "@/lib/request";
 import { useRouter } from 'next/navigation';
 
 interface SignData {
@@ -72,7 +72,7 @@ export default function Signin() {
         const data = await AddUser(signdata);
         if (data.message === "User created successfully") {
             const auth = await LoginUser(signdata);
-             router.push('/login');
+            router.push('/gettingstarted');
         }
     }
 
