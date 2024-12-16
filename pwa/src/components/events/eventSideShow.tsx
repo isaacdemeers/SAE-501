@@ -15,7 +15,7 @@ interface Event {
   maxparticipant: number;
   visibility: number;
   location: string;
-  // Add other properties your event object has
+  userCount: number;
 }
 
 
