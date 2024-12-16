@@ -19,7 +19,7 @@ interface Event {
 }
 
 
-export default function EventSideShow({ event, user }: { event: Event, user: any }) {
+export default function EventSideShow({ event, user }: { event: Event, user: any ,  onUnsubscribe: () => void;}) {
   console.log(event, user)
 
   const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";

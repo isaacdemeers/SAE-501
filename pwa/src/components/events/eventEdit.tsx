@@ -90,11 +90,14 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>("test");
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [endTime, setEndTime] = useState("12:00");
-  const [startTime, setStartTime] = useState("12:00");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const initialStartTime = new Date(event.datestart).toTimeString().slice(0, 5);
+  const initialEndTime = new Date(event.dateend).toTimeString().slice(0, 5);
+
+  const [endTime, setEndTime] = useState(initialEndTime);
+  const [startTime, setStartTime] = useState(initialStartTime);
 
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -110,7 +113,6 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
       },
     });
 
-
     // Function to combine date and time
   const combineDateAndTime = (
     date: Date | undefined,
@@ -119,21 +121,19 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
     if (!date) return undefined;
     const [hours, minutes] = time.split(":").map(Number);
     const newDate = new Date(date);
-    newDate.setHours(hours, minutes);
+    newDate.setHours(hours + 1, minutes, 0, 0); // Set hours (+1), minutes, seconds, and milliseconds
+    newDate.setDate(newDate.getDate() - 1); // Adjust date to remove the extra day
     return newDate;
   };
   
+
+
+
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
       try {
       setIsSubmitting(true);
       setError(null);
-
-      // Vérifier si la date de début est supérieure à la date de fin
-      if (values.startDate && values.endDate && values.startDate > values.endDate) {
-        setError("La date de début ne peut pas être supérieure à la date de fin.");
-        setIsSubmitting(false);
-        return;
-      }
 
       // Créer l'objet de données à envoyer
       const formData: any = {};
@@ -146,14 +146,24 @@ export default function EventForm({ event, onClose, onUpdate }: EventFormProps) 
         formData.description = values.description;
       }
       if (values.startDate) {
-        const adjustedStartDate = new Date(values.startDate);
-        adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
-        formData.datestart = adjustedStartDate.toISOString().split('.')[0];
+        const adjustedStartDate = combineDateAndTime(new Date(values.startDate), startTime);
+        if (adjustedStartDate) {
+          adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
+          formData.datestart = adjustedStartDate.toISOString().split('.')[0];
+        }
       }
       if (values.endDate) {
-        const adjustedEndDate = new Date(values.endDate);
-        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-        formData.dateend = adjustedEndDate.toISOString().split('.')[0];
+        const adjustedEndDate = combineDateAndTime(new Date(values.endDate), endTime);
+        if (adjustedEndDate) {
+          adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+          formData.dateend = adjustedEndDate.toISOString().split('.')[0];
+        }
+      }
+
+      if (formData.datestart && formData.dateend && formData.datestart > formData.dateend) {
+        setError("La date de début ne peut pas être supérieure à la date de fin.");
+        setIsSubmitting(false);
+        return;
       }
       if (values.location !== event.location) {
         formData.location = values.location;
@@ -424,7 +434,31 @@ const handleDelete = () => {
                   </FormItem>
                 )}
               />
-  
+   <div className="flex items-center gap-2">
+                      <Label className="w-20">Heure :</Label>
+                      <Select value={endTime} onValueChange={setEndTime}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sélectionner l'heure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, hour) =>
+                            Array.from({ length: 4 }, (_, quarterHour) => {
+                              const minutes = quarterHour * 15;
+                              const timeString = `${hour
+                                .toString()
+                                .padStart(2, "0")}:${minutes
+                                  .toString()
+                                  .padStart(2, "0")}`;
+                              return (
+                                <SelectItem key={timeString} value={timeString}>
+                                  {timeString}
+                                </SelectItem>
+                              );
+                            })
+                          ).flat()}
+                        </SelectContent>
+                      </Select>
+                    </div>
               <FormField
                 control={form.control}
                 name="location"

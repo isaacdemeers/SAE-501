@@ -49,6 +49,7 @@ interface Event {
     maxparticipant: number;
     visibility: number;
     location: string;
+    userCount: number;
 }
 
 
