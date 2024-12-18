@@ -126,8 +126,14 @@ class RegisterController extends AbstractController
         $email = (new Email())
             ->from('no-reply@example.com')
             ->to($user->getEmail())
-            ->subject('Please Confirm your Email')
-            ->html('<p>Please confirm your email by clicking on the following link: <a href="' . $verificationLink . '">Verify Email</a></p>');
+            ->subject('Bienvenue sur notre Plan It')
+            ->html(
+            $this->renderView(
+                'email/email_verify.html.twig',
+                ['verificationLink' => $verificationLink,
+                'APP_URL' => $appUrl]
+            )
+            );
 
         $mailer->send($email);
 

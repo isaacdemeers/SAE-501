@@ -160,6 +160,60 @@ class AdminController extends AbstractController
             $user->setPassword($hashedPassword);
         }
 
+        if(isset($data['regenerateToken']) && $data['regenerateToken'] === true){
+            $token = $JWTManager->create($user);
+
+        // Stocker le token dans la variable tokenpassword de l'utilisateur
+        $user->setTokenPassword($token);
+
+        // Création du lien pour réinitialiser le mot de passe
+        $appUrl = rtrim($this->params->get('APP_URL'), '/');
+        $resetLink = sprintf('%s/resetpassword/%s', $appUrl, $token);
+
+        // Envoi de l'email
+        $emailMessage = (new Email())
+            ->from('noreply@votredomaine.com')
+            ->to($data['email'])
+            ->subject('Réinitialisation du mot de passe')
+            ->html(
+                $this->renderView(
+                    'email/email_reset.html.twig',
+                    ['resetLink' => $resetLink,
+                    'APP_URL' => $appUrl]
+                )
+                );
+
+        // Envoyer l'email
+        try {
+            $mailer->send($emailMessage);
+        }
+        catch (\Exception $e) {
+            return $this->json(['message' => 'Failed to send email', 'error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    if(isset($data['regenerateemaillink']) && $data['regenerateemaillink'] === true && $user->isEmailverify() === false){
+        $confirmationToken = Uuid::v4()->toRfc4122();
+        $user->setEmaillink($confirmationToken);
+        $appUrl = $this->params->get('APP_URL');
+        $verificationLink = $appUrl . '/verify-email/' . $confirmationToken;
+
+        // Envoi de l'email de confirmation
+        $emailMessage = (new Email())
+            ->from('no-reply@example.com')
+            ->to($data['email'])
+            ->subject('Bienvenue sur notre Plan It')
+            ->html(
+            $this->renderView(
+                'email/email_verify2.html.twig',
+                ['verificationLink' => $verificationLink,
+                'APP_URL' => $appUrl]
+            )
+            );
+
+        $mailer->send($emailMessage);
+    }
+
         if (isset($data['disable'])) {
             if ($data['disable'] === true) {
                 $user->setDeletedat(new DateTime());

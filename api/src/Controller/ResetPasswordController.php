@@ -57,8 +57,14 @@ class ResetPasswordController extends AbstractController
         $emailMessage = (new Email())
             ->from('noreply@votredomaine.com')
             ->to($email)
-            ->subject('Reset your password')
-            ->html(sprintf('Click <a href="%s">here</a> to reset your password.', $resetLink));
+            ->subject('Réinitialisation du mot de passe')
+            ->html(
+                $this->renderView(
+                    'email/email_reset.html.twig',
+                    ['resetLink' => $resetLink,
+                    'APP_URL' => $appUrl]
+                )
+                );
 
         // Envoyer l'email
         try {

@@ -72,14 +72,10 @@ class EventController extends AbstractController
         $event->setVisibility($data['visibility'] === 'public' ? 1 : 0);
         if ($file) {
             $imageName = uniqid() . '.' . $file->guessExtension();
-            $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
-            if ($uploaded) {
-                $event->setImg($imageName);
-            } else {
-                return new JsonResponse(['message' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            $file->move($this->getParameter('kernel.project_dir') . '/public/assets', $imageName);
+            $event->setImg($this->params->get('APP_URL') . '/assets/' . $imageName);
         } else {
-            $event->setImg('event-background-desktop.png');
+            $event->setImg($this->params->get('APP_URL') . '/assets/event-background-desktop.png');
         }
 
         $invitees = json_decode($data['invitees'], true);
@@ -118,19 +114,19 @@ class EventController extends AbstractController
                 $entityManager->persist($userInvitation);
                 $entityManager->flush();
 
-                // Send invitation email
-                $emailContent = '<p>You have been invited to the event: ' . $event->getTitle() . '</p><p>Event details: <a href="' . $shareLink . '">Event Detail</a></p>';
-                if ($event->getVisibility() === 0) {
-                    $emailContent .= '<p>This is a private event. You need to have or create an account with the email that received this link.</p>';
-                }
-                $emailContent .= "<p>To join the event, please click on the following link: <a href=\"{$link}\">Join Event</a></p>";
-
+                $emailContent = $this->renderView('email/email_invite_event.html.twig', [
+                    'event' => $event,
+                    'sender_name' => $this->getUser()->getUsername( ),
+                    'link' => $link,
+                    'APP_URL' => $appUrl,
+                ]);
+                
                 $email = (new Email())
-                    ->from('no-reply@example.com')
+                    ->from('support@planit.com')
                     ->to($invitee)
-                    ->subject('You are invited to an event')
+                    ->subject('Invitation à un événement Plan-it')
                     ->html($emailContent);
-
+                
                 $mailer->send($email);
             }
         }
@@ -215,11 +211,17 @@ class EventController extends AbstractController
                             $emailInvitation->setDateInvitation(new \DateTime());
                             $entityManager->flush();
 
+                            $emailContent = $this->renderView('email/email_join_event.html.twig', [
+                                'event' => $event,
+                                'link' => $link,
+                                'APP_URL' => $appUrl,
+                            ]);
+
                             $email = (new Email())
                                 ->from('noreply@exemple.fr')
                                 ->to($user->getEmail())
                                 ->subject('You have joined an event')
-                                ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>');
+                                ->html($emailContent);
 
                             $mailer->send($email);
 
@@ -249,13 +251,20 @@ class EventController extends AbstractController
                     $entityManager->persist($EmailInvitation);
                     $entityManager->flush();
 
+                    $emailContent = $this->renderView('email/email_join_event.hml.twig', [
+                        'event' => $event,
+                        'link' => $link,
+                        'APP_URL' => $appUrl,
+                    ]);
+
                     $email = (new Email())
                         ->from('noreply@exemple.fr')
                         ->to($user->getEmail())
                         ->subject('You have joined an event')
-                        ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>');
+                        ->html($emailContent);
 
                     $mailer->send($email);
+
                     return $this->json([
                         'message' => 'User successfully joined the event',
                     ], Response::HTTP_OK);
@@ -317,11 +326,17 @@ class EventController extends AbstractController
                 $entityManager->persist($EmailInvitation);
                 $entityManager->flush();
 
+                $emailContent = $this->renderView('email/email_join_event.html.twig', [
+                    'event' => $event,
+                    'link' => $link,
+                    'APP_URL' => $appUrl,
+                ]);
+
                 $email = (new Email())
                     ->from('noreply@exemple.fr')
                     ->to($user->getEmail())
                     ->subject('You have joined an event')
-                    ->html('<p>You have successfully joined the event: ' . $event->getTitle() .  '  <p>To join the event, please click on the following link: <a href="' . $link . '">Join Event</a>');
+                    ->html($emailContent);
 
                 $mailer->send($email);
 
