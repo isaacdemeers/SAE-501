@@ -97,6 +97,9 @@ class AdminController extends AbstractController
             return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
+        // Store the current password
+        $currentPassword = $user->getPassword();
+
         // Update username
         if (isset($data['username'])) {
             $existingUser = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
@@ -212,6 +215,9 @@ class AdminController extends AbstractController
             } catch (\Exception $e) {
                 return $this->json(['message' => 'Failed to send verification email', 'error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
+        // Restore the original password if it wasn't changed
+        if (!isset($data['password'])) {
+            $user->setPassword($currentPassword);
         }
 
         // Persist the changes
@@ -219,8 +225,11 @@ class AdminController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
-    }
+        $entityManager->flush();
 
+        return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
+    }
+}
 
 
 

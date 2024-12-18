@@ -195,7 +195,7 @@ const EditEvents: React.FC = () => {
             {error && <p className="flex w-full item-center justify-center my-2 text-red-500">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <Label className="text-black">Title</Label>
+                    <Label className="text-black">Titre</Label>
                     <Input className="text-black" type="text" name="title" value={formData.title} onChange={handleChange} />
                 </div>
                 <div>
@@ -203,19 +203,19 @@ const EditEvents: React.FC = () => {
                     <Input className="text-black" type="text" name="description" value={formData.description} onChange={handleChange} />
                 </div>
                 <div>
-                    <Label className="text-black">Date Start</Label>
+                    <Label className="text-black">Date de début</Label>
                     <Input className="bg-neutral-600 text-white" type="datetime-local" name="datestart" value={formData.datestart} onChange={(e) => handleDateChange('datestart', new Date(e.target.value))} />
                 </div>
                 <div>
-                    <Label className="text-black">Date End</Label>
+                    <Label className="text-black">Date de fin</Label>
                     <Input className="bg-neutral-600 text-white" type="datetime-local" name="dateend" value={formData.dateend} onChange={(e) => handleDateChange('dateend', new Date(e.target.value))} />
                 </div>
                 <div>
-                    <Label className="text-black">Location</Label>
+                    <Label className="text-black">Localisation de l'évènement</Label>
                     <Input className="text-black" type="text" name="location" value={formData.location} onChange={handleChange} />
                 </div>
                 <div>
-                    <Label className="text-black">Share Link</Label>
+                    <Label className="text-black">Lien de partage</Label>
                     <Input className="text-black" type="text" name="Sharelink" readOnly value={formData.Sharelink} onChange={handleChange} />
                 </div>
                 <div>
@@ -225,12 +225,12 @@ const EditEvents: React.FC = () => {
                         {formData.img && typeof formData.img === 'string' ? (
                             <>
                                 <img src={formData.img} alt="Uploaded" className="w-full h-32 rounded-lg object-cover" />
-                                <Button type="button" className="mt-2 z-10" onClick={handleRemoveImage}>Remove Image</Button>
+                                <Button type="button" className="mt-2 z-10" onClick={handleRemoveImage}>Retirer l'image</Button>
                             </>
                         ) : formData.img && typeof formData.img !== 'string' ? (
                             <>
                                 <img src={URL.createObjectURL(formData.img)} alt="Uploaded" className="w-full h-32 rounded-lg object-cover" />
-                                <Button type="button" className="mt-2 z-10" onClick={handleRemoveImage}>Remove Image</Button>
+                                <Button type="button" className="mt-2 z-10" onClick={handleRemoveImage}>Retirer l'image</Button>
                             </>
                         ) : (
                             <>
@@ -245,23 +245,23 @@ const EditEvents: React.FC = () => {
                     </div>
                 </div>
                 <div className='flex flex-col'>
-                    <Label className="text-black">Visibility</Label>
+                    <Label className="text-black">Visibilité de l'évènement</Label>
                     <Select name="visibility" value={formData.visibility.toString()} onValueChange={(value) => handleVisibilityChange(value)}>
                         <SelectTrigger className="text-black">
                             <SelectValue placeholder="Select visibility" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="1">Public</SelectItem>
-                            <SelectItem value="0">Private</SelectItem>
+                            <SelectItem value="1">Publique</SelectItem>
+                            <SelectItem value="0">Privé</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div>
-                    <Label className="text-black">Max Participants</Label>
+                    <Label className="text-black">Nombre de participants maximum</Label>
                     <Input className="text-black" type="number" name="maxparticipants" value={formData.maxparticipants} onChange={handleChange} />
                 </div>
                 <div>
-                    <Label className="text-black">Deleted At</Label>
+                    <Label className="text-black">Supprimé le</Label>
                     <div className="flex items-center">
                         <Input className="text-black" type="datetime-local" name="deleted_at" value={formData.deleted_at.slice(0, 16)} readOnly />
                         <Button type="button" className="ml-2" onClick={handleDisableClick}>
@@ -270,12 +270,12 @@ const EditEvents: React.FC = () => {
                     </div>
                 </div>
                 <div>
-                    <Label className="text-black">Created At</Label>
+                    <Label className="text-black">Créé le</Label>
                     <div className="flex items-center">
                         <Input className="text-black" type="datetime-local" name="created_at" value={formData.created_at.slice(0, 16)} readOnly />
                     </div>
                 </div>
-                <Button type="submit">Update Event</Button>
+                <Button type="submit">Mettre à jour l'évènement</Button>
             </form>
         </>
     );
