@@ -40,6 +40,7 @@ const EditEvents: React.FC = () => {
         created_at: '',
         disable: false,
     });
+    const [modifiedFields, setModifiedFields] = useState<Partial<UserAdminFormData>>({});
 
     useEffect(() => {
         const hash = window.location.hash;

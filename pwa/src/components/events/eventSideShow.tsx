@@ -2,10 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import EventInfoTag from "@/components/events/eventInfoTag"
-import { X, Share, Eye, Pencil, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
+import { X, Eye, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
 import CustomBadge from "@/components/utils/badge"
-import Image from "next/image"
-import eventImage from "@images/image_mairie_limoges.png"
 import Link from "next/link"
 interface Event {
   id: string;
@@ -78,12 +76,12 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
             Voir l&apos;événement
           </Link>
         </Button>
-        <Button variant="outline" className="w-full text-sm font-semibold">
+        {/* <Button variant="outline" className="w-full text-sm font-semibold">
           <Link href={`/events/${event.id}`} className="w-full flex items-center justify-center flex-row">
             <Pencil className="w-4 h-4 mr-2" />
             Éditer l&apos;événement
           </Link>
-        </Button>
+        </Button> */}
         <Button variant="outline" className="w-full  hover:bg-red-600 hover:text-white text-sm font-semibold">
           <X className="w-4 h-4 mr-2" />
           Quitter l&apos;événement

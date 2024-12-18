@@ -86,7 +86,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/users/{id}', name: 'app_users_update_admin', methods: ['POST'])]
-    public function updateAdminUser(int $id, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer, JWTTokenManagerInterface $JWTManager, ParameterBagInterface $params): Response
+    public function updateAdminUser(int $id, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer, JWTTokenManagerInterface $JWTManager, ParameterBagInterface $params, UserPasswordHasherInterface $passwordHasher): Response
     {
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
@@ -97,9 +97,6 @@ class AdminController extends AbstractController
             return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // Store the current password
-        $currentPassword = $user->getPassword();
-
         // Update username
         if (isset($data['username'])) {
             $existingUser = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
@@ -109,9 +106,14 @@ class AdminController extends AbstractController
             $user->setUsername($data['username']);
         }
 
-        if(isset($data['role'])){
-            $user->setRoles([$data['role']]);
+        // Update role with proper array handling
+        if (isset($data['role'])) {
+            $newRole = is_array($data['role']) ? $data['role'] : [$data['role']];
+            if ($newRole !== $user->getRoles()) {
+                $user->setRoles($newRole);
+            }
         }
+
         // Update firstname
         if (isset($data['firstname'])) {
             $user->setFirstname($data['firstname']);
@@ -142,53 +144,22 @@ class AdminController extends AbstractController
                 $user->setPhoto($data['photo']);
             }
         } elseif ($file) {
-            // Delete the old photo from S3 if it's not the default one
             $oldPhoto = $user->getPhoto();
             if ($oldPhoto && $oldPhoto !== 'logimg.png' && $oldPhoto !== 'default.jpg') {
                 $this->s3Service->deleteObject($oldPhoto);
             }
-
-            // Generate a new filename with UUID
             $extension = $file->guessExtension();
             $newFilename = uniqid() . '.' . $extension;
-
-            // Upload the new photo to S3
             $this->s3Service->uploadObject($newFilename, $file->getPathname());
-
-            // Update the user's photo
             $user->setPhoto($newFilename);
         }
 
-        // Regenerate token and send reset password email
-        if (isset($data['regenerateToken']) && $data['regenerateToken'] === true) {
-            // Generate JWT token for the user with the email
-            $token = $JWTManager->create($user);
-
-            // Store the token in the user's tokenpassword variable
-            $user->setTokenPassword($token);
-
-            $appUrl = rtrim($params->get('APP_URL'), '/');
-            $resetLink = sprintf('%s/resetpassword/%s', $appUrl, $token);
-
-            $emailMessage = (new Email())
-                ->from('noreply@votredomaine.com')
-                ->to($user->getEmail())
-                ->subject('Reset your password')
-                ->html(sprintf('Click <a href="%s">here</a> to reset your password.', $resetLink));
-
-            try {
-                $mailer->send($emailMessage);
-            } catch (\Exception $e) {
-                return $this->json(['message' => 'Failed to send email', 'error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+        // Handle password updates
+        if (isset($data['password']) && !empty($data['password'])) {
+            $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
+            $user->setPassword($hashedPassword);
         }
 
-        // Update email verification status
-        if (isset($data['emailverify'])) {
-            $user->setEmailverify($data['emailverify']);
-        }
-
-        // Update deleted_at date if disable is true
         if (isset($data['disable'])) {
             if ($data['disable'] === true) {
                 $user->setDeletedat(new DateTime());
@@ -197,39 +168,11 @@ class AdminController extends AbstractController
             }
         }
 
-        // Regenerate email verification link and send verification email
-        if (isset($data['regenerateemaillink']) && $data['regenerateemaillink'] === true) {
-            $appUrl = $params->get('APP_URL');
-            $confirmationToken = Uuid::v4()->toRfc4122();
-            $user->setEmaillink($confirmationToken);
-            $verificationLink = $appUrl . '/verify-email/' . $confirmationToken;
-
-            $email = (new Email())
-                ->from('no-reply@example.com')
-                ->to($user->getEmail())
-                ->subject('Please Confirm your Email')
-                ->html('<p>Please confirm your email by clicking on the following link: <a href="' . $verificationLink . '">Verify Email</a></p>');
-
-            try {
-                $mailer->send($email);
-            } catch (\Exception $e) {
-                return $this->json(['message' => 'Failed to send verification email', 'error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-        // Restore the original password if it wasn't changed
-        if (!isset($data['password'])) {
-            $user->setPassword($currentPassword);
-        }
-
-        // Persist the changes
         $entityManager->persist($user);
         $entityManager->flush();
 
         return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'User updated successfully'], Response::HTTP_OK);
     }
-}
 
 
 

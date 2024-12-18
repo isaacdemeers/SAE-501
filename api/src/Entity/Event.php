@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(),
         new GetCollection(),
         new Delete(
-            uriTemplate: '/admin/events/{id}',
+            uriTemplate: '/events/{id}',
             controller: AdminController::class . '::deleteAdminEvent',
             normalizationContext: ['groups' => ['event:read']],
         ),

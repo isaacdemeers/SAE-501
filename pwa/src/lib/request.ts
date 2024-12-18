@@ -563,6 +563,7 @@ export async function fetchUserAdmin(userId: number | undefined) {
 
 export async function UpdateUserAdmin(data: any, userId: number | undefined) {
   console.log(data);
+  delete data.password;
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
   if (data.photo && data.photo instanceof File) {
