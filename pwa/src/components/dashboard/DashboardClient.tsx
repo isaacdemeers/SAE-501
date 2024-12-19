@@ -5,6 +5,7 @@ import SuggestedEvents from '@/components/dashboard/SuggestedEvents';
 import MyEvents from '@/components/dashboard/MyEvents';
 import AuthPrompt from '@/components/dashboard/loginPrompt';
 import { useSearchParams } from 'next/navigation';
+import API_BASE_URL from "../../../utils/apiConfig";
 
 interface AuthResponse {
     isValid: boolean;
@@ -50,11 +51,10 @@ export default function DashboardClient() {
     // Fetch upcoming events
     const fetchUpcomingEvents = async (page: number = 1) => {
         try {
-            const response = await fetch(`/api/events/upcoming?page=${page}`);
+            const response = await fetch(`${API_BASE_URL}/api/events/upcoming?page=${page}`);
             if (!response.ok) throw new Error('Failed to fetch events');
 
             const { events, totalPages } = await response.json();
-            console.log('API Response:', events);
 
             const formattedEvents = events.map((event: Event) => ({
                 id: event.id,
@@ -71,7 +71,6 @@ export default function DashboardClient() {
                 }),
                 buttonText: "Voir l'Événement"
             }));
-            console.log('Formatted Events:', formattedEvents);
             setSuggestedEvents(formattedEvents);
         } catch (error) {
             console.error('Error fetching upcoming events:', error);
@@ -81,7 +80,7 @@ export default function DashboardClient() {
     // Function to fetch user events
     const fetchUserEvents = async (userId: number) => {
         try {
-            const response = await fetch(`/user/${userId}/events`);
+            const response = await fetch(`${API_BASE_URL}/user/${userId}/events`);
             if (!response.ok) throw new Error('Failed to fetch events');
             const data = await response.json();
             setMyEvents(data);
@@ -103,7 +102,7 @@ export default function DashboardClient() {
     useEffect(() => {
         const authenticateUser = async () => {
             try {
-                const response = await fetch('/api/auth/validate-token', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/validate-token`, {
                     method: 'POST',
                     credentials: 'include',
                 });

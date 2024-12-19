@@ -5,8 +5,9 @@ import EventInfoTag from "@/components/events/eventInfoTag"
 import { X, Eye, MapPin, Users, Lock, Star, Mail } from 'lucide-react'
 import CustomBadge from "@/components/utils/badge"
 import Link from "next/link"
+import { DeleteEvent, unsubscribeConnectedUser } from "@/lib/request"
 interface Event {
-  id: string;
+  id: number;
   title: string;
   image: string;
   dates: string;
@@ -14,13 +15,33 @@ interface Event {
   visibility: number;
   location: string;
   userCount: number;
+  creatorusername: string;
+  creatoremail: string;
+  role: string;
 }
 
 
-export default function EventSideShow({ event, user }: { event: Event, user: any ,  onUnsubscribe: () => void;}) {
-  console.log(event, user)
+export default function EventSideShow({ event, user, onUnsubscribe }: { 
+  event: Event, 
+  user: any, 
+  onUnsubscribe: () => void 
+}) {
 
   const participantsCount = event.maxparticipant ? event.maxparticipant.toString() : "0";
+
+  const handleDelete = async () => {
+    let response = await  DeleteEvent(event.id);
+    if(response.message === "Event deleted successfully"){
+      onUnsubscribe();
+  }
+  }
+
+const handleLeave = async () => { 
+  let response = await unsubscribeConnectedUser(event.id);
+  if(response.message === "User successfully left the event"){
+    onUnsubscribe();
+  }
+}
 
   return (
     <Card className="flex resize-x flex-col sticky top-0 w-full h-full cursor-default max-w-sm bg-white shadow-lg border-none p-0">
@@ -55,13 +76,13 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
             type="full"
             title="Organisateur"
             icon={<Star />}
-            content={user.username}
+            content={event.creatorusername}
           />
           <EventInfoTag
             type="full"
             title="Contact"
             icon={<Mail />}
-            content={user.email}
+            content={event.creatoremail}
           />
 
         </ul>
@@ -82,10 +103,17 @@ export default function EventSideShow({ event, user }: { event: Event, user: any
             Éditer l&apos;événement
           </Link>
         </Button> */}
-        <Button variant="outline" className="w-full  hover:bg-red-600 hover:text-white text-sm font-semibold">
-          <X className="w-4 h-4 mr-2" />
-          Quitter l&apos;événement
-        </Button>
+        {event.role === "ROLE_ADMIN" ? (
+          <Button onClick={handleDelete} variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
+            <X className="w-4 h-4 mr-2" />
+            Supprimer l&apos;événement
+          </Button>
+        ) : (
+          <Button onClick={handleLeave} variant="outline" className="w-full hover:bg-red-600 hover:text-white text-sm font-semibold">
+            <X className="w-4 h-4 mr-2" />
+            Quitter l&apos;événement
+          </Button>
+        )}
 
         {/* <Button variant="default" className="w-full text-sm font-semibold">
           <Share className="w-4 h-4 mr-2" />

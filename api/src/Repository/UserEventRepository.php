@@ -23,6 +23,7 @@ class UserEventRepository extends ServiceEntityRepository
             ->join('ue.event', 'e')
             ->where('ue.user = :userId')
             ->andWhere('e.dateend >= :currentDate')
+            ->andWhere('e.deleted_date IS NULL')
             ->setParameter('userId', $userId)
             ->setParameter('currentDate', $currentDate)
             ->orderBy('e.datestart', 'ASC')

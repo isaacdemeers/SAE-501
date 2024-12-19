@@ -15,7 +15,7 @@ class LogoutController extends AbstractController
     {
         $response = new JsonResponse(['message' => 'Logged out successfully']);
         
-        // Supprime le cookie JWT avec tous les paramètres nécessaires
+        
         $response->headers->clearCookie('2af7273686d970a5404661e918a0439b316a0332fff65ce830dd52b9b46d333e', 
             path: '/', 
             domain: null,

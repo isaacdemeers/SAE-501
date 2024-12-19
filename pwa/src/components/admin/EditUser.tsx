@@ -70,7 +70,6 @@ const EditUsers: React.FC = () => {
                 if (response.status !== 200) {
                     setError("Problème lors de la modification d'un utilisateur veuillez contacter la dsi");
                 }
-                console.log(data);
                 if (data.deleted_at === null || data.deleted_at === undefined) {
                     data.deleted_at = "";
                 } else {

@@ -267,12 +267,14 @@ export default function ProfileSettings() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Nom d&apos;utilisateur</Label>
-              <Input
+            <Label>
+              Nom d&apos;utilisateur
+              <span className="text-xs text-red-500"> &nbsp;*Contactez le support pour pouvoir modifier votre  nom d&apos;utilisateur</span></Label>
+            <Input
                 id="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder={userData?.username || ""}
+                type="text"
+                defaultValue={userData?.username}
+                disabled
               />
             </div>
             <Button className="w-full mt-6" onClick={handleUpdateAccount}>

@@ -36,7 +36,7 @@ export async function editUser(id: number, data: any) {
       throw new Error(errorResponse.message || "Failed to edit user");
     }
 
-    return await response.json(); // Retourne les données mises à jour de l'utilisateur
+    return await response.json(); 
   } catch (error) {
     console.error("Error editing user:", error);
     throw error;
@@ -58,7 +58,7 @@ export async function editUserPhoto(id: number, file: File) {
       throw new Error(errorResponse.message || "Failed to edit user");
     }
 
-    return await response.json(); // Retourne les données mises à jour de l'utilisateur
+    return await response.json(); 
   } catch (error) {
     console.error("Error editing user:", error);
     throw error;
@@ -235,23 +235,6 @@ export async function GetAllEvents() {
   }
 }
 
-// export async function GetUserEvents() {
-//   try {
-//     const response = await fetch(`${API_BASE_URL}/users/events`, {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       credentials: "include",
-//     });
-//     return await response.json();
-//   } catch (error) {
-//     console.error("Error fetching events:", error);
-//     console.error("Error getting event:", error);
-//     throw error;
-//   }
-// }
-
 export async function AddEvent(formData: any) {
   try {
     const response = await fetch(`${API_BASE_URL}/event/create`, {
@@ -412,33 +395,7 @@ export async function ShareInvitation(id: number, emails: string[]) {
     console.error('Error sharing invitation:', error);
   }
 }
-// stocker les users qu'on invite pour event privé
-// stocker id + email + uuid pour le lien de pas connecter
-// pour priver prend le lien et obliger de se connecter ou créer un compte pour voir le compte
 
-// export async function UpdateEvent(id: number, data: any): Promise<any> {
-//   console.log(data)
-//   try {
-//     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
-//       method: "PATCH",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       credentials: "include",
-//       body: JSON.stringify(data),
-//     });
-
-//     if (!response.ok) {
-//       const errorData = await response.json();
-//       throw new Error(errorData.error || "Failed to update event");
-//     }
-
-//     return await response.json();
-//   } catch (error) {
-//     console.error("Error updating event:", error);
-//     throw error;
-//   }
-// }
 export async function UpdateEvent(id: number, data: any): Promise<any> {
   try {
     let body: any;
@@ -450,8 +407,7 @@ export async function UpdateEvent(id: number, data: any): Promise<any> {
       body = new FormData();
       body.append("data", JSON.stringify(data));
       body.append("file", data.image, data.image.name);
-      headers = {}; // FormData sets its own headers
-
+      headers = {}; 
     } else {
       body = JSON.stringify(data);
     }
@@ -543,7 +499,6 @@ export async function fetchUserEvents(userId: number) {
     const response = await fetch(`/user/${userId}/events`);
     if (!response.ok) throw new Error('Failed to fetch events');
     const data = await response.json();
-    console.log('fez', data)
     return data;
   } catch (error) {
     console.error('Error fetching user events:', error);
@@ -562,7 +517,6 @@ export async function fetchUserAdmin(userId: number | undefined) {
 }
 
 export async function UpdateUserAdmin(data: any, userId: number | undefined) {
-  console.log(data);
   delete data.password;
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
@@ -595,7 +549,6 @@ export async function fetchEventAdmin(userId: number | undefined) {
 }
 
 export async function UpdateEventAdmin(data: any, userId: number | undefined) {
-  console.log(data);
   const formData = new FormData();
   formData.append("data", JSON.stringify(data));
   if (data.img && data.img instanceof File) {

@@ -22,7 +22,6 @@ const randomColor = () => {
 }
 
 function transformEvents(events: any[]) {
-    console.log(events)
     return events.map(event => ({
         id: event.eventId || event.id,
         title: event.title,
@@ -36,13 +35,16 @@ function transformEvents(events: any[]) {
             sharelink: event.sharelink,
             img: event.img,
             visibility: event.visibility,
-            id: event.eventId || event.id
+            id: event.eventId || event.id,
+            creatorusername: event.creatorusername,
+            creatoremail: event.creatoremail,
+            role: event.role
         }
     }));
 }
 
 interface Event {
-    id: string;
+    id: number;
     title: string;
     image: string;
     dates: string;
@@ -50,7 +52,10 @@ interface Event {
     visibility: number;
     location: string;
     userCount: number;
-}
+    creatorusername: string;
+    creatoremail: string;
+    role: string;
+  }
 
 
 export function Calendar() {
@@ -67,17 +72,22 @@ export function Calendar() {
             setUser(data.user);
             fetchUserEvents(data.user.id).then((data) => {
                 const transformedEvents = transformEvents(data);
-                console.log(transformedEvents)
+              
                 setEvents(transformedEvents);
             });
         });
     }, []);
 
     const handleUnsubscribe = async () => {
-        // Refresh events after unsubscribe
         const data = await fetchUserEvents(user.id);
-        const transformedEvents = transformEvents(data);
-        setEvents(transformedEvents);
+ 
+        if (data.message === "No events found for this user") {
+            setEvents([]);
+        } else {
+            const transformedEvents = transformEvents(data);
+            setEvents(transformedEvents);
+        }
+        setSelectedEvent(null); 
     };
 
     return (
@@ -212,7 +222,10 @@ export function Calendar() {
                                 return `Du ${start.day} à ${start.time} au ${end.day} à ${end.time}`;
                             })(),
                             participants: info.event.extendedProps.maxparticipant,
-                            visibility: info.event.extendedProps.visibility
+                            visibility: info.event.extendedProps.visibility,
+                            creatorusername: info.event.extendedProps.creatorusername,
+                            creatoremail: info.event.extendedProps.creatoremail,
+                            role: info.event.extendedProps.role
                         }
                         setSelectedEvent(event);
                     }}
