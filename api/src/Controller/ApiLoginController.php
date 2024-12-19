@@ -21,21 +21,21 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
-        // Récupérer l'utilisateur connecté
+        
         $user = $token->getUser();
     
-        // Générer le token JWT
+       
         $jwt = $this->jwtManager->create($user);
     
-        // Vérifier que le JWT contient bien deux points
+     
         if (substr_count($jwt, '.') !== 2) {
             throw new \Exception('Invalid JWT format');
         }
     
-        // Split the JWT into header, payload, and signature
+       
         [$header, $payload, $signature] = explode('.', $jwt);
     
-        // Créer les cookies
+     
         $headerPayloadCookie = new Cookie(
             '2af7273686d970a5404661e918a0439b316a0332fff65ce830dd52b9b46d333e',
             $header . '.' . $payload,
@@ -60,12 +60,12 @@ class ApiLoginController implements AuthenticationSuccessHandlerInterface
             'lax'
         );
     
-        // Créer une réponse avec les cookies
+      
         $response = new JsonResponse([
             'message' => 'Authentication successful',
         ]);
     
-        // Ajouter les cookies à la réponse
+       
         $response->headers->setCookie($headerPayloadCookie);
         $response->headers->setCookie($signatureCookie);
     

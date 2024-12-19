@@ -70,7 +70,6 @@ const EditUsers: React.FC = () => {
                 if (response.status !== 200) {
                     setError("Problème lors de la modification d'un utilisateur veuillez contacter la dsi");
                 }
-                console.log(data);
                 if (data.deleted_at === null || data.deleted_at === undefined) {
                     data.deleted_at = "";
                 } else {
@@ -188,19 +187,19 @@ const EditUsers: React.FC = () => {
                 <Input className="text-black" type="text" name="role" value={formData.role} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Password</Label>
+                <Label className="text-black">Mot de passe</Label>
                 <Input className="text-black" type="password" readOnly name="password" value={formData.password} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">First Name</Label>
+                <Label className="text-black">Prénom</Label>
                 <Input className="text-black" type="text" name="firstname" value={formData.firstname} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Last Name</Label>
+                <Label className="text-black">Nom</Label>
                 <Input className="text-black" type="text" name="lastname" value={formData.lastname} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Username</Label>
+                <Label className="text-black">Pseudonyme</Label>
                 <Input className="text-black" type="text" name="username" value={formData.username} onChange={handleChange} />
             </div>
             <div>
@@ -210,7 +209,7 @@ const EditUsers: React.FC = () => {
                     {formData.photo && formData.photo !== 'logimg.png' && formData.photo !== 'default.jpg' ? (
                         <>
                             <img src={typeof formData.photo === 'string' ? formData.photo : URL.createObjectURL(formData.photo)} alt="Uploaded" className="w-32 h-32 rounded-full object-cover" />
-                            <Button type="button" className="mt-2" onClick={handleRemoveImage}>Remove Image</Button>
+                            <Button type="button" className="mt-2" onClick={handleRemoveImage}>Retirer l'image</Button>
                         </>
                     ) : (
                         <>
@@ -228,11 +227,11 @@ const EditUsers: React.FC = () => {
                 )}
             </div>
             <div>
-                <Label className="text-black">Email Verify</Label>
+                <Label className="text-black">Email vérification</Label>
                 <Input className="text-black" type="checkbox" name="emailverify" checked={formData.emailverify} onChange={handleChange} />
             </div>
             <div>
-                <Label className="text-black">Email Link</Label>
+                <Label className="text-black">Lien de vérification d'email</Label>
                 <Input className="text-black" type="text" readOnly name="emaillink" value={formData.emaillink} onChange={handleChange} />
             </div>
             <div className="flex flex-col gap-2 items-start justify-start">
@@ -240,7 +239,7 @@ const EditUsers: React.FC = () => {
                 <Checkbox className="text-black " name="regenerateemaillink" checked={formData.regenerateemaillink} onCheckedChange={(checked) => setFormData({ ...formData, regenerateemaillink: checked })} />
             </div>
             <div>
-                <Label className="text-black">Token Password</Label>
+                <Label className="text-black">Token de la modification du mot de passe</Label>
                 <Input className="text-black" type="text" name="tokenpassword" readOnly value={formData.tokenpassword} onChange={handleChange} />
             </div>
             <div className="flex flex-col gap-2 items-start justify-start">
@@ -248,7 +247,7 @@ const EditUsers: React.FC = () => {
                 <Checkbox className="text-black " name="regenerateToken" checked={!!formData.regenerateToken} onCheckedChange={(checked) => setFormData({ ...formData, regenerateToken: checked })} />
             </div>
             <div>
-                <Label className="text-black">Deleted At</Label>
+                <Label className="text-black">Supprimer le</Label>
                 <div className="flex items-center">
                     <Input className="text-black" type="datetime-local" name="deleted_at" value={formData.deleted_at.slice(0, 16)} readOnly />
                     <Button type="button" className="ml-2" onClick={handleDisableClick}>
@@ -257,7 +256,7 @@ const EditUsers: React.FC = () => {
                 </div>
             </div>
             <div>
-                <Label className="text-black">Created At</Label>
+                <Label className="text-black">Créé le</Label>
                 <div className="flex items-center">
                     <Input className="text-black" type="datetime-local" name="created_at" value={formData.created_at.slice(0, 16)} readOnly />
                 </div> 

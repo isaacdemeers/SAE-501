@@ -31,6 +31,7 @@ const Admin = () => {
           <HydraAdmin entrypoint={window.origin}>
             <ResourceGuesser
               name="events"
+              options={{ label: 'Evenements' }}  // Ajoutez cette ligne
               create={EventForm}
               edit={EditEvents}
             />
@@ -39,8 +40,6 @@ const Admin = () => {
               create={Signin}
               edit={EditUsers}
             />
-            <ResourceGuesser name="users"
-              create={Signin} />
             <ResourceGuesser name="user_events" />
             <ResourceGuesser name="user_invitations" />
           </HydraAdmin>

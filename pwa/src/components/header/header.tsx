@@ -38,12 +38,14 @@ interface AuthResponse {
         email: string;
         id: number;
         username: string;
+        role: string;
     };
 }
 
 export default function Header() {
     const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [role , setRole] = useState("" as string);
     const [showEventForm, setShowEventForm] = useState(false);
 
     useEffect(() => {
@@ -56,6 +58,9 @@ export default function Header() {
 
                 const data: AuthResponse = await response.json();
                 setIsAuthenticated(data.isValid);
+                if (data.user?.role) {
+                    setRole(data.user.role);
+                }
             } catch (error) {
                 console.error('Authentication error:', error);
                 setIsAuthenticated(false);
@@ -84,6 +89,20 @@ export default function Header() {
                 <div className="flex items-center w-full gap-2 justify-end">
                     {isAuthenticated ? (
                         <TooltipProvider>
+                            {role === 'ROLE_ADMIN' && (
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="hidden h-10 w-16 sm:flex">
+                                        <Link href="/admin">
+                                        <h2>Admin</h2>
+                                        </Link>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Accès SuperAdmin</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            )}
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button

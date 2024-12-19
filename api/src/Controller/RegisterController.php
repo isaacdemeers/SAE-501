@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Service\AmazonS3Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,13 +17,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RegisterController extends AbstractController
 {
-    private $s3Service;
+  
     private $params;
 
 
-    public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
+    public function __construct( ParameterBagInterface $params)
     {
-        $this->s3Service = $s3Service;
         $this->params = $params;
     }
 
@@ -69,16 +67,16 @@ class RegisterController extends AbstractController
     #[Route('/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
     {
-        // Récupérer les données JSON et le fichier
+        
         $data = json_decode($request->request->get('data'), true);
         $file = $request->files->get('file');
 
-        // Vérifier si un utilisateur existe déjà par email
+        
         $existingUserByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         $existingUserByUsername = $entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
 
         if (null !== $existingUserByEmail && in_array('ROLE_INVITE', $existingUserByEmail->getRoles())) {
-            // Mettre à jour les informations de l'utilisateur existant
+          
             $user = $existingUserByEmail;
         } elseif (null !== $existingUserByEmail || null !== $existingUserByUsername) {
             return $this->json(['message' => 'User already exists'], Response::HTTP_CONFLICT);
@@ -87,30 +85,25 @@ class RegisterController extends AbstractController
             $user->setEmail($data['email']);
         }
 
-        // Hachage du mot de passe
+       
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
 
-        // Champs facultatifs
+        
         $user->setFirstname($data['firstname'] ?? 'DefaultFirstname');
         $user->setLastname($data['lastname'] ?? 'DefaultLastname');
         $user->setUsername($data['username'] ?? 'DefaultUsername');
         $user->setRoles(['ROLE_USER']);
         $user->setCreatedAt(new \DateTimeImmutable());
-        // Génération du token de confirmation d'email
+        
         $confirmationToken = Uuid::v4()->toRfc4122();
         $user->setEmaillink($confirmationToken);
 
-        // Gestion de l'image
+       
         if ($file) {
             $imageName = uniqid() . '.' . $file->guessExtension();
-            // Upload de l'image sur S3
-            $uploaded = $this->s3Service->uploadObject($imageName, $file->getPathname());
-            if ($uploaded) {
-                $user->setPhoto($imageName); // Enregistrer le nom de fichier dans l'utilisateur
-            } else {
-                return $this->json(['message' => 'Failed to upload image to S3.'], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            $file->move($this->getParameter('kernel.project_dir') . '/public/assets', $imageName);
+            $user->setPhoto($imageName);
         } else {
             $user->setPhoto('logimg.png');
         }
@@ -118,16 +111,22 @@ class RegisterController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // Génération du lien de vérification
+        
         $appUrl = $this->params->get('APP_URL');
         $verificationLink = $appUrl . '/verify-email/' . $confirmationToken;
 
-        // Envoi de l'email de confirmation
+       
         $email = (new Email())
             ->from('no-reply@example.com')
             ->to($user->getEmail())
-            ->subject('Please Confirm your Email')
-            ->html('<p>Please confirm your email by clicking on the following link: <a href="' . $verificationLink . '">Verify Email</a></p>');
+            ->subject('Bienvenue sur notre Plan It')
+            ->html(
+            $this->renderView(
+                'email/email_verify.html.twig',
+                ['verificationLink' => $verificationLink,
+                'APP_URL' => $appUrl]
+            )
+            );
 
         $mailer->send($email);
 

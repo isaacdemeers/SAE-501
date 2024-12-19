@@ -85,7 +85,6 @@ export default function SearchResult({ isOpen, search }: SearchResultProps) {
             try {
                 const data = await GetAllEvents();
                 const events = data['hydra:member'] || [];
-                console.log('Fetched events:', data); // Debugging line
                 setAllEvents(data);
                 setEvents(filterEvents(events, search, activeFilters));
             } catch (error) {

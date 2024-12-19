@@ -29,38 +29,44 @@ class ResetPasswordController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $email = $data['email'] ?? null;
 
-        // Vérification de l'email
+      
         if (null === $email) {
             return $this->json(['message' => 'Email is missing'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Cherche l'utilisateur par email
+   
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
         if (null === $user) {
             return $this->json(['message' => 'Email not found'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Génération du token JWT pour l'utilisateur avec l'email
+       
         $token = $JWTManager->create($user);
 
-        // Stocker le token dans la variable tokenpassword de l'utilisateur
+        
         $user->setTokenPassword($token);
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // Création du lien pour réinitialiser le mot de passe
+       
         $appUrl = rtrim($this->params->get('APP_URL'), '/');
         $resetLink = sprintf('%s/resetpassword/%s', $appUrl, $token);
 
-        // Envoi de l'email
+      
         $emailMessage = (new Email())
             ->from('noreply@votredomaine.com')
             ->to($email)
-            ->subject('Reset your password')
-            ->html(sprintf('Click <a href="%s">here</a> to reset your password.', $resetLink));
+            ->subject('Réinitialisation du mot de passe')
+            ->html(
+                $this->renderView(
+                    'email/email_reset.html.twig',
+                    ['resetLink' => $resetLink,
+                    'APP_URL' => $appUrl]
+                )
+                );
 
-        // Envoyer l'email
+     
         try {
             $mailer->send($emailMessage);
         } catch (\Exception $e) {
@@ -73,7 +79,7 @@ class ResetPasswordController extends AbstractController
     #[Route('/reset/password', name: 'reset_password', methods: ['POST'])]
     public function resetPassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, JWTTokenManagerInterface $JWTManager): Response
     {
-        // Décoder le token JWT pour obtenir l'utilisateur
+        
         $data = json_decode($request->getContent(), true);
         $token = $data['token'] ?? null;
 
@@ -85,7 +91,7 @@ class ResetPasswordController extends AbstractController
             $tokenData = $JWTManager->parse($token);
             $username = $tokenData['username'];
             
-            // Vérifier si le token est expiré
+           
             $expiration = $tokenData['exp'];
             if ($expiration < time()) {
                 return $this->json(['message' => 'Token has expired'], Response::HTTP_BAD_REQUEST);
@@ -94,14 +100,14 @@ class ResetPasswordController extends AbstractController
             return $this->json(['message' => 'Invalid token'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Chercher l'utilisateur par le nom d'utilisateur
+        
         $user = $entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
 
         if (null === $user) {
             return $this->json(['message' => 'User not found'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Vérifier si le token correspond à celui stocké dans la base de données
+      
         if ($user->getTokenPassword() !== $token) {
             return $this->json(['message' => 'Invalid token'], Response::HTTP_BAD_REQUEST);
         }
@@ -116,14 +122,14 @@ class ResetPasswordController extends AbstractController
             return $this->json(['message' => 'Password must be at least 4 characters long'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Hachage du mot de passe
+       
         $hashedPassword = $passwordHasher->hashPassword($user, $password);
         $user->setPassword($hashedPassword);
 
-        // Supprimer le token de la base de données
+      
         $user->setTokenPassword(null);
 
-        // Sauvegarde de l'utilisateur
+
         $entityManager->persist($user);
         $entityManager->flush();
 

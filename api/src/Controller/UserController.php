@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\UserEvent;
 use App\Repository\UserEventRepository;
-use App\Service\AmazonS3Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,13 +23,12 @@ use DateTime;
 
 class UserController extends AbstractController
 {
-    private $s3Service;
+   
     private $params;
 
 
-    public function __construct(AmazonS3Service $s3Service, ParameterBagInterface $params)
+    public function __construct( ParameterBagInterface $params)
     {
-        $this->s3Service = $s3Service;
         $this->params = $params;
     }
 
@@ -125,18 +123,20 @@ class UserController extends AbstractController
         return $this->json(['message' => 'No file provided'], Response::HTTP_BAD_REQUEST);
     }
 
-    // Delete the old photo from S3
     $oldPhoto = $user->getPhoto();
     if ($oldPhoto && $oldPhoto !== 'logimg.png') {
-        $this->s3Service->deleteObject($oldPhoto);
+        $oldPhotoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/' . $oldPhoto;
+        if (file_exists($oldPhotoPath)) {
+            unlink($oldPhotoPath);
+        }
     }
 
     // Generate a new filename with UUID
     $extension = $file->guessExtension();
     $newFilename = uniqid() . '.' . $extension;
 
-    // Upload the new photo to S3
-    $this->s3Service->uploadObject($newFilename, $file->getPathname());
+    // Move the new photo to the assets directory
+    $file->move($this->getParameter('kernel.project_dir') . '/public/assets', $newFilename);
 
     // Update the user's photo
     $user->setPhoto($newFilename);
@@ -151,6 +151,7 @@ class UserController extends AbstractController
     #[Route('/user/{id}/events', name: 'get_user_events', methods: ['GET'])]
     public function getUserEvents(int $id, UserEventRepository $userEventRepository): JsonResponse
     {
+        $user = $this->getUser();
         $currentDate = new DateTime();
         $userEvents = $userEventRepository->findUpcomingEvents($id, $currentDate);
 
@@ -159,19 +160,21 @@ class UserController extends AbstractController
         error_log('Number of events found: ' . count($userEvents));
 
         if (!$userEvents) {
-            return $this->json(['message' => 'No events found for this user'], JsonResponse::HTTP_NOT_FOUND);
+            return $this->json([], JsonResponse::HTTP_OK);
         }
 
         $events = [];
         foreach ($userEvents as $userEvent) {
             $event = $userEvent->getEvent();
+            $userEventAdmin = $userEventRepository->findOneBy(['event' => $event->getId(), 'role' => 'ROLE_ADMIN']);
+            $creatorusername = $userEventAdmin ? $userEventAdmin->getUser()->getUsername() : 'Unknown';
+            $creatoremail = $userEventAdmin ? $userEventAdmin->getUser()->getEmail() : 'Unknown';
+            $role = $userEvent->getRole();
             if ($event->getDeletedDate() !== null) {
-                continue;
+                return $this->json(['message' => 'Event not found'], JsonResponse::HTTP_NOT_FOUND);
             }
 
             $imgName = $event->getImg();
-            $fullImgUrl = $imgName ? $this->s3Service->getObjectUrl($imgName) : null;
-
             $eventData = [
                 'eventId' => $event->getId(),
                 'title' => $event->getTitle(),
@@ -179,9 +182,12 @@ class UserController extends AbstractController
                 'datestart' => $event->getDatestart()->format('Y-m-d H:i:s'),
                 'dateend' => $event->getDateend()->format('Y-m-d H:i:s'),
                 'location' => $event->getLocation(),
-                'img' => $fullImgUrl,
+                'img' =>$event->getImg(),
                 'visibility' => $userEvent->getEvent()->getVisibility(),
                 'maxparticipant' => $userEvent->getEvent()->getMaxparticipant(),
+                'creatorusername' => $creatorusername,
+                'creatoremail' => $creatoremail,
+                'role' => $role,
             ];
 
             $events[] = $eventData;

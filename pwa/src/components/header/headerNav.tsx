@@ -47,7 +47,6 @@ export default function Nav({ isAuthenticated }: NavProps) {
             fetchUsername();
         }
     }, [isAuthenticated]);
-
     return (
         <Sheet>
             <SheetTrigger asChild>

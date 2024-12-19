@@ -116,7 +116,7 @@ export default function EventModerate({ eventId }: EventModerateProps) {
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>{`${user.firstname} ${user.lastname}`}</TableCell>
+                <TableCell>{user.firstname && user.lastname ? `${user.firstname} ${user.lastname}` : "Non défini"}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{formatRole(user.role)}</TableCell>

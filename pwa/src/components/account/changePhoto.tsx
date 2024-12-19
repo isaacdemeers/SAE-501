@@ -95,12 +95,6 @@ export function ProfilePhotoUpload({
 
 
     try {
-      console.log('Starting upload with formData:', {
-        fileName: selectedFile.name,
-        fileType: selectedFile.type,
-        fileSize: selectedFile.size
-      });
-
       const response = await editUserPhoto(userId, selectedFile);
 
       if (response.message === 'User photo updated successfully') {

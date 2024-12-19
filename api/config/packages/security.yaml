@@ -22,25 +22,22 @@ security:
         jwt: ~
 
     access_control:
-      # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN sur le /admin
+        # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN
     - {path: ^/admin, roles: PUBLIC_ACCESS}
-    - {path: ^/docs, roles: PUBLIC_ACCESS }
-    - {path : ^/admin/users, roles: PUBLIC_ACCESS}
-    - {path: ^/admin/events, roles: PUBLIC_ACCESS}
-      # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN sur le /admin
-    - {path: ^/$, roles: PUBLIC_ACCESS }
-    - {path: ^/auth, roles: PUBLIC_ACCESS }
-    - {path: ^/users/verify-email, roles: PUBLIC_ACCESS }
-    - {path: ^/api, roles: PUBLIC_ACCESS }
+    - { path: ^/docs, roles: PUBLIC_ACCESS} 
+    # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN
+    - { path: ^/$, roles: PUBLIC_ACCESS }
+    - { path: ^/auth, roles: PUBLIC_ACCESS }
+    - { path: ^/users/verify-email, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: PUBLIC_ACCESS }
+    - { path: /api/users/username, roles: PUBLIC_ACCESS}
     - {path: /users/testemail, roles: PUBLIC_ACCESS}
     - {path: /users/testusername, roles: PUBLIC_ACCESS}
     - {path: ^/events, roles: ROLE_ADMIN, methods: [DELETE]}
     - {path: ^/users, roles: ROLE_ADMIN, methods: [DELETE]}
-    - {path: ^/admin, roles: ROLE_ADMIN}
     - {path: ^/events, roles: IS_AUTHENTICATED_FULLY}
     - {path: ^/users, roles: IS_AUTHENTICATED_FULLY}
     - {path: /api/auth/logout, roles: IS_AUTHENTICATED_FULLY}
-  
     
 when@test:
     security:

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Plan It{% endblock %}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff;">
+    <table cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto">
+        <tr>
+            <td align="center" style="padding: 20px 0; font-size: 32px; font-weight: bold; color: #0f172a;">
+                Plan-it
+            </td>
+        </tr>
+        
+        {% block content %}{% endblock %}
+
+        <tr>
+            <td style="padding: 30px 30px 0 30px; background-color: #0f172a; border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                <h2 style="font-size: 18px; font-weight: bold; color: #ffffff; margin-bottom: 10px;">
+                    Contacts
+                </h2>
+                <p style="font-size: 14px; line-height: 24px; margin: 0">
+                    <a href="mailto:support@planit.com" style="color: #ffffff; text-decoration: none">support@planit.com</a>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px 30px; background-color: #0f172a">
+                <h2 style="font-size: 18px; font-weight: bold; color: #ffffff; margin-bottom: 10px;">
+                    Liens
+                </h2>
+                <p style="font-size: 14px; line-height: 24px; margin: 0 0 5px 0">
+                    <a href="{{ APP_URL }}/confidentiality" style="color: #ffffff; text-decoration: none">Politique de confidentialité</a>
+                <br>
+                </p>
+                <p style="font-size: 14px; line-height: 24px; margin: 0 0 5px 0">
+                    <a href="{{ APP_URL }}/cgu" style="color: #ffffff; text-decoration: none">Conditions générales</a>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px 30px; background-color: #0f172a; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; text-align: center;">
+                <p style="font-size: 12px; color: #9ca3af; margin: 0">
+                    © Tous droits réservés - {{ "now"|date("Y") }}
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

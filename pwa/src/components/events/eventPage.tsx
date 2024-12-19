@@ -15,11 +15,9 @@ import {
   Eye,
   UserCog,
   Check,
-  Instagram,
-  Link2,
 } from "lucide-react";
 import Link from "next/link";
-import { GetEvent } from "@/lib/request"; // Utilisation de votre fichier request.ts
+import { GetEvent } from "@/lib/request"; 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import eventImage from "@images/event-background-desktop.png";
@@ -36,9 +34,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IsAuthentificated, JoinEvent, VerifyConnectionUUID, VerifyConnectionConnectedUser, unsubscribeConnectedUser, unsubscribeUUID, NewConnectionUUID } from "@/lib/request";
 import { DialogClose, DialogTitle } from "@radix-ui/react-dialog";
-import EventForm from "./eventEdit"; // Ajoutez cet import
+import EventForm from "./eventEdit"; 
 import EventModerate from "./eventModerate";
-import { GetEventAdmin } from "@/lib/request"; // Ajoutez cet importimport { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Clipboard } from "lucide-react";
 import {
   FacebookIcon,
@@ -101,8 +98,8 @@ export default function PageEvent({ params }: EventPageProps) {
   const router = useRouter();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showModerateDialog, setShowModerateDialog] = useState(false);
-  const [eventAdmin, setEventAdmin] = useState<Admin | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [ShareInvitees, setShareInvitees] = useState<string>("");
 
   useEffect(() => {
     const fetchEventAndCheckAuthentication = async () => {
@@ -209,10 +206,13 @@ export default function PageEvent({ params }: EventPageProps) {
   async function handleSubscribe() {
     let sub = await JoinEvent(id, email);
     if (sub.message === "User successfully joined the event") {
+      if (event) {
+        event.userCount += 1;
+      }
       setIsDialogOpen(false);
       setIsSubscribed(true);
       if (sub.uuid !== "") {
-        setConnectionuuid(sub.uuid);      // Replace alert with console log or any other notification method
+        setConnectionuuid(sub.uuid);    
       }
     }
     else if (sub.error) {
@@ -319,6 +319,11 @@ export default function PageEvent({ params }: EventPageProps) {
   const handleSendInvitations = async (e: React.FormEvent) => {
     let invitation = await ShareInvitation(id, invitees);
     if (invitation.message === "Invitations sent successfully") {
+      setShareInvitees("utilisateurs invités");
+      setTimeout(() => {
+        setShareInvitees("");
+      }
+      , 5000);
     }
   };
 
@@ -442,6 +447,11 @@ export default function PageEvent({ params }: EventPageProps) {
                     </>
                   ) : (
                     <div className="space-y-2">
+                      {ShareInvitees === "utilisateurs invités" ? (
+                        <p className="text-green-500">
+                          <Check className="w-4 h-4 mr-2" /> Invitations envoyées
+                        </p>
+                      ) : null}
                       <Label htmlFor="invitee">Inviter des personnes</Label>
                       <div className="flex gap-2">
                         <Input
