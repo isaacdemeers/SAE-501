@@ -23,20 +23,6 @@ services:
     App\Controller\ApiLoginController:
         arguments:
             $jwtManager: '@lexik_jwt_authentication.jwt_manager'
-
-    Aws\S3\S3Client:
-        arguments:
-            - 
-                version: 'latest'
-                region: '%env(AWS_S3_REGION)%'  # Remplacez par votre région
-                credentials:
-                    key: '%env(AWS_S3_ACCESS_KEY_ID)%'     # Remplacez par votre clé d'accès
-                    secret: '%env(AWS_S3_SECRET_ACCESS_KEY)%' # Remplacez par votre clé secrète
-
-    App\Service\AmazonS3Service:
-        arguments:
-            $s3Client: '@Aws\S3\S3Client'
-            $bucketName: '%env(AWS_S3_BUCKET_NAME)%' # Remplacez par votre nom de bucket
     
     App\Security\JWTExtractor:
         tags:
