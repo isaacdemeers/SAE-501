@@ -1009,7 +1009,8 @@ public function getevent (Request $request , EventRepository $eventRepository , 
 
           
                 $oldImageName = $event->getImg();
-                if ($oldImageName && $oldImageName !== 'event-background-desktop.png') {
+                $defaultImage = $this->params->get('APP_URL') . '/assets/event-background-desktop.png';
+                if ($oldImageName && $oldImageName !== $defaultImage) {
                     $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/assets/' . basename($oldImageName);
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
