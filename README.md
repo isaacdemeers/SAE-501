@@ -21,7 +21,6 @@
 - Exécutez la commande : `php bin/console lexik:jwt:generate-keypair`
 
 # Setup Admin (ne marche que en localhost , ne marche pas en codespace du aux redirections de port) 
-
 - Créer un compte puis aller dans `/admin`
 - passer le role de l'utilisateur par `ROLE_ADMIN`
 - aller dans `api/config/packages/security.yaml` et passer les 2 routes entre commentaire en ROLE_ADMIN

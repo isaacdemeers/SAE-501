@@ -136,7 +136,7 @@ export default function Signinform({ handleSignData }: SigninformProps): JSX.Ele
             htmlFor="terms"
             className={`text-sm md:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
           >
-            J'accepte les <span><a className={`appearance-none text-black underline`} href="#">Conditions d'utilisation</a></span> et la <span><a className={`appearance-none text-black underline`} href="#">Politique de confidentialité</a></span>
+            J'accepte les <span><Link className={`appearance-none text-black underline`} href="/cgu">Conditions d'utilisation</Link></span> et la <span><Link className={`appearance-none text-black underline`} href="/confidentiality">Politique de confidentialité</Link></span>
           </label>
         </div>
         {termserror ? (

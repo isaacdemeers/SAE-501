@@ -22,7 +22,7 @@ security:
         jwt: ~
 
     access_control:
-        # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN
+    # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN
     - {path: ^/admin, roles: PUBLIC_ACCESS}
     - { path: ^/docs, roles: PUBLIC_ACCESS} 
     # a passer en ROLE_ADMIN une fois un utilisateur passer en ADMIN
